@@ -1,0 +1,21 @@
+/**
+ * Configure Tailwind v4 in this file using CSS variables and directives:
+ * https://tailwindcss.com/docs/v4-beta#css-first-configuration
+ */
+
+@import 'tailwindcss';
+
+@theme {
+  --font-heading: 'IBM Plex Sans Condensed', ui-sans-serif, system-ui, sans-serif;
+  --font-body: 'IBM Plex Mono', ui-monospace, monospace;
+  --color-background: #ffffff;
+  --color-foreground: #000000cf;
+  --color-foreground-heading: #000000;
+  --color-primary: #000000;
+  --color-primary-hover: #333333;
+  --color-border: #0000000f;
+  --color-muted: #f5f5f5;
+  --radius-button: 14px;
+  --radius-card: 4px;
+  --max-width-page: 1200px;
+}

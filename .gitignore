@@ -1,0 +1,21 @@
+node_modules
+/.DS_Store
+/.cache
+/build
+/dist
+/public/build
+/.mf
+.env
+.env.*
+!.env.example
+.shopify
+.react-router
+*.tsbuildinfo
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor
+.idea/
+.vscode/

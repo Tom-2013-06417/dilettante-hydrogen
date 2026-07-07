@@ -4,7 +4,7 @@ import {Suspense} from 'react';
 import {Image} from '@shopify/hydrogen';
 import type {
   FeaturedCollectionFragment,
-  RecommendedProductsQuery,
+  HomepageProductsQuery,
 } from 'storefrontapi.generated';
 import {ProductItem} from '~/components/ProductItem';
 import {MockShopNotice} from '~/components/MockShopNotice';
@@ -47,8 +47,8 @@ async function loadCriticalData({context}: Route.LoaderArgs) {
  * Make sure to not throw any errors here, as it will cause the page to 500.
  */
 function loadDeferredData({context}: Route.LoaderArgs) {
-  const recommendedProducts = context.storefront
-    .query(RECOMMENDED_PRODUCTS_QUERY)
+  const homepageProducts = context.storefront
+    .query(HOMEPAGE_PRODUCTS_QUERY)
     .catch((error: Error) => {
       // Log query errors, but don't throw them so the page can still render
       console.error(error);
@@ -56,7 +56,7 @@ function loadDeferredData({context}: Route.LoaderArgs) {
     });
 
   return {
-    recommendedProducts,
+    homepageProducts,
   };
 }
 
@@ -66,7 +66,7 @@ export default function Homepage() {
     <div className="home">
       {data.isShopLinked ? null : <MockShopNotice />}
       <FeaturedCollection collection={data.featuredCollection} />
-      <RecommendedProducts products={data.recommendedProducts} />
+      <HomepageProducts products={data.homepageProducts} />
     </div>
   );
 }
@@ -97,17 +97,17 @@ function FeaturedCollection({
   );
 }
 
-function RecommendedProducts({
+function HomepageProducts({
   products,
 }: {
-  products: Promise<RecommendedProductsQuery | null>;
+  products: Promise<HomepageProductsQuery | null>;
 }) {
   return (
     <section
       className="recommended-products"
       aria-labelledby="recommended-products"
     >
-      <h2 id="recommended-products">Latest</h2>
+      <h2 id="recommended-products">Latest products</h2>
       <Suspense fallback={<div>Loading...</div>}>
         <Await resolve={products}>
           {(response) => (
@@ -149,7 +149,7 @@ const FEATURED_COLLECTION_QUERY = `#graphql
   }
 ` as const;
 
-const RECOMMENDED_PRODUCTS_QUERY = `#graphql
+const HOMEPAGE_PRODUCTS_QUERY = `#graphql
   fragment RecommendedProduct on Product {
     id
     title
@@ -168,9 +168,9 @@ const RECOMMENDED_PRODUCTS_QUERY = `#graphql
       height
     }
   }
-  query RecommendedProducts ($country: CountryCode, $language: LanguageCode)
+  query HomepageProducts ($country: CountryCode, $language: LanguageCode)
     @inContext(country: $country, language: $language) {
-    products(first: 4, sortKey: UPDATED_AT, reverse: true) {
+    products(first: 8, sortKey: UPDATED_AT, reverse: true) {
       nodes {
         ...RecommendedProduct
       }

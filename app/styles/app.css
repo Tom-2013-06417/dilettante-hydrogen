@@ -288,6 +288,29 @@ main {
   width: 100%;
 }
 
+.page-transition {
+  isolation: isolate;
+  overflow-x: clip;
+  position: relative;
+  width: 100%;
+}
+
+.page-transition-content {
+  background: var(--color-background);
+  inset: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-transition-content {
+    position: relative;
+    will-change: auto;
+  }
+}
+
 .header-menu-mobile-toggle {
   @media (min-width: 48em) {
     display: none;

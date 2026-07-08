@@ -1,5 +1,4 @@
 import {ServerRouter} from 'react-router';
-import {isbot} from 'isbot';
 import {renderToReadableStream} from 'react-dom/server';
 import {
   createContentSecurityPolicy,
@@ -19,6 +18,18 @@ export default async function handleRequest(
       checkoutDomain: context.env.PUBLIC_CHECKOUT_DOMAIN,
       storeDomain: context.env.PUBLIC_STORE_DOMAIN,
     },
+    styleSrc: [
+      'https://fonts.googleapis.com',
+      'https://use.typekit.net',
+      'https://p.typekit.net',
+    ],
+    fontSrc: [
+      "'self'",
+      'https://fonts.gstatic.com',
+      'https://use.typekit.net',
+      'https://p.typekit.net',
+    ],
+    connectSrc: ['https://use.typekit.net', 'https://p.typekit.net'],
   });
 
   const body = await renderToReadableStream(
@@ -39,9 +50,7 @@ export default async function handleRequest(
     },
   );
 
-  if (isbot(request.headers.get('user-agent'))) {
-    await body.allReady;
-  }
+  await body.allReady;
 
   responseHeaders.set('Content-Type', 'text/html');
   responseHeaders.set('Content-Security-Policy', header);

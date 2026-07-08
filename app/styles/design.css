@@ -1,0 +1,125 @@
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-down {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes draw-outline {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes bounce-soft {
+  0%,
+  70%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(16px);
+  }
+  90% {
+    transform: translateY(4px);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up var(--fade-duration, 0.8s) cubic-bezier(0.22, 1, 0.36, 1)
+    var(--fade-delay, 0s) both;
+}
+
+.animate-fade-in {
+  animation: fade-in var(--fade-duration, 1.2s) ease-out var(--fade-delay, 0s)
+    both;
+}
+
+.animate-fade-down {
+  animation: fade-down var(--fade-duration, 0.5s)
+    var(--fade-ease, cubic-bezier(0.22, 1, 0.36, 1)) var(--fade-delay, 0s) both;
+}
+
+.animate-draw-outline {
+  stroke-dasharray: 1;
+  animation: draw-outline var(--fade-duration, 0.7s)
+    var(--fade-ease, ease-in-out) var(--fade-delay, 0s) both;
+}
+
+.animate-bounce-soft {
+  animation: bounce-soft var(--fade-duration, 0.9s)
+    var(--fade-ease, ease-in-out) var(--fade-delay, 0s) both;
+}
+
+.blueprint-rule-h {
+  flex: none;
+  height: 1px;
+  background-image: repeating-linear-gradient(
+    to right,
+    currentColor 0 4px,
+    transparent 4px 9px
+  );
+}
+
+.blueprint-rule-v {
+  flex: none;
+  align-self: stretch;
+  width: 1px;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    currentColor 0 4px,
+    transparent 4px 9px
+  );
+}
+
+.page-transition-content--static {
+  position: relative;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up,
+  .animate-fade-in,
+  .animate-fade-down,
+  .animate-draw-outline,
+  .animate-bounce-soft {
+    animation: none;
+  }
+}
+
+body:has(.main--home) {
+  background-color: rgb(14 22 14);
+}
+
+.main--home {
+  margin: 0;
+  max-width: none;
+  padding: 0;
+  width: 100%;
+}

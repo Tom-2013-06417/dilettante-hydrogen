@@ -17,6 +17,8 @@ import resetStyles from '~/styles/reset.css?url';
 import appStyles from '~/styles/app.css?url';
 import tailwindCss from './styles/tailwind.css?url';
 import {PageLayout} from './components/PageLayout';
+import {ClientOnly} from './components/ClientOnly';
+import {TypekitFonts} from './components/TypekitFonts';
 
 export type RootLoader = typeof loader;
 
@@ -70,6 +72,10 @@ export function links() {
       rel: 'preconnect',
       href: 'https://fonts.gstatic.com',
       crossOrigin: 'anonymous',
+    },
+    {
+      rel: 'stylesheet',
+      href: 'https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap',
     },
     {
       rel: 'stylesheet',
@@ -159,18 +165,22 @@ export function Layout({children}: {children?: React.ReactNode}) {
   const nonce = useNonce();
 
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
+        {nonce ? <meta name="csp-nonce" content={nonce} /> : null}
         <link rel="stylesheet" href={tailwindCss}></link>
         <link rel="stylesheet" href={resetStyles}></link>
         <link rel="stylesheet" href={appStyles}></link>
         <Meta />
         <Links />
       </head>
-      <body>
+      <body suppressHydrationWarning>
         {children}
+        <ClientOnly>
+          <TypekitFonts />
+        </ClientOnly>
         <ScrollRestoration nonce={nonce} />
         <Scripts nonce={nonce} />
       </body>

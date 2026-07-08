@@ -5,7 +5,7 @@ import {
   useEffect,
   useState,
 } from 'react';
-import {useId} from 'react';
+import {ClientOnly} from '~/components/ClientOnly';
 
 type AsideType = 'search' | 'cart' | 'mobile' | 'closed';
 type AsideContextValue = {
@@ -35,7 +35,7 @@ export function Aside({
 }) {
   const {type: activeType, close} = useAside();
   const expanded = type === activeType;
-  const id = useId();
+  const headingId = `aside-${type}-heading`;
   useEffect(() => {
     const abortController = new AbortController();
 
@@ -58,17 +58,19 @@ export function Aside({
       aria-modal
       className={`overlay ${expanded ? 'expanded' : ''}`}
       role="dialog"
-      aria-labelledby={id}
+      aria-labelledby={headingId}
     >
       <button className="close-outside" onClick={close} />
       <aside>
         <header>
-          <h3 id={id}>{heading}</h3>
+          <h3 id={headingId}>{heading}</h3>
           <button className="close reset" onClick={close} aria-label="Close">
             &times;
           </button>
         </header>
-        <main>{children}</main>
+        <div className="aside-panel">
+          <ClientOnly>{children}</ClientOnly>
+        </div>
       </aside>
     </div>
   );

@@ -1,5 +1,5 @@
-import {Await, Link} from 'react-router';
-import {Suspense, useId} from 'react';
+import {Await, Link, useLocation} from 'react-router';
+import {Suspense} from 'react';
 import type {
   CartApiQueryFragment,
   HeaderQuery,
@@ -29,21 +29,24 @@ export function PageLayout({
   isLoggedIn,
   publicStoreDomain,
 }: PageLayoutProps) {
+  const location = useLocation();
+  const isHome = location.pathname === '/';
+
   return (
     <Aside.Provider>
       <CartAside cart={cart} />
       <SearchAside />
       <MobileMenuAside header={header} publicStoreDomain={publicStoreDomain} />
-      {header && (
+      {header && !isHome ? (
         <Header
           header={header}
           cart={cart}
           isLoggedIn={isLoggedIn}
           publicStoreDomain={publicStoreDomain}
         />
-      )}
-      <main>
-        <PageTransition>{children}</PageTransition>
+      ) : null}
+      <main className={isHome ? 'main--home' : undefined}>
+        {isHome ? children : <PageTransition>{children}</PageTransition>}
       </main>
     </Aside.Provider>
   );
@@ -64,7 +67,7 @@ function CartAside({cart}: {cart: PageLayoutProps['cart']}) {
 }
 
 function SearchAside() {
-  const queriesDatalistId = useId();
+  const queriesDatalistId = 'predictive-search-queries';
   return (
     <Aside type="search" heading="SEARCH">
       <div className="predictive-search">

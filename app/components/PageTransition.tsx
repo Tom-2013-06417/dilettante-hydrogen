@@ -1,6 +1,7 @@
 import {AnimatePresence, motion, useReducedMotion} from 'motion/react';
 import {useLayoutEffect, useRef, useState, type ReactNode} from 'react';
 import {useLocation, useNavigationType} from 'react-router';
+import {ClientOnly} from '~/components/ClientOnly';
 
 const EASE = [0.32, 0.72, 0, 1] as const;
 const DURATION = 0.38;
@@ -37,7 +38,17 @@ const reducedMotionVariants = {
   exit: {opacity: 0},
 };
 
-export function PageTransition({children}: {children: ReactNode}) {
+function PageTransitionStatic({children}: {children: ReactNode}) {
+  return (
+    <div className="page-transition">
+      <div className="page-transition-content page-transition-content--static">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function PageTransitionAnimated({children}: {children: ReactNode}) {
   const location = useLocation();
   const navigationType = useNavigationType();
   const reducedMotion = useReducedMotion();
@@ -63,17 +74,14 @@ export function PageTransition({children}: {children: ReactNode}) {
   }, [location.key, children]);
 
   return (
-    <div
-      className="page-transition"
-      style={{height: height ?? 'auto'}}
-    >
+    <div className="page-transition" style={{height: height ?? 'auto'}}>
       <AnimatePresence initial={false} custom={direction}>
         <motion.div
           ref={contentRef}
           key={location.key}
           custom={direction}
           variants={variants}
-          initial="enter"
+          initial={false}
           animate="center"
           exit="exit"
           transition={transition}
@@ -83,5 +91,13 @@ export function PageTransition({children}: {children: ReactNode}) {
         </motion.div>
       </AnimatePresence>
     </div>
+  );
+}
+
+export function PageTransition({children}: {children: ReactNode}) {
+  return (
+    <ClientOnly fallback={<PageTransitionStatic>{children}</PageTransitionStatic>}>
+      <PageTransitionAnimated>{children}</PageTransitionAnimated>
+    </ClientOnly>
   );
 }

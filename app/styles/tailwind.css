@@ -4,8 +4,36 @@
  */
 
 @import 'tailwindcss';
+@import './design.css';
 
 @theme {
+  /* Designer palette — inkwell */
+  --color-inkwell-50: rgb(240 244 240);
+  --color-inkwell-100: rgb(214 230 214);
+  --color-inkwell-200: rgb(174 204 174);
+  --color-inkwell-300: rgb(122 170 122);
+  --color-inkwell-400: rgb(77 128 77);
+  --color-inkwell-500: rgb(46 90 46);
+  --color-inkwell-600: rgb(31 63 31);
+  --color-inkwell-700: rgb(21 32 21);
+  --color-inkwell-800: rgb(14 22 14);
+  --color-inkwell-900: rgb(8 13 8);
+  --color-inkwell-950: rgb(4 7 4);
+
+  /* Designer palette — vellum */
+  --color-vellum-50: rgb(255 255 255);
+  --color-vellum-100: rgb(255 246 230);
+  --color-vellum-200: rgb(255 236 200);
+  --color-vellum-300: rgb(255 217 154);
+  --color-vellum-400: rgb(245 192 106);
+  --color-vellum-500: rgb(232 162 60);
+  --color-vellum-600: rgb(201 125 26);
+  --color-vellum-700: rgb(160 94 13);
+  --color-vellum-800: rgb(122 69 8);
+  --color-vellum-900: rgb(82 46 4);
+  --color-vellum-950: rgb(46 24 2);
+
+  /* Legacy hydrogen tokens (other routes) */
   --font-heading: 'IBM Plex Sans Condensed', ui-sans-serif, system-ui, sans-serif;
   --font-body: 'IBM Plex Mono', ui-monospace, monospace;
   --color-background: #ffffff;

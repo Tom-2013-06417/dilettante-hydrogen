@@ -334,43 +334,16 @@ export function HomePage() {
       >
         <HomeHero onScrollDown={() => goToSection(1)} />
         <section className="h-[100dvh] w-full bg-vellum-100">
-          <motion.div
-            className="h-full w-full"
-            animate={{
-              opacity: section === 1 ? 1 : 0.94,
-              y: section === 1 ? 0 : 12,
-            }}
-            transition={{duration: 0.45, ease: EASE, delay: section === 1 ? 0.1 : 0}}
-          >
-            <BrandIntro />
-          </motion.div>
+          <BrandIntro active={section === 1} />
         </section>
         <section id="scent-01" className="h-[100dvh] w-full bg-inkwell-800">
-          <motion.div
-            className="h-full w-full"
-            animate={{
-              opacity: section === 2 ? 1 : 0.94,
-              y: section === 2 ? 0 : 12,
-            }}
-            transition={{duration: 0.45, ease: EASE, delay: section === 2 ? 0.1 : 0}}
-          >
-            <ScentFeature />
-          </motion.div>
+          <ScentFeature active={section === 2} />
         </section>
         <section
           id="scent-01-anatomy"
           className="h-[100dvh] w-full bg-inkwell-800"
         >
-          <motion.div
-            className="h-full w-full"
-            animate={{
-              opacity: section === 3 ? 1 : 0.94,
-              y: section === 3 ? 0 : 12,
-            }}
-            transition={{duration: 0.45, ease: EASE, delay: section === 3 ? 0.1 : 0}}
-          >
-            <ScentAnatomy />
-          </motion.div>
+          <ScentAnatomy active={section === 3} />
         </section>
       </motion.div>
     </div>

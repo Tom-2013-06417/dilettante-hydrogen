@@ -1,13 +1,31 @@
+import {motion, useReducedMotion} from 'motion/react';
 import fig02 from '~/assets/design/fig-02.jpg';
 import {HeaderBar} from '~/components/design/HeaderBar';
+import {
+  fadeUpItem,
+  revealRightItem,
+  staggerContainer,
+  wipeItem,
+} from '~/components/design/animations';
 
-export function ScentAnatomy() {
+export function ScentAnatomy({active = false}: {active?: boolean}) {
+  const reducedMotion = useReducedMotion();
+  const animate = reducedMotion ? 'show' : active ? 'show' : 'hidden';
+
   return (
     <div className="h-full w-full bg-inkwell-800 p-3 sm:p-4">
-      <div className="flex h-full w-full flex-col overflow-hidden bg-vellum-100 font-['trust-3a'] text-inkwell-700">
+      <motion.div
+        className="flex h-full w-full flex-col overflow-hidden bg-vellum-100 font-['trust-3a'] text-inkwell-700"
+        variants={staggerContainer}
+        initial={reducedMotion ? false : 'hidden'}
+        animate={animate}
+      >
         <HeaderBar />
 
-        <div className="flex flex-none items-center justify-between px-6 py-6 sm:px-8">
+        <motion.div
+          className="flex flex-none items-center justify-between px-6 py-6 sm:px-8"
+          variants={fadeUpItem}
+        >
           <p className="text-[16px] font-[700] tracking-[0.02em]">
             Scent Composition
           </p>
@@ -17,7 +35,7 @@ export function ScentAnatomy() {
               01
             </span>
           </div>
-        </div>
+        </motion.div>
 
         <div className="relative flex min-h-0 grow-[3] basis-0 flex-col">
           <div className="blueprint-rule-h absolute inset-x-0 top-0 z-10 text-inkwell-700/35" />
@@ -29,19 +47,26 @@ export function ScentAnatomy() {
               className="relative flex min-h-0 grow basis-0 items-center"
             >
               <div className="blueprint-rule-h absolute inset-x-0 bottom-0 text-inkwell-700/35" />
-              <p className="w-[55%] pr-8 text-right text-[15px] tracking-[0.06em] text-inkwell-700/80">
+              <motion.p
+                className="w-[55%] pr-8 text-right text-[15px] tracking-[0.06em] text-inkwell-700/80"
+                variants={revealRightItem}
+              >
                 {tier}
-              </p>
+              </motion.p>
             </div>
           ))}
-          <img
+          <motion.img
             className="absolute inset-y-0 left-[55%] right-8 z-[5] h-full w-auto max-w-none object-cover sm:right-12"
             src={fig02}
             alt=""
+            variants={wipeItem}
           />
         </div>
 
-        <div className="relative flex flex-none items-center px-6 py-6 sm:px-8">
+        <motion.div
+          className="relative flex flex-none items-center px-6 py-6 sm:px-8"
+          variants={fadeUpItem}
+        >
           <div className="blueprint-rule-h absolute inset-x-0 bottom-0 text-inkwell-700/35" />
           <div className="blueprint-rule-v absolute inset-y-0 left-4 text-inkwell-700/35 sm:left-8" />
           <div className="blueprint-rule-v absolute inset-y-0 right-4 text-inkwell-700/35 sm:right-8" />
@@ -55,10 +80,10 @@ export function ScentAnatomy() {
             </p>
           </div>
           <div className="ml-auto mr-4 h-20 w-20 flex-none bg-inkwell-600 sm:mr-8" />
-        </div>
+        </motion.div>
 
         <div className="min-h-0 grow-[2] basis-0" />
-      </div>
+      </motion.div>
     </div>
   );
 }

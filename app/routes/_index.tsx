@@ -1,7 +1,7 @@
 import {useLoaderData} from 'react-router';
 import type {Route} from './+types/_index';
-import {HomePage} from '~/components/home/HomePage';
-import {MockShopNotice} from '~/components/MockShopNotice';
+import {HomePage} from '~/components/home';
+import {MockShopNotice} from '~/components/shared';
 import {pageTitle} from '~/lib/constants';
 
 export const meta: Route.MetaFunction = () => {

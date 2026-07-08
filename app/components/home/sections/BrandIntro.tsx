@@ -6,7 +6,7 @@ import {
   fadeUpItem,
   staggerContainer,
   wipeItem,
-} from '~/components/design/animations';
+} from './animations';
 
 export function BrandIntro({active = false}: {active?: boolean}) {
   const reducedMotion = useReducedMotion();

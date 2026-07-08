@@ -1,7 +1,7 @@
 import {AnimatePresence, motion, useReducedMotion} from 'motion/react';
 import {useLayoutEffect, useRef, useState, type ReactNode} from 'react';
 import {useLocation, useNavigationType} from 'react-router';
-import {ClientOnly} from '~/components/ClientOnly';
+import {ClientOnly} from '~/components/shared';
 
 const EASE = [0.32, 0.72, 0, 1] as const;
 const DURATION = 0.38;

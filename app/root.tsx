@@ -16,9 +16,8 @@ import {FOOTER_QUERY, HEADER_QUERY} from '~/lib/fragments';
 import resetStyles from '~/styles/reset.css?url';
 import appStyles from '~/styles/app.css?url';
 import tailwindCss from './styles/tailwind.css?url';
-import {PageLayout} from './components/PageLayout';
-import {ClientOnly} from './components/ClientOnly';
-import {TypekitFonts} from './components/TypekitFonts';
+import {PageLayout, TypekitFonts} from '~/components/layout';
+import {ClientOnly} from '~/components/shared';
 
 export type RootLoader = typeof loader;
 

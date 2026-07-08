@@ -1,12 +1,12 @@
 import {motion, useReducedMotion} from 'motion/react';
 import fig02 from '~/assets/design/fig-02.jpg';
-import {HeaderBar} from '~/components/design/HeaderBar';
+import {HeaderBar} from './HeaderBar';
 import {
   fadeUpItem,
   revealRightItem,
   staggerContainer,
   wipeItem,
-} from '~/components/design/animations';
+} from './animations';
 
 export function ScentAnatomy({active = false}: {active?: boolean}) {
   const reducedMotion = useReducedMotion();

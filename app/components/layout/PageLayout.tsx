@@ -4,15 +4,15 @@ import type {
   CartApiQueryFragment,
   HeaderQuery,
 } from 'storefrontapi.generated';
-import {Aside} from '~/components/Aside';
-import {PageTransition} from '~/components/PageTransition';
-import {Header, HeaderMenu} from '~/components/Header';
-import {CartMain} from '~/components/CartMain';
+import {Aside} from './Aside';
+import {PageTransition} from './PageTransition';
+import {Header, HeaderMenu} from './Header';
+import {CartMain} from '~/components/cart';
 import {
   SEARCH_ENDPOINT,
   SearchFormPredictive,
-} from '~/components/SearchFormPredictive';
-import {SearchResultsPredictive} from '~/components/SearchResultsPredictive';
+  SearchResultsPredictive,
+} from '~/components/search';
 
 interface PageLayoutProps {
   cart: Promise<CartApiQueryFragment | null>;

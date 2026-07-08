@@ -5,7 +5,7 @@ import {
   useEffect,
   useState,
 } from 'react';
-import {ClientOnly} from '~/components/ClientOnly';
+import {ClientOnly} from '~/components/shared';
 
 type AsideType = 'search' | 'cart' | 'mobile' | 'closed';
 type AsideContextValue = {

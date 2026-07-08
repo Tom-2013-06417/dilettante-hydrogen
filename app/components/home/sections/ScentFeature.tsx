@@ -2,14 +2,14 @@ import {motion, useReducedMotion} from 'motion/react';
 import fig01 from '~/assets/design/fig-01.jpg';
 import fig02 from '~/assets/design/fig-02.jpg';
 import wordmarkInkwell from '~/assets/design/wordmark-inkwell.png';
-import {HeaderBar} from '~/components/design/HeaderBar';
-import {ScentTitle} from '~/components/design/ScentTitle';
+import {HeaderBar} from './HeaderBar';
+import {ScentTitle} from './ScentTitle';
 import {
   fadeUpItem,
   revealRightItem,
   staggerContainer,
   wipeItem,
-} from '~/components/design/animations';
+} from './animations';
 
 export function ScentFeature({active = false}: {active?: boolean}) {
   const reducedMotion = useReducedMotion();

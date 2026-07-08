@@ -1,6 +1,6 @@
 import {Link} from 'react-router';
 import wordmarkInkwell from '~/assets/design/wordmark-inkwell.png';
-import {PlaceholderFrame} from '~/components/design/PlaceholderFrame';
+import {PlaceholderFrame} from './PlaceholderFrame';
 
 export function HeaderBar({className = ''}: {className?: string}) {
   return (

@@ -6,9 +6,9 @@ import {
 import {useCallback, useEffect, useRef, useState} from 'react';
 import wordmarkVellum from '~/assets/design/wordmark-vellum.png';
 import heroLandscape from '~/assets/design/hero-landscape.jpg';
-import {BrandIntro} from '~/components/design/BrandIntro';
-import {ScentFeature} from '~/components/design/ScentFeature';
-import {ScentAnatomy} from '~/components/design/ScentAnatomy';
+import {BrandIntro} from './sections/BrandIntro';
+import {ScentFeature} from './sections/ScentFeature';
+import {ScentAnatomy} from './sections/ScentAnatomy';
 
 const SECTION_COUNT = 4;
 const SNAP_DURATION_MS = 700;

@@ -8,6 +8,7 @@ export default defineConfig({
   plugins: [tailwindcss(), hydrogen(), oxygen(), reactRouter()],
   resolve: {
     tsconfigPaths: true,
+    dedupe: ['scheduler', 'react', 'react-dom'],
   },
   build: {
     // Allow a strict Content-Security-Policy
@@ -27,6 +28,12 @@ export default defineConfig({
        * @see https://vitejs.dev/config/dep-optimization-options
        */
       include: [
+        'scheduler',
+        '@react-three/fiber > scheduler',
+        'react-reconciler',
+        'react-reconciler/constants',
+        '@react-three/fiber',
+        'three',
         'react-router > set-cookie-parser',
         'react-router > cookie',
         'react-router',

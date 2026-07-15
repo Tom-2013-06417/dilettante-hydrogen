@@ -5,6 +5,7 @@ export function ScentTitle({
   showEau = true,
   size = 'full',
   className = '',
+  titleClassName = '',
 }: {
   number: string;
   title: string;
@@ -12,6 +13,7 @@ export function ScentTitle({
   showEau?: boolean;
   size?: 'full' | 'min';
   className?: string;
+  titleClassName?: string;
 }) {
   const tight = style === 'tight' || style === 'tight-min';
   const cardBg = tight
@@ -59,7 +61,9 @@ export function ScentTitle({
               <div className="blueprint-rule-h absolute inset-x-0 bottom-0 z-10 text-inkwell-700/35" />
             </>
           )}
-          <h2 className="max-w-full font-['wayfinder-cf'] text-[length:inherit] font-[300] leading-[1.05] tracking-[-6%]">
+          <h2
+            className={`max-w-full font-['wayfinder-cf'] text-[length:inherit] font-[300] leading-[1.05] tracking-[-6%] ${titleClassName}`.trim()}
+          >
             {title}
           </h2>
           {showEau && (

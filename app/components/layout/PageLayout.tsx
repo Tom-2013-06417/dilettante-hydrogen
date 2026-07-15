@@ -31,13 +31,15 @@ export function PageLayout({
 }: PageLayoutProps) {
   const location = useLocation();
   const isHome = location.pathname === '/';
+  const isProduct = location.pathname.startsWith('/products/');
+  const isImmersive = isHome || isProduct;
 
   return (
     <Aside.Provider>
       <CartAside cart={cart} />
       <SearchAside />
       <MobileMenuAside header={header} publicStoreDomain={publicStoreDomain} />
-      {header && !isHome ? (
+      {header && !isImmersive ? (
         <Header
           header={header}
           cart={cart}
@@ -45,8 +47,12 @@ export function PageLayout({
           publicStoreDomain={publicStoreDomain}
         />
       ) : null}
-      <main className={isHome ? 'main--home' : undefined}>
-        {isHome ? children : <PageTransition>{children}</PageTransition>}
+      <main
+        className={
+          isHome ? 'main--home' : isProduct ? 'main--product' : undefined
+        }
+      >
+        {isImmersive ? children : <PageTransition>{children}</PageTransition>}
       </main>
     </Aside.Provider>
   );

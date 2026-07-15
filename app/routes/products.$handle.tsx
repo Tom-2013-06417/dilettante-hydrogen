@@ -4,11 +4,10 @@ import {
   getSelectedProductOptions,
   Analytics,
   useOptimisticVariant,
-  getProductOptions,
   getAdjacentAndFirstAvailableVariants,
   useSelectedOptionInUrlParam,
 } from '@shopify/hydrogen';
-import {ProductPrice, ProductImage, ProductForm} from '~/components/product';
+import {ProductPage} from '~/components/product/sections';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {pageTitle} from '~/lib/constants';
 
@@ -88,37 +87,9 @@ export default function Product() {
   // only when no search params are set in the url
   useSelectedOptionInUrlParam(selectedVariant.selectedOptions);
 
-  // Get the product options array
-  const productOptions = getProductOptions({
-    ...product,
-    selectedOrFirstAvailableVariant: selectedVariant,
-  });
-
-  const {title, descriptionHtml} = product;
-
   return (
-    <div className="product">
-      <ProductImage image={selectedVariant?.image} />
-      <div className="product-main">
-        <h1>{title}</h1>
-        <ProductPrice
-          price={selectedVariant?.price}
-          compareAtPrice={selectedVariant?.compareAtPrice}
-        />
-        <br />
-        <ProductForm
-          productOptions={productOptions}
-          selectedVariant={selectedVariant}
-        />
-        <br />
-        <br />
-        <p>
-          <strong>Description</strong>
-        </p>
-        <br />
-        <div dangerouslySetInnerHTML={{__html: descriptionHtml}} />
-        <br />
-      </div>
+    <>
+      <ProductPage product={product} selectedVariant={selectedVariant} />
       <Analytics.ProductView
         data={{
           products: [
@@ -134,7 +105,7 @@ export default function Product() {
           ],
         }}
       />
-    </div>
+    </>
   );
 }
 

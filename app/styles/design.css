@@ -113,13 +113,26 @@
   }
 }
 
-body:has(.main--home) {
+body:has(.main--home),
+body:has(.main--product) {
   background-color: rgb(14 22 14);
 }
 
-.main--home {
+.main--home,
+.main--product {
   margin: 0;
   max-width: none;
   padding: 0;
+  width: 100%;
+}
+
+.product-page img {
+  border-radius: 0;
+}
+
+.page-container {
+  box-sizing: border-box;
+  padding-left: 32px;
+  padding-right: 32px;
   width: 100%;
 }

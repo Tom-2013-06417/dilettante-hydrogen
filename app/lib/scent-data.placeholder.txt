@@ -1,0 +1,27 @@
+# Temporary scent variables
+# Maps to future Shopify product metafields.
+# Code reference: app/lib/scentProfile.ts
+
+scent_number = "01"
+scent_subtitle = "Eau de Toilette — ℮ 30 ml · 1.01 fl oz"
+
+# Section 2 — square anatomy image (separate product photo; placeholder for now)
+detail_image = fig-02.jpg
+
+# Tier row images (placeholder crops until per-tier assets exist)
+top_tier_image = fig-01.jpg
+heart_tier_image = fig-02.jpg
+base_tier_image = hero-landscape.jpg
+
+# Notes — three per layer (randomized at runtime from note pools)
+top_notes = [?, ?, ?]
+heart_notes = [?, ?, ?]
+base_notes = [?, ?, ?]
+
+# Future metafield keys (suggested)
+# custom.scent_number
+# custom.scent_subtitle
+# custom.scent_detail_image
+# custom.scent_top_notes
+# custom.scent_heart_notes
+# custom.scent_base_notes

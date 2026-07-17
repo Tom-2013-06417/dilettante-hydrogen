@@ -54,7 +54,7 @@ export function ProductHero({
       </div>
 
       <motion.div
-        className="relative z-10 flex h-full w-full flex-col"
+        className="relative z-[1] flex h-full w-full flex-col"
         variants={staggerContainer}
         initial={reducedMotion ? false : 'hidden'}
         animate="show"
@@ -108,7 +108,7 @@ export function ProductHero({
       </motion.div>
 
       <motion.div
-        className="pointer-events-none absolute bottom-6 left-1/2 z-10 -translate-x-1/2 text-vellum-100/60"
+        className="pointer-events-none absolute bottom-6 left-1/2 z-[1] -translate-x-1/2 text-vellum-100/60"
         initial={reducedMotion ? false : {opacity: 0, y: -4}}
         animate={{opacity: 1, y: 0}}
         transition={{delay: 1.2, duration: 0.6}}

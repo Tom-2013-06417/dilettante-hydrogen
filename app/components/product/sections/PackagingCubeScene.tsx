@@ -54,6 +54,7 @@ function LayerNotes({
     <Html
       position={position}
       center={side !== 'right'}
+      zIndexRange={[5, 0]}
       style={{
         pointerEvents: 'none',
         whiteSpace: 'nowrap',

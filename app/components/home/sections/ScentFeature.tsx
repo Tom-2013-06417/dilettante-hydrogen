@@ -25,7 +25,7 @@ export function ScentFeature({active = false}: {active?: boolean}) {
       >
         <div className="relative flex min-h-0 grow-[5] basis-0 flex-col">
           <motion.div
-            className="absolute inset-x-0 bottom-0 top-[11%] flex"
+            className="pointer-events-none absolute inset-x-0 bottom-0 top-[11%] flex"
             variants={wipeItem}
           >
             <div

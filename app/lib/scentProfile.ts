@@ -18,6 +18,9 @@ export type ScentTier = {
 export type ScentProfile = {
   number: string;
   subtitle: string;
+  tagline: string;
+  description: string;
+  summaryNotes: [string, string, string];
   tiers: [ScentTier, ScentTier, ScentTier];
   detailImage: string;
 };
@@ -25,6 +28,14 @@ export type ScentProfile = {
 // Mirrors scent-data.placeholder.txt
 const SCENT_NUMBER = '01';
 const SCENT_SUBTITLE = 'Eau de Toilette — ℮ 30 ml · 1.01 fl oz';
+const SCENT_TAGLINE = 'For the purest of hearts.';
+const SCENT_DESCRIPTION =
+  'A luminous opening of citrus and green tea settles into a soft floral heart, grounded by sandalwood and white musk.';
+const SCENT_SUMMARY_NOTES: [string, string, string] = [
+  'citrus',
+  'floral',
+  'musk',
+];
 const DETAIL_IMAGE = fig02;
 const TOP_TIER_IMAGE = fig01;
 const HEART_TIER_IMAGE = fig02;
@@ -102,6 +113,9 @@ export function getScentProfile(handle = 'default'): ScentProfile {
   return {
     number: SCENT_NUMBER,
     subtitle: SCENT_SUBTITLE,
+    tagline: SCENT_TAGLINE,
+    description: SCENT_DESCRIPTION,
+    summaryNotes: SCENT_SUMMARY_NOTES,
     detailImage: DETAIL_IMAGE,
     tiers: [
       {

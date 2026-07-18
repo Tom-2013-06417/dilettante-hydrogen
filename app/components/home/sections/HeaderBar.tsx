@@ -3,7 +3,14 @@ import wordmarkInkwell from '~/assets/design/wordmark-inkwell.png';
 import {PageContainer} from '~/components/shared';
 import {PlaceholderFrame} from './PlaceholderFrame';
 
-export function HeaderBar({className = ''}: {className?: string}) {
+export function HeaderBar({
+  className = '',
+  showLeftRule = true,
+}: {
+  className?: string;
+  /** Set false when a parent draws a continuous left rule past the header. */
+  showLeftRule?: boolean;
+}) {
   return (
     <header
       className={`relative flex w-full flex-none flex-col bg-vellum-100 text-inkwell-700 ${className}`}
@@ -12,7 +19,9 @@ export function HeaderBar({className = ''}: {className?: string}) {
       <div className="blueprint-rule-h absolute inset-x-0 bottom-0 text-inkwell-700/35" />
       <PageContainer className="relative flex items-stretch">
         <div className="relative flex items-center px-2 pb-2 pt-4 sm:px-4 sm:pb-5 sm:pt-8">
-          <div className="blueprint-rule-v absolute inset-y-0 left-0 text-inkwell-700/35" />
+          {showLeftRule ? (
+            <div className="blueprint-rule-v absolute inset-y-0 left-0 text-inkwell-700/35" />
+          ) : null}
           <div className="blueprint-rule-v absolute inset-y-0 right-0 text-inkwell-700/35" />
           <Link to="/" prefetch="intent">
             <img

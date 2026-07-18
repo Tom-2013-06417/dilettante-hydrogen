@@ -101,6 +101,7 @@ export function ScentNotesExplorer({scentProfile}: {scentProfile: ScentProfile})
   return (
     <section
       ref={sectionRef}
+      id="scent-anatomy"
       className="relative h-[100dvh] w-full overflow-x-clip bg-vellum-100 font-['trust-3a'] text-inkwell-700"
     >
       <PageContainer className="flex h-full flex-col">

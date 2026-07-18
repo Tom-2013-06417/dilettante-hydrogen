@@ -4,6 +4,9 @@
 
 scent_number = "01"
 scent_subtitle = "Eau de Toilette — ℮ 30 ml · 1.01 fl oz"
+scent_tagline = "For the purest of hearts."
+scent_description = "A luminous opening of citrus and green tea settles into a soft floral heart, grounded by sandalwood and white musk."
+scent_summary_notes = ["citrus", "floral", "musk"]
 
 # Section 2 — square anatomy image (separate product photo; placeholder for now)
 detail_image = fig-02.jpg
@@ -21,6 +24,9 @@ base_notes = [?, ?, ?]
 # Future metafield keys (suggested)
 # custom.scent_number
 # custom.scent_subtitle
+# custom.scent_tagline
+# custom.scent_description
+# custom.scent_summary_notes
 # custom.scent_detail_image
 # custom.scent_top_notes
 # custom.scent_heart_notes

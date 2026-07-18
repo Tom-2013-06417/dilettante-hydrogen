@@ -15,6 +15,7 @@ import {
 import {ProductPrice} from '~/components/product/ProductPrice';
 import type {ScentProfile} from '~/lib/scentProfile';
 import {ProductBottleBand} from './ProductBottleBand';
+import {ProductTitle} from './ProductTitle';
 
 type ProductHeroProps = {
   title: string;
@@ -37,7 +38,7 @@ export function ProductHero({
   const {open} = useAside();
 
   return (
-    <div className="relative flex w-full flex-col overflow-hidden bg-vellum-100 text-inkwell-700">
+    <div className="relative flex w-full flex-col overflow-x-hidden bg-vellum-100 text-inkwell-700">
       <motion.div
         className="relative z-[1] flex min-h-[100dvh] w-full flex-col"
         variants={staggerContainer}
@@ -78,6 +79,16 @@ export function ProductHero({
                 <div className="h-full w-full bg-inkwell-700/15" />
               )}
             </div>
+
+            <motion.div
+              className="pointer-events-none absolute inset-y-0 left-8 z-10 flex items-center justify-start overflow-visible sm:left-16"
+              variants={fadeUpItem}
+            >
+              <ProductTitle
+                number={scentProfile.number}
+                title={title}
+              />
+            </motion.div>
           </div>
         </div>
 
@@ -126,20 +137,6 @@ export function ProductHero({
           image={image}
           scentProfile={scentProfile}
         />
-
-        {/* Title + No. temporarily hidden
-        <PageContainer className="flex min-h-0 grow flex-col justify-end pb-10 pt-6 sm:pb-14">
-          <motion.div variants={fadeUpItem}>
-            <ScentTitle
-              number={scentProfile.number}
-              title={title}
-              style="bordered"
-              size="min"
-              showEau={false}
-            />
-          </motion.div>
-        </PageContainer>
-        */}
       </motion.div>
 
       <motion.div

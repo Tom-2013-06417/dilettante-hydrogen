@@ -1,12 +1,7 @@
 import {motion, useReducedMotion} from 'motion/react';
 import fig01 from '~/assets/design/fig-01.jpg';
 import fig02 from '~/assets/design/fig-02.jpg';
-import {
-  fadeInItem,
-  fadeUpItem,
-  staggerContainer,
-  wipeItem,
-} from './animations';
+import {fadeInItem, fadeUpItem, staggerContainer, wipeItem} from './animations';
 
 export function BrandIntro({active = false}: {active?: boolean}) {
   const reducedMotion = useReducedMotion();
@@ -56,9 +51,9 @@ export function BrandIntro({active = false}: {active?: boolean}) {
             <br />
             It is the bespoke perfumery of Paulo Pascua: fragrances composed one
             story at a time, drawn from the places, rituals, and memories of the
-            people who wear them. No catalogue, no formula chased for the
-            market — only scent pursued the way an amateur pursues anything: out
-            of love.
+            people who wear them. No catalogue, no formula chased for the market
+            — only scent pursued the way an amateur pursues anything: out of
+            love.
           </p>
         </motion.div>
 

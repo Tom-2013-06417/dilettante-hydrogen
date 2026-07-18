@@ -38,10 +38,7 @@ export function ProductBottleBand({
             <div className="absolute inset-0 bg-inkwell-700/10" />
           )}
           <div className="relative w-4 shrink-0 sm:w-8" aria-hidden />
-          <div
-            className="relative flex items-center px-2 sm:px-4"
-            aria-hidden
-          >
+          <div className="relative flex items-center px-2 sm:px-4" aria-hidden>
             <img
               className="invisible h-6 w-auto sm:h-9"
               src={wordmarkInkwell}

@@ -2,9 +2,8 @@ import {useEffect, useState, type ComponentType} from 'react';
 import type {PackagingCubeCanvasProps} from './PackagingCubeCanvas';
 
 export function PackagingCubeLoader(props: PackagingCubeCanvasProps) {
-  const [Canvas, setCanvas] = useState<
-    ComponentType<PackagingCubeCanvasProps> | null
-  >(null);
+  const [Canvas, setCanvas] =
+    useState<ComponentType<PackagingCubeCanvasProps> | null>(null);
 
   useEffect(() => {
     void import('./PackagingCubeCanvas').then((mod) => {

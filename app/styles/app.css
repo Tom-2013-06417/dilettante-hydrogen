@@ -6,7 +6,8 @@
   --header-height: 64px;
   --color-dark: #000;
   --color-light: #fff;
-  --font-heading: 'IBM Plex Sans Condensed', ui-sans-serif, system-ui, sans-serif;
+  --font-heading:
+    'IBM Plex Sans Condensed', ui-sans-serif, system-ui, sans-serif;
   --font-body: 'IBM Plex Mono', ui-monospace, monospace;
   --color-background: #ffffff;
   --color-foreground: #000000cf;

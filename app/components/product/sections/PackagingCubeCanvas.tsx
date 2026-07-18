@@ -2,10 +2,7 @@ import {Canvas, useThree} from '@react-three/fiber';
 import {Suspense, useLayoutEffect} from 'react';
 import * as THREE from 'three';
 import type {ScentTier} from '~/lib/scentProfile';
-import {
-  PackagingCubeScene,
-  type CubePhase,
-} from './PackagingCubeScene';
+import {PackagingCubeScene, type CubePhase} from './PackagingCubeScene';
 
 export type PackagingCubeCanvasProps = {
   textureUrl: string;

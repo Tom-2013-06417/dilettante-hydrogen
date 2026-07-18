@@ -1,9 +1,6 @@
 import {Await, Link, useLocation} from 'react-router';
 import {Suspense} from 'react';
-import type {
-  CartApiQueryFragment,
-  HeaderQuery,
-} from 'storefrontapi.generated';
+import type {CartApiQueryFragment, HeaderQuery} from 'storefrontapi.generated';
 import {Aside} from './Aside';
 import {PageTransition} from './PageTransition';
 import {Header, HeaderMenu} from './Header';

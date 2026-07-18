@@ -5,7 +5,8 @@ import {NonceProvider} from '@shopify/hydrogen';
 
 function getHydrationNonce() {
   return (
-    document.querySelector<HTMLMetaElement>('meta[name="csp-nonce"]')?.content ||
+    document.querySelector<HTMLMetaElement>('meta[name="csp-nonce"]')
+      ?.content ||
     document.querySelector<HTMLScriptElement>('script[nonce]')?.nonce ||
     undefined
   );

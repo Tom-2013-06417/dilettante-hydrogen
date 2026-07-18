@@ -36,13 +36,13 @@ Restart the dev server after pulling environment variables.
 
 ## Scripts
 
-| Command | Description |
-| --- | --- |
-| `npm run dev` | Start dev server with GraphQL codegen |
-| `npm run build` | Production build |
-| `npm run preview` | Preview production build locally |
-| `npm run typecheck` | TypeScript check |
-| `npm run lint` | ESLint |
+| Command             | Description                           |
+| ------------------- | ------------------------------------- |
+| `npm run dev`       | Start dev server with GraphQL codegen |
+| `npm run build`     | Production build                      |
+| `npm run preview`   | Preview production build locally      |
+| `npm run typecheck` | TypeScript check                      |
+| `npm run lint`      | ESLint                                |
 
 ## Security
 

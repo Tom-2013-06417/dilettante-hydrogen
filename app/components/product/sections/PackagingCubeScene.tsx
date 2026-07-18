@@ -119,11 +119,7 @@ function LayerSlab({
     <group ref={groupRef} position={[0, STACK_Y[index], 0]}>
       <mesh castShadow receiveShadow>
         <boxGeometry args={[SIZE, SLAB_H * 0.96, SIZE]} />
-        <meshStandardMaterial
-          map={texture}
-          roughness={0.55}
-          metalness={0.05}
-        />
+        <meshStandardMaterial map={texture} roughness={0.55} metalness={0.05} />
       </mesh>
       <LayerNotes
         notes={tier.notes}
@@ -148,8 +144,7 @@ export function PackagingCubeScene({
   useFrame(() => {
     if (!rootRef.current) return;
 
-    const targetY =
-      phase === 'cube' ? scrollRotationY : 0;
+    const targetY = phase === 'cube' ? scrollRotationY : 0;
     const targetX = phase === 'cube' ? 0.18 : 0;
 
     rootRef.current.rotation.y = THREE.MathUtils.lerp(

@@ -40,7 +40,11 @@ function phaseHint(phase: CubePhase) {
   }
 }
 
-export function ScentNotesExplorer({scentProfile}: {scentProfile: ScentProfile}) {
+export function ScentNotesExplorer({
+  scentProfile,
+}: {
+  scentProfile: ScentProfile;
+}) {
   const reducedMotion = useReducedMotion();
   const sectionRef = useRef<HTMLElement>(null);
   const inView = useInView(sectionRef, {once: true, margin: '-10% 0px'});

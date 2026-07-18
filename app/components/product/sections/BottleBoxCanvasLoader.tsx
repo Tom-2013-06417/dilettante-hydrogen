@@ -7,9 +7,7 @@ type CanvasProps = {rotationY: number};
  * never evaluates @react-three/fiber or its CJS scheduler dependency.
  */
 export function BottleBoxCanvasLoader({rotationY}: CanvasProps) {
-  const [Canvas, setCanvas] = useState<ComponentType<CanvasProps> | null>(
-    null,
-  );
+  const [Canvas, setCanvas] = useState<ComponentType<CanvasProps> | null>(null);
 
   useEffect(() => {
     void import('./BottleBoxCanvas').then((mod) => {

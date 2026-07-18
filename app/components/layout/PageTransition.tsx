@@ -12,8 +12,7 @@ const pageVariants = {
     scale: direction > 0 ? 1 : 0.94,
     transformOrigin: direction > 0 ? 'center center' : 'left center',
     zIndex: direction > 0 ? 2 : 1,
-    boxShadow:
-      direction > 0 ? '-10px 0 30px rgba(0, 0, 0, 0.08)' : 'none',
+    boxShadow: direction > 0 ? '-10px 0 30px rgba(0, 0, 0, 0.08)' : 'none',
   }),
   center: {
     x: 0,
@@ -27,8 +26,7 @@ const pageVariants = {
     scale: direction > 0 ? 0.94 : 1,
     transformOrigin: direction > 0 ? 'left center' : 'center center',
     zIndex: direction > 0 ? 1 : 2,
-    boxShadow:
-      direction < 0 ? '-10px 0 30px rgba(0, 0, 0, 0.08)' : 'none',
+    boxShadow: direction < 0 ? '-10px 0 30px rgba(0, 0, 0, 0.08)' : 'none',
   }),
 };
 
@@ -96,7 +94,9 @@ function PageTransitionAnimated({children}: {children: ReactNode}) {
 
 export function PageTransition({children}: {children: ReactNode}) {
   return (
-    <ClientOnly fallback={<PageTransitionStatic>{children}</PageTransitionStatic>}>
+    <ClientOnly
+      fallback={<PageTransitionStatic>{children}</PageTransitionStatic>}
+    >
       <PageTransitionAnimated>{children}</PageTransitionAnimated>
     </ClientOnly>
   );

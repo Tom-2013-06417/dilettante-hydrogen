@@ -27,7 +27,11 @@ function PerfumeBox({targetRotationY}: {targetRotationY: number}) {
     <group ref={groupRef}>
       <mesh castShadow receiveShadow>
         <boxGeometry args={[1.15, 1.75, 0.42]} />
-        <meshStandardMaterial color={INKWELL} roughness={0.55} metalness={0.08} />
+        <meshStandardMaterial
+          color={INKWELL}
+          roughness={0.55}
+          metalness={0.08}
+        />
       </mesh>
 
       {/* Lid */}

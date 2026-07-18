@@ -1,8 +1,4 @@
-import {
-  motion,
-  useReducedMotion,
-  type Variants,
-} from 'motion/react';
+import {motion, useReducedMotion, type Variants} from 'motion/react';
 import {useCallback, useEffect, useRef, useState} from 'react';
 import wordmarkVellum from '~/assets/design/wordmark-vellum.png';
 import heroLandscape from '~/assets/design/hero-landscape.jpg';
@@ -252,7 +248,11 @@ export function HomePage() {
 
       const now = performance.now();
       const scale =
-        event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? window.innerHeight : 1;
+        event.deltaMode === 1
+          ? 16
+          : event.deltaMode === 2
+            ? window.innerHeight
+            : 1;
       const delta = Math.abs(event.deltaY) * scale;
       const lastDelta = Math.abs(lastWheelDelta);
       const isBoundary =

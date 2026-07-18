@@ -101,7 +101,7 @@ export function ProductHero({
 
           <div className="relative flex w-[40%] items-center justify-center">
             <AddToCartButton
-              className="cursor-pointer border-0 bg-[#152015] px-4 py-2 font-['trust-3a'] text-[12px] font-[700] uppercase tracking-[0.08em] text-vellum-100 transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 sm:px-5 sm:text-[13px]"
+              className="cursor-pointer border-0 bg-[#152015] px-4 py-2 font-['config-mono-vf'] text-[12px] font-[700] uppercase tracking-[0.08em] text-vellum-100 transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 sm:px-5 sm:text-[13px]"
               disabled={!selectedVariant?.availableForSale}
               onClick={() => open('cart')}
               lines={

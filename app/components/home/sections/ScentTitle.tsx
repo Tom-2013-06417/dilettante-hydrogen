@@ -20,14 +20,14 @@ export function ScentTitle({
     ? 'bg-vellum-100 pt-0 pb-2.5 pr-4'
     : style === 'bordered'
       ? 'bg-vellum-100 py-[0.08em] pr-4'
-      : 'bg-gradient-to-r from-vellum-100 from-70% to-vellum-100/0 py-[0.08em] pr-10 sm:pr-16';
+      : 'bg-linear-to-r from-vellum-100 from-70% to-vellum-100/0 py-[0.08em] pr-10 sm:pr-16';
 
   return (
     <div className={`relative ${className}`}>
       <div className="blueprint-rule-v absolute left-4 top-0 h-full text-inkwell-700/35 sm:left-8" />
       <div className="inline-flex items-center gap-1.5 pb-1 pl-6.5 pr-6 pt-2 text-[12px] font-bold tracking-[0.02em] sm:pl-8">
         No.
-        <span className="flex h-[17px] w-[32px] items-center justify-center rounded-[50%] bg-inkwell-700 font-['config-mono-vf'] text-[14px] font-bold leading-none text-vellum-100 [font-variant-numeric:slashed-zero]">
+        <span className="flex h-4.25 w-8 items-center justify-center rounded-[50%] bg-inkwell-700 font-['config-mono-vf'] text-[14px] font-bold leading-none text-vellum-100 [font-variant-numeric:slashed-zero]">
           {number}
         </span>
       </div>

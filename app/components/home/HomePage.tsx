@@ -57,14 +57,14 @@ function HomeHero({onScrollDown}: {onScrollDown: () => void}) {
   const reducedMotion = useReducedMotion();
 
   return (
-    <section className="relative flex h-[100dvh] w-full flex-col items-stretch overflow-hidden bg-inkwell-800">
+    <section className="relative flex h-dvh w-full flex-col items-stretch overflow-hidden bg-inkwell-800">
       <motion.div
         className="relative flex h-[20%] w-full items-start bg-inkwell-800 lg:h-[15%]"
         variants={heroStagger}
         initial={reducedMotion ? false : 'hidden'}
         animate="show"
       >
-        <h1 className="absolute bottom-0 left-1/2 z-10 w-[92%] max-w-[640px] -translate-x-1/2 translate-y-1/2">
+        <h1 className="absolute bottom-0 left-1/2 z-10 w-[92%] max-w-160 -translate-x-1/2 translate-y-1/2">
           <motion.img
             className="w-full"
             src={wordmarkVellum}
@@ -72,7 +72,7 @@ function HomeHero({onScrollDown}: {onScrollDown: () => void}) {
             variants={fadeUp}
           />
           <motion.span
-            className="absolute left-0 right-0 top-[calc(100%+2rem)] flex flex-col text-center font-['trust-3a'] text-[15px] font-[400] leading-[22px] tracking-[0.06em] text-vellum-100"
+            className="absolute left-0 right-0 top-[calc(100%+2rem)] flex flex-col text-center font-['trust-3a'] text-[15px] font-normal leading-5.5 tracking-[0.06em] text-vellum-100"
             variants={fadeIn}
             custom={0.35}
           >
@@ -316,7 +316,7 @@ export function HomePage() {
   return (
     <div
       ref={containerRef}
-      className="relative h-[100dvh] w-full overflow-hidden touch-none"
+      className="relative h-dvh w-full overflow-hidden touch-none"
     >
       <motion.div
         className="w-full will-change-transform"
@@ -333,15 +333,15 @@ export function HomePage() {
         onAnimationComplete={handleAnimationComplete}
       >
         <HomeHero onScrollDown={() => goToSection(1)} />
-        <section className="h-[100dvh] w-full bg-vellum-100">
+        <section className="h-dvh w-full bg-vellum-100">
           <BrandIntro active={section === 1} />
         </section>
-        <section id="scent-01" className="h-[100dvh] w-full bg-inkwell-800">
+        <section id="scent-01" className="h-dvh w-full bg-inkwell-800">
           <ScentFeature active={section === 2} />
         </section>
         <section
           id="scent-01-anatomy"
-          className="h-[100dvh] w-full bg-inkwell-800"
+          className="h-dvh w-full bg-inkwell-800"
         >
           <ScentAnatomy active={section === 3} />
         </section>

@@ -8,7 +8,8 @@
     "build": "shopify hydrogen build --codegen",
     "dev": "shopify hydrogen dev --codegen",
     "preview": "shopify hydrogen preview --build",
-    "lint": "eslint --no-error-on-unmatched-pattern .",
+    "lint": "eslint --no-error-on-unmatched-pattern . && tailwind-lint --auto",
+    "lint:fix": "tailwind-lint --auto --fix",
     "format": "prettier --write --ignore-unknown .",
     "format:check": "prettier --check --ignore-unknown .",
     "typecheck": "react-router typegen && tsc --noEmit",
@@ -62,6 +63,7 @@
     "globals": "^15.14.0",
     "graphql-config": "^5.0.3",
     "prettier": "^3.4.2",
+    "tailwind-lint": "^0.12.1",
     "typescript": "^5.9.2",
     "vite": "^8.0.1"
   },

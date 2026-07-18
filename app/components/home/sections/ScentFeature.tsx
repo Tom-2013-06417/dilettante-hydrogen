@@ -69,15 +69,15 @@ export function ScentFeature({active = false}: {active?: boolean}) {
             <p className="font-['config-mono-vf'] text-[12px] tracking-[0.06em] text-inkwell-700/65">
               citrus&ensp;&bull;&ensp;floral&ensp;&bull;&ensp;musk
             </p>
-            <p className="max-w-[42ch] pr-4 text-[18px] italic leading-[20px] tracking-[0.02em]">
+            <p className="max-w-[42ch] pr-4 text-[18px] italic leading-5 tracking-[0.02em]">
               Sanctity of Childhood
             </p>
           </div>
-          <div className="ml-auto mr-6 h-[64px] w-[64px] flex-none bg-inkwell-600 sm:mr-10" />
+          <div className="ml-auto mr-6 h-16 w-16 flex-none bg-inkwell-600 sm:mr-10" />
         </motion.div>
 
         <div className="flex min-h-0 grow-4 basis-0">
-          <div className="w-[38%] min-w-[120px]">
+          <div className="w-[38%] min-w-30">
             <motion.img
               className="h-full w-full object-cover"
               src={fig02}
@@ -88,7 +88,7 @@ export function ScentFeature({active = false}: {active?: boolean}) {
           <div className="blueprint-rule-v text-inkwell-700/35" />
           <div className="flex min-w-0 grow items-center px-6 pb-24 sm:px-10">
             <motion.p
-              className="max-w-[42ch] text-[14px] italic leading-[24px] tracking-[0.02em] text-inkwell-700/45"
+              className="max-w-[42ch] text-[14px] italic leading-6 tracking-[0.02em] text-inkwell-700/45"
               variants={revealRightItem}
             >
               Young love manifested in stolen glances between church pews, hands

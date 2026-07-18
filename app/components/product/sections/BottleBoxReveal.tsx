@@ -30,13 +30,13 @@ export function BottleBoxReveal({title}: {title: string}) {
   return (
     <section
       ref={sectionRef}
-      className="relative min-h-[100dvh] w-full overflow-hidden bg-vellum-100 py-20"
+      className="relative min-h-dvh w-full overflow-hidden bg-vellum-100 py-20"
     >
       <div className="blueprint-rule-h pointer-events-none absolute inset-x-0 top-16 text-inkwell-700/25" />
       <div className="blueprint-rule-h pointer-events-none absolute inset-x-0 bottom-16 text-inkwell-700/25" />
 
       <PageContainer className="relative flex h-full min-h-[calc(100dvh-10rem)] flex-col items-center justify-center">
-        <p className="mb-8 font-['trust-3a'] text-[12px] font-[700] uppercase tracking-[0.14em] text-inkwell-700/55">
+        <p className="mb-8 font-['trust-3a'] text-[12px] font-bold uppercase tracking-[0.14em] text-inkwell-700/55">
           The vessel
         </p>
 

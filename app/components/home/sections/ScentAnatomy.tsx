@@ -31,7 +31,7 @@ export function ScentAnatomy({active = false}: {active?: boolean}) {
           </p>
           <div className="flex items-center gap-1.5 text-[12px] font-bold tracking-[0.02em]">
             No.
-            <span className="flex h-[17px] w-[32px] items-center justify-center rounded-[50%] bg-inkwell-700 font-['config-mono-vf'] text-[14px] font-bold leading-none text-vellum-100 [font-variant-numeric:slashed-zero]">
+            <span className="flex h-4.25 w-8 items-center justify-center rounded-[50%] bg-inkwell-700 font-['config-mono-vf'] text-[14px] font-bold leading-none text-vellum-100 [font-variant-numeric:slashed-zero]">
               01
             </span>
           </div>

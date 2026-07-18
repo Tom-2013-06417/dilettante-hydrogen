@@ -64,7 +64,7 @@ export function buildOrderSearchQuery(
 /**
  * Parses order filter parameters from URLSearchParams
  * @param searchParams - The URL search parameters
- * @returns Parsed filter parameters
+ * @returns Parsed parameters
  * @example
  * const url = new URL('https://example.com/orders?name=1001&confirmation_number=ABC123');
  * parseOrderFilters(url.searchParams) // returns \{ name: '1001', confirmationNumber: 'ABC123' \}

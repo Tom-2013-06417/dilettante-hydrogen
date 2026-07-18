@@ -15,8 +15,8 @@ export function BrandIntro({active = false}: {active?: boolean}) {
         initial={reducedMotion ? false : 'hidden'}
         animate={animate}
       >
-        <div className="flex min-h-[80px] grow-[4] basis-0">
-          <div className="w-[10%] min-w-[72px] max-w-[280px]">
+        <div className="flex min-h-20 grow-4 basis-0">
+          <div className="w-[10%] min-w-18 max-w-70">
             <motion.img
               className="h-full w-full object-cover"
               src={fig01}
@@ -29,11 +29,11 @@ export function BrandIntro({active = false}: {active?: boolean}) {
         <div className="relative flex items-stretch">
           <div className="blueprint-rule-h absolute inset-x-0 top-0 text-inkwell-700/35" />
           <div className="blueprint-rule-h absolute inset-x-0 bottom-0 text-inkwell-700/35" />
-          <div className="flex w-[10%] min-w-[72px] max-w-[280px] flex-none justify-end">
+          <div className="flex w-[10%] min-w-18 max-w-70 flex-none justify-end">
             <div className="blueprint-rule-v text-inkwell-700/35" />
           </div>
           <motion.h2
-            className="relative z-10 -mb-[0.2em] -mt-[0.13em] min-w-0 grow pr-4 text-right font-['wayfinder-cf'] text-[clamp(3rem,9vw,6.5rem)] font-[400] leading-[1.05] tracking-[-5%] text-inkwell-700/90 sm:pr-6"
+            className="relative z-10 mb-[-0.2em] mt-[-0.13em] min-w-0 grow pr-4 text-right font-['wayfinder-cf'] text-[clamp(3rem,9vw,6.5rem)] font-normal leading-[1.05] tracking-[-5%] text-inkwell-700/90 sm:pr-6"
             variants={fadeUpItem}
           >
             For the love of it.
@@ -44,7 +44,7 @@ export function BrandIntro({active = false}: {active?: boolean}) {
           className="flex flex-none px-12 pb-4 pl-6 pt-8"
           variants={fadeUpItem}
         >
-          <p className="max-w-[58ch] text-[12px] leading-[22px] tracking-[0.02em]">
+          <p className="max-w-[58ch] text-[12px] leading-5.5 tracking-[0.02em]">
             Dilettante takes its name from the Italian{' '}
             <em className="font-['wayfinder-cf'] italic">dilettare</em>
             {' — to delight.'}
@@ -58,7 +58,7 @@ export function BrandIntro({active = false}: {active?: boolean}) {
         </motion.div>
 
         <div className="blueprint-rule-h text-inkwell-700/35" />
-        <div className="flex min-h-[100px] grow-[3] basis-0 justify-end">
+        <div className="flex min-h-25 grow-3 basis-0 justify-end">
           <div className="w-[62%] sm:w-[48%]">
             <motion.img
               className="h-full w-full object-cover"
@@ -71,10 +71,10 @@ export function BrandIntro({active = false}: {active?: boolean}) {
         <div className="blueprint-rule-h text-inkwell-700/35" />
 
         <motion.div
-          className="flex min-h-[60px] grow-[2] basis-0 items-end justify-center pb-6 sm:pb-8"
+          className="flex min-h-15 grow-2 basis-0 items-end justify-center pb-6 sm:pb-8"
           variants={fadeInItem}
         >
-          <p className="px-6 text-center text-[13px] leading-[21px] tracking-[0.04em] text-inkwell-700/70">
+          <p className="px-6 text-center text-[13px] leading-5.25 tracking-[0.04em] text-inkwell-700/70">
             <span className="font-['wayfinder-cf'] text-[15px] italic">
               dilettante
             </span>{' '}

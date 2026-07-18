@@ -51,7 +51,7 @@ export function ProductBottleBand({
         <div className="relative flex min-w-0 flex-1 flex-col">
           <div
             aria-hidden
-            className="blueprint-rule-v absolute inset-y-0 left-0 z-[1] text-inkwell-700/35"
+            className="blueprint-rule-v absolute inset-y-0 left-0 z-1 text-inkwell-700/35"
           />
 
           {/* Tagline row — same height as price/CTA */}
@@ -80,7 +80,7 @@ export function ProductBottleBand({
       {/* Bottle overlays the narrow left column */}
       <Image
         alt={`${title} bottle`}
-        className="pointer-events-none absolute bottom-0 left-0 z-[2] h-full w-[50%] -translate-x-[25%] translate-y-[5%] object-contain object-left-bottom"
+        className="pointer-events-none absolute bottom-0 left-0 z-2 h-full w-[50%] translate-x-[-25%] translate-y-[5%] object-contain object-bottom-left"
         src={BOTTLE_IMAGE}
         width={187}
         height={178}
@@ -89,7 +89,7 @@ export function ProductBottleBand({
 
       <div
         aria-hidden
-        className="blueprint-rule-h absolute inset-x-0 bottom-0 z-[1] text-inkwell-700/35"
+        className="blueprint-rule-h absolute inset-x-0 bottom-0 z-1 text-inkwell-700/35"
       />
     </div>
   );

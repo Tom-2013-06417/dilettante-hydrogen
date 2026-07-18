@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unknown-property -- R3F Three.js props */
 import {Html, useTexture} from '@react-three/drei';
 import {useFrame} from '@react-three/fiber';
 import {useLayoutEffect, useMemo, useRef} from 'react';
@@ -196,3 +197,4 @@ export function PackagingCubeScene({
     </>
   );
 }
+/* eslint-enable react/no-unknown-property */

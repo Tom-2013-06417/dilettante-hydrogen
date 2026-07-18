@@ -25,9 +25,9 @@ export function ScentTitle({
   return (
     <div className={`relative ${className}`}>
       <div className="blueprint-rule-v absolute left-4 top-0 h-full text-inkwell-700/35 sm:left-8" />
-      <div className="inline-flex items-center gap-1.5 pb-1 pl-6.5 pr-6 pt-2 text-[12px] font-[700] tracking-[0.02em] sm:pl-8">
+      <div className="inline-flex items-center gap-1.5 pb-1 pl-6.5 pr-6 pt-2 text-[12px] font-bold tracking-[0.02em] sm:pl-8">
         No.
-        <span className="flex h-[17px] w-[32px] items-center justify-center rounded-[50%] bg-inkwell-700 font-['config-mono-vf'] text-[14px] font-[700] leading-none text-vellum-100 [font-variant-numeric:slashed-zero]">
+        <span className="flex h-[17px] w-[32px] items-center justify-center rounded-[50%] bg-inkwell-700 font-['config-mono-vf'] text-[14px] font-bold leading-none text-vellum-100 [font-variant-numeric:slashed-zero]">
           {number}
         </span>
       </div>
@@ -62,7 +62,7 @@ export function ScentTitle({
             </>
           )}
           <h2
-            className={`max-w-full font-['wayfinder-cf'] text-[length:inherit] font-[300] leading-[1.05] tracking-[-6%] ${titleClassName}`.trim()}
+            className={`max-w-full font-['wayfinder-cf'] text-[length:inherit] font-light leading-[1.05] tracking-[-6%] ${titleClassName}`.trim()}
           >
             {title}
           </h2>
@@ -72,7 +72,7 @@ export function ScentTitle({
                 size === 'min' ? 'text-[13px]' : 'text-[16px]'
               }`}
             >
-              <span className="font-[700]">Eau de Toilette</span>
+              <span className="font-bold">Eau de Toilette</span>
               <span>{' — ℮ 30 ml · 1.01 fl oz'}</span>
             </p>
           )}

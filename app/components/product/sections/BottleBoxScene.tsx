@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unknown-property -- R3F Three.js props */
 import {useFrame} from '@react-three/fiber';
 import {useRef} from 'react';
 import * as THREE from 'three';
@@ -59,3 +60,4 @@ export function BottleBoxScene({rotationY}: {rotationY: number}) {
     </>
   );
 }
+/* eslint-enable react/no-unknown-property */

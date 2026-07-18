@@ -12,9 +12,9 @@ export function ProductTitle({
 }: ProductTitleProps) {
   return (
     <div className={`relative overflow-visible ${className}`}>
-      <div className="mb-2 inline-flex items-center gap-1.5 text-[12px] font-[700] tracking-[0.02em]">
+      <div className="mb-2 inline-flex items-center gap-1.5 text-[12px] font-bold tracking-[0.02em]">
         No.
-        <span className="flex h-[17px] w-[32px] items-center justify-center rounded-[50%] bg-inkwell-700 font-['config-mono-vf'] text-[14px] font-[700] leading-none text-vellum-100 [font-variant-numeric:slashed-zero]">
+        <span className="flex h-[17px] w-[32px] items-center justify-center rounded-[50%] bg-inkwell-700 font-['config-mono-vf'] text-[14px] font-bold leading-none text-vellum-100 [font-variant-numeric:slashed-zero]">
           {number}
         </span>
       </div>
@@ -29,7 +29,7 @@ export function ProductTitle({
             aria-hidden
             className="blueprint-rule-h absolute inset-x-0 bottom-0 z-10 text-inkwell-700/35"
           />
-          <span className="relative z-0 block px-2 translate-y-[2px] whitespace-nowrap font-['wayfinder-cf'] text-[60px] font-[300] leading-[0.72] tracking-[-6%] text-[#3E423F]">
+          <span className="relative z-0 block px-2 translate-y-[2px] whitespace-nowrap font-['wayfinder-cf'] text-[60px] font-light leading-[0.72] tracking-[-6%] text-[#3E423F]">
             {title}
           </span>
         </div>

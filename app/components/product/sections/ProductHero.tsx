@@ -40,7 +40,7 @@ export function ProductHero({
   return (
     <div className="relative flex w-full flex-col overflow-x-hidden bg-vellum-100 text-inkwell-700">
       <motion.div
-        className="relative z-[1] flex min-h-[100dvh] w-full flex-col"
+        className="relative z-1 flex min-h-dvh w-full flex-col"
         variants={staggerContainer}
         initial={reducedMotion ? false : 'hidden'}
         animate="show"
@@ -109,7 +109,7 @@ export function ProductHero({
 
           <div className="relative flex w-[40%] items-center justify-center">
             <AddToCartButton
-              className="cursor-pointer border-0 bg-[#152015] px-4 py-2 font-['config-mono-vf'] text-[12px] font-[700] uppercase tracking-[0.08em] text-vellum-100 transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 sm:px-5 sm:text-[13px]"
+              className="cursor-pointer border-0 bg-[#152015] px-4 py-2 font-['config-mono-vf'] text-[12px] font-bold uppercase tracking-[0.08em] text-vellum-100 transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 sm:px-5 sm:text-[13px]"
               disabled={!selectedVariant?.availableForSale}
               onClick={() => open('cart')}
               lines={
@@ -137,7 +137,7 @@ export function ProductHero({
       </motion.div>
 
       <motion.div
-        className="absolute bottom-6 left-1/2 z-[1] flex -translate-x-1/2 flex-col items-center gap-3 text-inkwell-700/40"
+        className="absolute bottom-6 left-1/2 z-1 flex -translate-x-1/2 flex-col items-center gap-3 text-inkwell-700/40"
         initial={reducedMotion ? false : {opacity: 0, y: -4}}
         animate={{opacity: 1, y: 0}}
         transition={{delay: 1.2, duration: 0.6}}

@@ -106,7 +106,7 @@ export function ScentNotesExplorer({
     <section
       ref={sectionRef}
       id="scent-anatomy"
-      className="relative h-[100dvh] w-full overflow-x-clip bg-vellum-100 font-['trust-3a'] text-inkwell-700"
+      className="relative h-dvh w-full overflow-x-clip bg-vellum-100 font-['trust-3a'] text-inkwell-700"
     >
       <PageContainer className="flex h-full flex-col">
         <motion.div
@@ -115,8 +115,8 @@ export function ScentNotesExplorer({
           initial={reducedMotion ? false : 'hidden'}
           animate={inView || reducedMotion ? 'show' : 'hidden'}
         >
-          <div className="relative z-[2] flex shrink-0 items-center justify-between pt-6 sm:pt-8">
-            <p className="text-[14px] font-[700] tracking-[0.04em]">
+          <div className="relative z-2 flex shrink-0 items-center justify-between pt-6 sm:pt-8">
+            <p className="text-[14px] font-bold tracking-[0.04em]">
               Scent anatomy
             </p>
             <p className="text-[12px] tracking-[0.06em] text-inkwell-700/55">
@@ -152,11 +152,11 @@ export function ScentNotesExplorer({
                   ? 'Unfold packaging into scent layers'
                   : 'Reset to packaging cube'
               }
-              className="absolute inset-0 z-[1] border-0 bg-transparent p-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-inkwell-700 disabled:cursor-default enabled:cursor-pointer"
+              className="absolute inset-0 z-1 border-0 bg-transparent p-0 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-inkwell-700 disabled:cursor-default enabled:cursor-pointer"
             />
           </div>
 
-          <p className="relative z-[2] max-w-[36ch] shrink-0 pb-6 text-[13px] italic leading-[1.6] tracking-[0.02em] text-inkwell-700/50 sm:pb-8">
+          <p className="relative z-2 max-w-[36ch] shrink-0 pb-6 text-[13px] italic leading-[1.6] tracking-[0.02em] text-inkwell-700/50 sm:pb-8">
             Top, heart, and base — the three registers that unfold as the scent
             settles on skin.
           </p>

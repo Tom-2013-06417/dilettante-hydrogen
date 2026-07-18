@@ -23,7 +23,7 @@ export function ScentFeature({active = false}: {active?: boolean}) {
         initial={reducedMotion ? false : 'hidden'}
         animate={animate}
       >
-        <div className="relative flex min-h-0 grow-[5] basis-0 flex-col">
+        <div className="relative flex min-h-0 grow-5 basis-0 flex-col">
           <motion.div
             className="pointer-events-none absolute inset-x-0 bottom-0 top-[11%] flex"
             variants={wipeItem}
@@ -76,7 +76,7 @@ export function ScentFeature({active = false}: {active?: boolean}) {
           <div className="ml-auto mr-6 h-[64px] w-[64px] flex-none bg-inkwell-600 sm:mr-10" />
         </motion.div>
 
-        <div className="flex min-h-0 grow-[4] basis-0">
+        <div className="flex min-h-0 grow-4 basis-0">
           <div className="w-[38%] min-w-[120px]">
             <motion.img
               className="h-full w-full object-cover"

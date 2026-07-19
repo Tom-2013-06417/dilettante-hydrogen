@@ -1,0 +1,8 @@
+node_modules
+dist
+build
+.shopify
+.react-router
+*.generated.d.ts
+package-lock.json
+CHANGELOG.md

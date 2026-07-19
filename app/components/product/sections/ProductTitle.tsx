@@ -7,7 +7,7 @@ type ProductTitleProps = {
 };
 
 const titleTypeClassName =
-  "relative z-0 -m-[2px] block pr-2 font-['wayfinder-cf'] font-light tracking-[-6%] text-[#3E423F]";
+  "relative z-0 -m-0.5 block pr-2 font-['wayfinder-cf'] font-light tracking-[-6%] text-[#3E423F]";
 
 /** Product-page scent title: No. badge + vellum plate with dashed cap/baseline rules. */
 export function ProductTitle({

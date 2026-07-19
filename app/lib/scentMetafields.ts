@@ -31,10 +31,7 @@ export type CustomScentMetafieldKey =
   (typeof CUSTOM_SCENT_METAFIELD_KEYS)[number];
 
 /** Known `shopify` namespace category metafield keys. */
-export const SHOPIFY_CATEGORY_METAFIELD_KEYS = [
-  'occasion',
-  'season',
-] as const;
+export const SHOPIFY_CATEGORY_METAFIELD_KEYS = ['occasion', 'season'] as const;
 
 export type ShopifyCategoryMetafieldKey =
   (typeof SHOPIFY_CATEGORY_METAFIELD_KEYS)[number];
@@ -99,7 +96,9 @@ export type ParsedScentMetafields = {
   season?: string[];
 };
 
-function parseListString(value: string | undefined | null): string[] | undefined {
+function parseListString(
+  value: string | undefined | null,
+): string[] | undefined {
   if (!value) return undefined;
   try {
     const parsed: unknown = JSON.parse(value);

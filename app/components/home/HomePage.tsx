@@ -339,10 +339,7 @@ export function HomePage() {
         <section id="scent-01" className="h-dvh w-full bg-inkwell-800">
           <ScentFeature active={section === 2} />
         </section>
-        <section
-          id="scent-01-anatomy"
-          className="h-dvh w-full bg-inkwell-800"
-        >
+        <section id="scent-01-anatomy" className="h-dvh w-full bg-inkwell-800">
           <ScentAnatomy active={section === 3} />
         </section>
       </motion.div>

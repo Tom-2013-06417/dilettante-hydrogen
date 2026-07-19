@@ -140,8 +140,7 @@ export function getScentProfile(
     typeof productOrHandle === 'string'
       ? productOrHandle
       : productOrHandle.handle;
-  const offline =
-    SCENT_BY_HANDLE[handle] ?? SCENT_BY_HANDLE[DEFAULT_HANDLE]!;
+  const offline = SCENT_BY_HANDLE[handle] ?? SCENT_BY_HANDLE[DEFAULT_HANDLE]!;
 
   const parsed: ParsedScentMetafields =
     typeof productOrHandle === 'string'
@@ -150,8 +149,7 @@ export function getScentProfile(
           scentNumber: productOrHandle.scentNumber ?? null,
           scentSubtitle: productOrHandle.scentSubtitle ?? null,
           scentTagline: productOrHandle.scentTagline ?? null,
-          scentShortDescription:
-            productOrHandle.scentShortDescription ?? null,
+          scentShortDescription: productOrHandle.scentShortDescription ?? null,
           heroNotes: productOrHandle.heroNotes ?? null,
           topNotes: productOrHandle.topNotes ?? null,
           heartNotes: productOrHandle.heartNotes ?? null,
@@ -171,9 +169,7 @@ export function getScentProfile(
     subtitle: parsed.subtitle ?? SCENT_SUBTITLE,
     tagline: parsed.tagline ?? offline.tagline,
     shortDescription: parsed.shortDescription ?? offline.shortDescription,
-    heroNotes: parsed.heroNotes?.length
-      ? parsed.heroNotes
-      : offline.heroNotes,
+    heroNotes: parsed.heroNotes?.length ? parsed.heroNotes : offline.heroNotes,
     detailImage: DETAIL_IMAGE,
     ingredientList: parsed.ingredientList,
     occasion: parsed.occasion,

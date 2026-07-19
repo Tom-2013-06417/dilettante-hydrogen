@@ -1,3 +1,5 @@
+import {ScentFormatLine} from '~/components/shared/ScentFormatLine';
+
 export function ScentTitle({
   number,
   title,
@@ -6,6 +8,8 @@ export function ScentTitle({
   size = 'full',
   className = '',
   titleClassName = '',
+  concentration = 'Eau de Toilette',
+  variantTitle = '30 mL',
 }: {
   number: string;
   title: string;
@@ -14,6 +18,10 @@ export function ScentTitle({
   size?: 'full' | 'min';
   className?: string;
   titleClassName?: string;
+  /** From metafield custom.concentration */
+  concentration?: string;
+  /** Shopify variant title, e.g. "30 mL" */
+  variantTitle?: string;
 }) {
   const tight = style === 'tight' || style === 'tight-min';
   const cardBg = tight
@@ -67,14 +75,13 @@ export function ScentTitle({
             {title}
           </h2>
           {showEau && (
-            <p
+            <ScentFormatLine
               className={`-mt-0.75 pb-1 pt-1 font-['trust-3a'] leading-none tracking-[0.01em] ${
                 size === 'min' ? 'text-[13px]' : 'text-[16px]'
               }`}
-            >
-              <span className="font-bold">Eau de Toilette</span>
-              <span>{' — ℮ 30 ml · 1.01 fl oz'}</span>
-            </p>
+              concentration={concentration}
+              variantTitle={variantTitle}
+            />
           )}
         </div>
       </div>

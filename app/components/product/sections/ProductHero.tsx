@@ -13,6 +13,7 @@ import {
   staggerContainer,
 } from '~/components/home/sections/animations';
 import {ProductPrice} from '~/components/product/ProductPrice';
+import {ScentFormatLine} from '~/components/shared/ScentFormatLine';
 import type {ScentProfile} from '~/lib/scentProfile';
 import {ProductBottleBand} from './ProductBottleBand';
 import {ProductTitle} from './ProductTitle';
@@ -109,9 +110,11 @@ export function ProductHero({
             <div className="product-hero-price font-['config-mono-vf'] text-[18px] tracking-[0.04em] text-inkwell-700 sm:text-[22px] [&_.product-price-on-sale_s]:text-inkwell-700/45">
               <ProductPrice price={price} compareAtPrice={compareAtPrice} />
             </div>
-            <span className="whitespace-nowrap font-['trust-3a'] text-[11px] leading-none tracking-[0.02em] text-inkwell-700/70">
-              {scentProfile.subtitle}
-            </span>
+            <ScentFormatLine
+              className="whitespace-nowrap font-['trust-3a'] text-[11px] leading-none tracking-[0.02em] text-inkwell-700/70"
+              concentration={scentProfile.concentration}
+              variantTitle={selectedVariant?.title}
+            />
           </div>
 
           <div className="relative flex w-[40%] items-center justify-center">

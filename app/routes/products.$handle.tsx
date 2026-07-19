@@ -198,7 +198,7 @@ const PRODUCT_FRAGMENT = `#graphql
       type
       value
     }
-    scentSubtitle: metafield(namespace: "custom", key: "scent_subtitle") {
+    concentration: metafield(namespace: "custom", key: "concentration") {
       type
       value
     }

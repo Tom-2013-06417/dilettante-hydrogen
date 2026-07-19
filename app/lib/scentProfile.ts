@@ -20,8 +20,8 @@ export type ScentTier = {
 
 export type ScentProfile = {
   number: string;
-  /** Format line under price — e.g. "Eau de Toilette — ℮ 30 ml · 1.01 fl oz". */
-  subtitle: string;
+  /** From metafield custom.concentration — e.g. "Eau de Toilette". */
+  concentration?: string;
   tagline: string;
   shortDescription: string;
   /** From metafield custom.hero_notes — shown under the short description. */
@@ -35,7 +35,6 @@ export type ScentProfile = {
   season?: string[];
 };
 
-const SCENT_SUBTITLE = 'Eau de Toilette — ℮ 30 ml · 1.01 fl oz';
 const DETAIL_IMAGE = fig02;
 const TOP_TIER_IMAGE = fig01;
 const HEART_TIER_IMAGE = fig02;
@@ -59,7 +58,7 @@ export type ScentProductInput = {
 export function getScentProfile(product: ScentProductInput): ScentProfile {
   const parsed = parseScentMetafields({
     scentNumber: product.scentNumber ?? null,
-    scentSubtitle: product.scentSubtitle ?? null,
+    concentration: product.concentration ?? null,
     scentTagline: product.scentTagline ?? null,
     scentShortDescription: product.scentShortDescription ?? null,
     heroNotes: product.heroNotes ?? null,
@@ -74,7 +73,7 @@ export function getScentProfile(product: ScentProductInput): ScentProfile {
 
   return {
     number: parsed.number ?? '',
-    subtitle: parsed.subtitle ?? SCENT_SUBTITLE,
+    concentration: parsed.concentration,
     tagline: parsed.tagline ?? '',
     shortDescription: parsed.shortDescription ?? '',
     heroNotes: parsed.heroNotes ?? [],

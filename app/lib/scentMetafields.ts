@@ -14,7 +14,7 @@ export type ScentMetafieldType =
 /** Known `custom` namespace product metafield keys. */
 export const CUSTOM_SCENT_METAFIELD_KEYS = [
   'scent_number',
-  'scent_subtitle',
+  'concentration',
   'scent_tagline',
   'scent_short_description',
   'hero_notes',
@@ -66,7 +66,7 @@ export type StorefrontScentMetafield = {
  */
 export type ProductScentMetafields = {
   scentNumber: StorefrontScentMetafield;
-  scentSubtitle: StorefrontScentMetafield;
+  concentration: StorefrontScentMetafield;
   scentTagline: StorefrontScentMetafield;
   scentShortDescription: StorefrontScentMetafield;
   heroNotes: StorefrontScentMetafield;
@@ -83,7 +83,7 @@ export type ProductScentMetafields = {
 /** Parsed, app-ready scent fields from metafields (before UI defaults). */
 export type ParsedScentMetafields = {
   number?: string;
-  subtitle?: string;
+  concentration?: string;
   tagline?: string;
   shortDescription?: string;
   heroNotes?: string[];
@@ -144,7 +144,7 @@ export function parseScentMetafields(
 ): ParsedScentMetafields {
   return {
     number: textValue(fields.scentNumber),
-    subtitle: textValue(fields.scentSubtitle),
+    concentration: textValue(fields.concentration),
     tagline: textValue(fields.scentTagline),
     shortDescription: textValue(fields.scentShortDescription),
     heroNotes: parseListString(fields.heroNotes?.value),

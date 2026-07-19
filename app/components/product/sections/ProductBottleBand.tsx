@@ -1,6 +1,7 @@
 import {Image} from '@shopify/hydrogen';
 import type {ProductVariantFragment} from 'storefrontapi.generated';
 import wordmarkInkwell from '~/assets/design/wordmark-inkwell.png';
+import {BlueprintRule} from '~/components/product/BlueprintRule';
 import {ProductHeroImageVeil} from '~/components/product/ProductHeroImageVeil';
 import type {ScentProfile} from '~/lib/scentProfile';
 
@@ -21,12 +22,10 @@ export function ProductBottleBand({
 }: ProductBottleBandProps) {
   return (
     <div
-      className="relative h-[35dvh] w-full shrink-0 overflow-visible bg-vellum-100 text-inkwell-700"
+      className="relative h-[35dvh] w-full shrink-0 overflow-x-clip overflow-y-visible bg-vellum-100 text-inkwell-700"
       aria-label={`${title} bottle`}
     >
-      {/* Matches hero image left edge: gutter + logo cell */}
       <div className="relative flex h-full w-full">
-        {/* Narrow left column — product image under bottle */}
         <div className="relative flex shrink-0 self-stretch overflow-hidden">
           {image ? (
             <>
@@ -51,18 +50,16 @@ export function ProductBottleBand({
           </div>
         </div>
 
-        {/* Wide right column — vertical rule at hero-image left edge */}
         <div className="relative flex min-w-0 flex-1 flex-col">
-          <div
-            aria-hidden
-            className="blueprint-rule-v absolute inset-y-0 left-0 z-1 text-inkwell-700/35"
+          <BlueprintRule
+            orientation="v"
+            className="absolute inset-y-0 left-0 z-1 text-inkwell-700/35"
           />
 
-          {/* Tagline row — same height as price/CTA */}
           <div className="relative flex h-[10dvh] shrink-0 flex-col items-center justify-center gap-0.5 px-4 sm:px-6">
-            <div
-              aria-hidden
-              className="blueprint-rule-h absolute inset-x-0 bottom-0 text-inkwell-700/35"
+            <BlueprintRule
+              orientation="h"
+              className="absolute inset-x-0 bottom-0 text-inkwell-700/35"
             />
             <span className="text-center font-['trust-3a'] text-[13px] leading-snug tracking-[0.02em] text-inkwell-700 sm:text-[15px]">
               {scentProfile.tagline}
@@ -74,10 +71,9 @@ export function ProductBottleBand({
             ) : null}
           </div>
 
-          {/* Description + hero notes — grouped and vertically centered */}
           <div className="flex min-h-0 flex-1 items-start pt-10 pl-16 pr-8">
             <div className="flex max-w-[36ch] flex-col gap-2">
-              <span className="font-['trust-3a'] text-[11px] italic leading-[1.8] tracking-[0.02em] mb-4 text-inkwell-700/70">
+              <span className="mb-4 font-['trust-3a'] text-[11px] italic leading-[1.8] tracking-[0.02em] text-inkwell-700/70">
                 {scentProfile.shortDescription}
               </span>
               {scentProfile.heroNotes.length ? (
@@ -90,7 +86,6 @@ export function ProductBottleBand({
         </div>
       </div>
 
-      {/* Bottle overlays the narrow left column */}
       <Image
         alt={`${title} bottle`}
         className="pointer-events-none absolute bottom-0 left-0 z-2 h-full w-[50%] translate-x-[-25%] translate-y-[5%] object-contain object-bottom-left"
@@ -100,9 +95,9 @@ export function ProductBottleBand({
         sizes="50vw"
       />
 
-      <div
-        aria-hidden
-        className="blueprint-rule-h absolute inset-x-0 bottom-0 z-1 text-inkwell-700/35"
+      <BlueprintRule
+        orientation="h"
+        className="absolute inset-x-0 bottom-0 z-1 text-inkwell-700/35"
       />
     </div>
   );

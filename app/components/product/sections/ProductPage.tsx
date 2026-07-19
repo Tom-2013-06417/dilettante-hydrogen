@@ -25,7 +25,7 @@ export function ProductPage({
   const titleSubtitle = isForever ? FOREVER_TITLE_SUBTITLE : undefined;
 
   return (
-    <article className="product-page w-full">
+    <article className="product-page w-full overflow-x-clip">
       <ProductHero
         title={title}
         titleSubtitle={titleSubtitle}

@@ -80,6 +80,15 @@ export function links() {
       rel: 'stylesheet',
       href: 'https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans+Condensed:wght@400;500;600&display=swap',
     },
+    {
+      rel: 'preconnect',
+      href: 'https://use.typekit.net',
+      crossOrigin: 'anonymous',
+    },
+    {
+      rel: 'stylesheet',
+      href: 'https://use.typekit.net/anf0xzw.css',
+    },
     {rel: 'icon', type: 'image/svg+xml', href: favicon},
   ];
 }

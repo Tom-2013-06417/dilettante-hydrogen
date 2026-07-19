@@ -81,7 +81,7 @@ export function ProductHero({
             </div>
 
             <motion.div
-              className="pointer-events-none absolute inset-y-0 left-8 z-10 flex items-center justify-start overflow-visible sm:left-16"
+              className="pointer-events-none absolute inset-y-0 left-5 z-10 flex items-center justify-start overflow-visible sm:left-9"
               variants={fadeUpItem}
             >
               <ProductTitle number={scentProfile.number} title={title} />

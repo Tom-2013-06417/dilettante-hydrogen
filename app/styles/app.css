@@ -587,6 +587,33 @@ main {
   width: 100%;
 }
 
+/*
+ * Product hero image veil — sits above the photo:
+ * inset shadow and edge vignette (motion blur lives in the image asset).
+ */
+.product-hero-image-veil {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  box-shadow:
+    inset 0 0 18px rgb(21 32 21 / 0.28),
+    inset 0 0 48px rgb(21 32 21 / 0.18),
+    inset 0 0 90px rgb(21 32 21 / 0.12);
+}
+
+.product-hero-image-veil::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 70% 65% at 50% 45%,
+    transparent 38%,
+    rgb(21 32 21 / 0.14) 68%,
+    rgb(21 32 21 / 0.32) 100%
+  );
+}
+
 .product-main {
   align-self: start;
   position: sticky;

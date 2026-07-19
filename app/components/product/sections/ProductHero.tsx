@@ -12,6 +12,7 @@ import {
   fadeUpItem,
   staggerContainer,
 } from '~/components/home/sections/animations';
+import {ProductHeroImageVeil} from '~/components/product/ProductHeroImageVeil';
 import {ProductPrice} from '~/components/product/ProductPrice';
 import {ScentFormatLine} from '~/components/shared/ScentFormatLine';
 import type {ScentProfile} from '~/lib/scentProfile';
@@ -73,12 +74,15 @@ export function ProductHero({
             </div>
             <div className="relative min-w-0 flex-1 overflow-hidden">
               {image ? (
-                <Image
-                  alt={image.altText || title}
-                  className="h-full w-full object-cover"
-                  data={image}
-                  sizes="(min-width: 768px) 85vw, 100vw"
-                />
+                <>
+                  <Image
+                    alt={image.altText || title}
+                    className="h-full w-full object-cover"
+                    data={image}
+                    sizes="(min-width: 768px) 85vw, 100vw"
+                  />
+                  <ProductHeroImageVeil />
+                </>
               ) : (
                 <div className="h-full w-full bg-inkwell-700/15" />
               )}

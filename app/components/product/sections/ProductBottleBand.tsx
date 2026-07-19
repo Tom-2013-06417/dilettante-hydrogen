@@ -1,6 +1,7 @@
 import {Image} from '@shopify/hydrogen';
 import type {ProductVariantFragment} from 'storefrontapi.generated';
 import wordmarkInkwell from '~/assets/design/wordmark-inkwell.png';
+import {ProductHeroImageVeil} from '~/components/product/ProductHeroImageVeil';
 import type {ScentProfile} from '~/lib/scentProfile';
 
 /** Content > Files upload on the Dilettante Shopify store */
@@ -28,12 +29,15 @@ export function ProductBottleBand({
         {/* Narrow left column — product image under bottle */}
         <div className="relative flex shrink-0 self-stretch overflow-hidden">
           {image ? (
-            <Image
-              alt={image.altText || title}
-              className="absolute inset-0 h-full w-full object-cover"
-              data={image}
-              sizes="25vw"
-            />
+            <>
+              <Image
+                alt={image.altText || title}
+                className="absolute inset-0 h-full w-full object-cover"
+                data={image}
+                sizes="25vw"
+              />
+              <ProductHeroImageVeil />
+            </>
           ) : (
             <div className="absolute inset-0 bg-inkwell-700/10" />
           )}

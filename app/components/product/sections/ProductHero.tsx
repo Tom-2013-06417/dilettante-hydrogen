@@ -97,9 +97,9 @@ export function ProductHero({
           <div className="blueprint-rule-h absolute inset-x-0 top-0 text-inkwell-700/35" />
           <div className="blueprint-rule-h absolute inset-x-0 bottom-0 text-inkwell-700/35" />
 
-          <div className="relative flex w-[60%] flex-col items-start justify-center gap-0 px-4 sm:px-6">
+          <div className="relative flex w-[60%] flex-col items-start justify-center gap-[0.3rem] px-8 sm:px-10">
             <div className="blueprint-rule-v absolute inset-y-0 right-0 text-inkwell-700/35" />
-            <div className="product-hero-price font-['config-mono-vf'] text-[20px] tracking-[0.04em] text-inkwell-700 sm:text-[22px] [&_.product-price-on-sale_s]:text-inkwell-700/45">
+            <div className="product-hero-price font-['config-mono-vf'] text-[18px] tracking-[0.04em] text-inkwell-700 sm:text-[22px] [&_.product-price-on-sale_s]:text-inkwell-700/45">
               <ProductPrice price={price} compareAtPrice={compareAtPrice} />
             </div>
             <span className="whitespace-nowrap font-['trust-3a'] text-[11px] leading-none tracking-[0.02em] text-inkwell-700/70">

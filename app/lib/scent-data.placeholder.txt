@@ -4,8 +4,8 @@
 #
 # Mapping:
 #   tagline         ← APPROVED tagline
-#   description     ← Long descriptions
-#   summary_notes   ← Top notes (temporary)
+#   description     ← APPROVED short description
+#   summary_notes   ← Hero Notes
 #   top/heart/base  ← Pau's fragrance notes (3D cube)
 
 # Shared
@@ -18,8 +18,8 @@ base_tier_image = hero-landscape.jpg
 # ── 01. kids-on-the-slope ──────────────────────────────────────────
 scent_number = "01"
 scent_tagline = "For the purest of hearts."
-scent_description = "Bergamot and lemon cut through the morning air as bare feet race across dew-soaked grass. Things always look bigger when you're a child, playing among towering citrus trees, endless fields, and cascades upon cascades of wild jasmine flowers. Behold—the world, vast and infinite, ours for the taking. Do you remember how it feels to be young?"
-scent_summary_notes = [bergamot, petitgrain, lemon]
+scent_description = "The laughter of children echoes through endless fields of citrus trees, as they run wildly with jasmine garlands tangled in their hair. To be young is to be free—our souls at their purest state."
+scent_summary_notes = [bergamot, jasmine, incense]
 top_notes = [bergamot, petitgrain, lemon]
 heart_notes = [jasmine sambac, elemi]
 base_notes = [incense, vetiver, musk]
@@ -27,8 +27,8 @@ base_notes = [incense, vetiver, musk]
 # ── 02. summer-cannibals ───────────────────────────────────────────
 scent_number = "02"
 scent_tagline = "Feral lovemaking on a bed of crushed fruit."
-scent_description = "Passions run high when the weather gets warm. Lovers intertwine in a secret garden, skin on skin, moist with sweat as they lie on pulps of mango and raspberry. Roses in full bloom become voyeurs to this forbidden embrace, and each fevered, lipstick-stained kiss grows their appetite for each other. Teeth sink into flesh as they reach ecstasy. We are not in Eden anymore."
-scent_summary_notes = [foliage, wet earth]
+scent_description = "A forbidden, torrid kiss in the garden, at the height of summer. The pungent flesh of hedonists melts into each other, uncertain where one ends and the other begins."
+scent_summary_notes = [foliage, mango, raspberry, lipstick, musk]
 top_notes = [foliage, wet earth]
 heart_notes = [mango, raspberry, jasmine, rose]
 base_notes = [lipstick, skin, musk]
@@ -36,8 +36,8 @@ base_notes = [lipstick, skin, musk]
 # ── 03. temple-at-dawn ─────────────────────────────────────────────
 scent_number = "03"
 scent_tagline = "Sweetness made sacred."
-scent_description = "Even god's most devoted need a moment of rest. On top of a mountain, they hold their cups close to their chests, greeted by the sweet scent of lilacs dancing in the fields. There is truly nothing like the morning ritual of freshly-brewed coffee, topped with a dash of cinnamon and the slightest pinch of nutmeg. With the dawn comes a cool breeze and a hazy, sunkissed sky. Peace, finally."
-scent_summary_notes = [cardamom, lavender]
+scent_description = "Servants of god take respite at the break of dawn, surrounded by the aroma of rich, freshly-brewed coffee. A most sacred morning ritual for those in need of momentary peace."
+scent_summary_notes = [coffee, incense, lilac, amber]
 top_notes = [cardamom, lavender]
 heart_notes = [hyssop, coffee, lilac]
 base_notes = [incense, amber, spikenard, musk]
@@ -45,8 +45,8 @@ base_notes = [incense, amber, spikenard, musk]
 # ── 04. forever-on-the-crest-of-a-wave ─────────────────────────────
 scent_number = "04"
 scent_tagline = "A widow's tears on a withered bouquet."
-scent_description = "William Shakespeare once said, these violent delights have violent ends. Wilted bouquet in hand, an abandoned bride sits on a cliff overlooking turbulent waves. Orange blossom and neroli drift in on a sea breeze, sweet before the sorrow sets in. Giant flames burn furiously, the destruction fresh in her memories. From this great height, she wonders what it would be like, to join her lost lover on the other side."
-scent_summary_notes = [bergamot, sweet orange]
+scent_description = "From the aftermath of violent waves come tears and seafoam, sprinkled onto a wedding bouquet. A melancholic, olfactory expression of love found and love lost in the blink of an eye."
+scent_summary_notes = [orange blossom, sea breeze, smoke, hay]
 top_notes = [bergamot, sweet orange]
 heart_notes = [orange blossom, neroli, sea breeze, honey]
 base_notes = [hay, vetiver, smoke, amber, vanilla]
@@ -54,8 +54,8 @@ base_notes = [hay, vetiver, smoke, amber, vanilla]
 # ── 05. creature-feature ───────────────────────────────────────────
 scent_number = "05"
 scent_tagline = "Who lurks there?"
-scent_description = "Monsters, so it seems, are mirrors of our deepest desires. This dark seduction takes place in the home of a beast that begs to be tamed. Dense cigar smoke intertwines with soft florals and woods as rain dampens the age-old earth below. The creature beckons, calling out into the night. It is cold in this house, but the promise of his embrace feels warm."
-scent_summary_notes = [black pepper, pink pepper, rosemary]
+scent_description = '"See me," he whispers under tobacco-laced breath. An air of ancient forests and animalic musk looms heavy at three in the morning—is this creature of the night man or monster?'
+scent_summary_notes = [earth, queen of the night, tobacco]
 top_notes = [black pepper, pink pepper, rosemary]
 heart_notes = [queen of the night, mimosa, violet leaf]
 base_notes = [tobacco, spices, cedar, patchouli, musk]

@@ -55,7 +55,7 @@ export function ProductBottleBand({
           />
 
           {/* Tagline row — same height as price/CTA */}
-          <div className="relative flex h-[10dvh] shrink-0 flex-col items-center justify-center gap-0 px-4 sm:px-6">
+          <div className="relative flex h-[10dvh] shrink-0 flex-col items-center justify-center gap-0.5 px-4 sm:px-6">
             <div
               aria-hidden
               className="blueprint-rule-h absolute inset-x-0 bottom-0 text-inkwell-700/35"
@@ -63,7 +63,7 @@ export function ProductBottleBand({
             <span className="text-center font-['trust-3a'] text-[13px] leading-snug tracking-[0.02em] text-inkwell-700 sm:text-[15px]">
               {scentProfile.tagline}
             </span>
-            <span className="text-center font-['trust-3a'] text-[11px] leading-none tracking-[0.08em] text-inkwell-700/65">
+            <span className="text-center font-['trust-3a'] text-[9px] lowercase leading-none tracking-[0.08em] text-inkwell-700/65 sm:text-[10px]">
               {scentProfile.summaryNotes.join(' · ')}
             </span>
           </div>

@@ -1,13 +1,16 @@
-# Temporary scent variables (offline until Shopify metafields are wired)
-# Code reference: app/lib/scentProfile.ts
+# Offline fallback scent variables (used when a Shopify metafield is missing)
+# Code reference: app/lib/scentProfile.ts + app/lib/scentMetafields.ts
 # Source: "(For Diego & Tom) Dilettante Perfumery Copy Sheet … LONG DESCRIPTIONS.csv"
 #
 # Mapping:
-#   title_subtitle  ← optional title parenthetical (e.g. Forever)
-#   tagline         ← APPROVED tagline
-#   short_description ← APPROVED short description
-#   hero_notes      ← Hero Notes
-#   top/heart/base  ← Pau's fragrance notes (3D cube)
+#   tagline         ← custom.scent_tagline
+#   short_description ← custom.scent_short_description
+#   hero_notes      ← custom.hero_notes
+#   top/heart/base  ← custom.top_notes / heart_notes / base_notes
+#   ingredient_list ← custom.ingredient_list
+#   olfactory_family ← custom.olfactory_family
+#   occasion / season ← shopify.occasion / shopify.season (metaobject labels)
+#   Forever title parenthetical is a frontend-only split (not a metafield)
 
 # Shared
 scent_subtitle = "Eau de Toilette — ℮ 30 ml · 1.01 fl oz"
@@ -43,9 +46,8 @@ top_notes = [cardamom, lavender]
 heart_notes = [hyssop, coffee, lilac]
 base_notes = [incense, amber, spikenard, musk]
 
-# ── 04. forever-on-the-crest-of-a-wave ─────────────────────────────
+# ── 04. forever ────────────────────────────────────────────────────
 scent_number = "04"
-scent_title_subtitle = "(on the crest of a wave)"
 scent_tagline = "A widow's tears on a withered bouquet."
 scent_short_description = "From the aftermath of violent waves come tears and seafoam, sprinkled onto a wedding bouquet. A melancholic, olfactory expression of love found and love lost in the blink of an eye."
 hero_notes = [orange blossom, sea breeze, smoke, hay]
@@ -62,14 +64,13 @@ top_notes = [black pepper, pink pepper, rosemary]
 heart_notes = [queen of the night, mimosa, violet leaf]
 base_notes = [tobacco, spices, cedar, patchouli, musk]
 
-# Future metafield keys (suggested)
+# Live metafield keys (see app/lib/scentMetafields.ts)
 # custom.scent_number
-# custom.scent_title_subtitle
 # custom.scent_subtitle
 # custom.scent_tagline
 # custom.scent_short_description
 # custom.hero_notes
-# custom.scent_detail_image
-# custom.scent_top_notes
-# custom.scent_heart_notes
-# custom.scent_base_notes
+# custom.top_notes / heart_notes / base_notes
+# custom.ingredient_list
+# custom.olfactory_family
+# shopify.occasion / season

@@ -19,6 +19,8 @@ import {ProductTitle} from './ProductTitle';
 
 type ProductHeroProps = {
   title: string;
+  /** Optional parenthetical under the title (Forever only today). */
+  titleSubtitle?: string;
   image: ProductVariantFragment['image'];
   price?: ProductVariantFragment['price'];
   compareAtPrice: ProductVariantFragment['compareAtPrice'];
@@ -28,6 +30,7 @@ type ProductHeroProps = {
 
 export function ProductHero({
   title,
+  titleSubtitle,
   image,
   price,
   compareAtPrice,
@@ -81,13 +84,13 @@ export function ProductHero({
             </div>
 
             <motion.div
-              className="pointer-events-none absolute inset-y-0 left-5 z-10 flex items-center justify-start overflow-visible sm:left-9"
+              className="pointer-events-none absolute inset-y-0 left-5 z-10 flex translate-y-[-3%] items-center justify-start overflow-visible sm:left-9"
               variants={fadeUpItem}
             >
               <ProductTitle
                 number={scentProfile.number}
                 title={title}
-                subtitle={scentProfile.titleSubtitle}
+                subtitle={titleSubtitle}
               />
             </motion.div>
           </div>

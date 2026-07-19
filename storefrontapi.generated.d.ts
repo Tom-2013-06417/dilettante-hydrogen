@@ -763,6 +763,11 @@ export type ProductVariantFragment = Pick<
   >;
 };
 
+export type TaxonomyMetaobjectFragment = Pick<
+  StorefrontAPI.Metaobject,
+  'handle' | 'type'
+> & {fields: Array<Pick<StorefrontAPI.MetaobjectField, 'key' | 'value'>>};
+
 export type ProductFragment = Pick<
   StorefrontAPI.Product,
   | 'id'
@@ -864,6 +869,58 @@ export type ProductFragment = Pick<
     }
   >;
   seo: Pick<StorefrontAPI.Seo, 'description' | 'title'>;
+  scentNumber?: StorefrontAPI.Maybe<
+    Pick<StorefrontAPI.Metafield, 'type' | 'value'>
+  >;
+  scentSubtitle?: StorefrontAPI.Maybe<
+    Pick<StorefrontAPI.Metafield, 'type' | 'value'>
+  >;
+  scentTagline?: StorefrontAPI.Maybe<
+    Pick<StorefrontAPI.Metafield, 'type' | 'value'>
+  >;
+  scentShortDescription?: StorefrontAPI.Maybe<
+    Pick<StorefrontAPI.Metafield, 'type' | 'value'>
+  >;
+  heroNotes?: StorefrontAPI.Maybe<
+    Pick<StorefrontAPI.Metafield, 'type' | 'value'>
+  >;
+  topNotes?: StorefrontAPI.Maybe<
+    Pick<StorefrontAPI.Metafield, 'type' | 'value'>
+  >;
+  heartNotes?: StorefrontAPI.Maybe<
+    Pick<StorefrontAPI.Metafield, 'type' | 'value'>
+  >;
+  baseNotes?: StorefrontAPI.Maybe<
+    Pick<StorefrontAPI.Metafield, 'type' | 'value'>
+  >;
+  ingredientList?: StorefrontAPI.Maybe<
+    Pick<StorefrontAPI.Metafield, 'type' | 'value'>
+  >;
+  olfactoryFamily?: StorefrontAPI.Maybe<
+    Pick<StorefrontAPI.Metafield, 'type' | 'value'>
+  >;
+  occasion?: StorefrontAPI.Maybe<
+    Pick<StorefrontAPI.Metafield, 'type' | 'value'> & {
+      references?: StorefrontAPI.Maybe<{
+        nodes: Array<
+          Pick<StorefrontAPI.Metaobject, 'handle' | 'type'> & {
+            fields: Array<Pick<StorefrontAPI.MetaobjectField, 'key' | 'value'>>;
+          }
+        >;
+      }>;
+    }
+  >;
+  season?: StorefrontAPI.Maybe<
+    Pick<StorefrontAPI.Metafield, 'type' | 'value'> & {
+      references?: StorefrontAPI.Maybe<{
+        nodes: Array<
+          Pick<StorefrontAPI.Metaobject, 'handle' | 'type'> & {
+            fields: Array<Pick<StorefrontAPI.MetaobjectField, 'key' | 'value'>>;
+          }
+        >;
+      }>;
+    }
+  >;
 };
 
 export type ProductQueryVariables = StorefrontAPI.Exact<{
@@ -978,6 +1035,62 @@ export type ProductQuery = {
         }
       >;
       seo: Pick<StorefrontAPI.Seo, 'description' | 'title'>;
+      scentNumber?: StorefrontAPI.Maybe<
+        Pick<StorefrontAPI.Metafield, 'type' | 'value'>
+      >;
+      scentSubtitle?: StorefrontAPI.Maybe<
+        Pick<StorefrontAPI.Metafield, 'type' | 'value'>
+      >;
+      scentTagline?: StorefrontAPI.Maybe<
+        Pick<StorefrontAPI.Metafield, 'type' | 'value'>
+      >;
+      scentShortDescription?: StorefrontAPI.Maybe<
+        Pick<StorefrontAPI.Metafield, 'type' | 'value'>
+      >;
+      heroNotes?: StorefrontAPI.Maybe<
+        Pick<StorefrontAPI.Metafield, 'type' | 'value'>
+      >;
+      topNotes?: StorefrontAPI.Maybe<
+        Pick<StorefrontAPI.Metafield, 'type' | 'value'>
+      >;
+      heartNotes?: StorefrontAPI.Maybe<
+        Pick<StorefrontAPI.Metafield, 'type' | 'value'>
+      >;
+      baseNotes?: StorefrontAPI.Maybe<
+        Pick<StorefrontAPI.Metafield, 'type' | 'value'>
+      >;
+      ingredientList?: StorefrontAPI.Maybe<
+        Pick<StorefrontAPI.Metafield, 'type' | 'value'>
+      >;
+      olfactoryFamily?: StorefrontAPI.Maybe<
+        Pick<StorefrontAPI.Metafield, 'type' | 'value'>
+      >;
+      occasion?: StorefrontAPI.Maybe<
+        Pick<StorefrontAPI.Metafield, 'type' | 'value'> & {
+          references?: StorefrontAPI.Maybe<{
+            nodes: Array<
+              Pick<StorefrontAPI.Metaobject, 'handle' | 'type'> & {
+                fields: Array<
+                  Pick<StorefrontAPI.MetaobjectField, 'key' | 'value'>
+                >;
+              }
+            >;
+          }>;
+        }
+      >;
+      season?: StorefrontAPI.Maybe<
+        Pick<StorefrontAPI.Metafield, 'type' | 'value'> & {
+          references?: StorefrontAPI.Maybe<{
+            nodes: Array<
+              Pick<StorefrontAPI.Metaobject, 'handle' | 'type'> & {
+                fields: Array<
+                  Pick<StorefrontAPI.MetaobjectField, 'key' | 'value'>
+                >;
+              }
+            >;
+          }>;
+        }
+      >;
     }
   >;
 };
@@ -1245,7 +1358,7 @@ interface GeneratedQueryTypes {
     return: PoliciesQuery;
     variables: PoliciesQueryVariables;
   };
-  '#graphql\n  query Product(\n    $country: CountryCode\n    $handle: String!\n    $language: LanguageCode\n    $selectedOptions: [SelectedOptionInput!]!\n  ) @inContext(country: $country, language: $language) {\n    product(handle: $handle) {\n      ...Product\n    }\n  }\n  #graphql\n  fragment Product on Product {\n    id\n    title\n    vendor\n    handle\n    descriptionHtml\n    description\n    encodedVariantExistence\n    encodedVariantAvailability\n    options {\n      name\n      optionValues {\n        name\n        firstSelectableVariant {\n          ...ProductVariant\n        }\n        swatch {\n          color\n          image {\n            previewImage {\n              url\n            }\n          }\n        }\n      }\n    }\n    selectedOrFirstAvailableVariant(selectedOptions: $selectedOptions, ignoreUnknownOptions: true, caseInsensitiveMatch: true) {\n      ...ProductVariant\n    }\n    adjacentVariants (selectedOptions: $selectedOptions) {\n      ...ProductVariant\n    }\n    seo {\n      description\n      title\n    }\n  }\n  #graphql\n  fragment ProductVariant on ProductVariant {\n    availableForSale\n    compareAtPrice {\n      amount\n      currencyCode\n    }\n    id\n    image {\n      __typename\n      id\n      url\n      altText\n      width\n      height\n    }\n    price {\n      amount\n      currencyCode\n    }\n    product {\n      title\n      handle\n    }\n    selectedOptions {\n      name\n      value\n    }\n    sku\n    title\n    unitPrice {\n      amount\n      currencyCode\n    }\n  }\n\n\n': {
+  '#graphql\n  query Product(\n    $country: CountryCode\n    $handle: String!\n    $language: LanguageCode\n    $selectedOptions: [SelectedOptionInput!]!\n  ) @inContext(country: $country, language: $language) {\n    product(handle: $handle) {\n      ...Product\n    }\n  }\n  #graphql\n  fragment Product on Product {\n    id\n    title\n    vendor\n    handle\n    descriptionHtml\n    description\n    encodedVariantExistence\n    encodedVariantAvailability\n    options {\n      name\n      optionValues {\n        name\n        firstSelectableVariant {\n          ...ProductVariant\n        }\n        swatch {\n          color\n          image {\n            previewImage {\n              url\n            }\n          }\n        }\n      }\n    }\n    selectedOrFirstAvailableVariant(selectedOptions: $selectedOptions, ignoreUnknownOptions: true, caseInsensitiveMatch: true) {\n      ...ProductVariant\n    }\n    adjacentVariants (selectedOptions: $selectedOptions) {\n      ...ProductVariant\n    }\n    seo {\n      description\n      title\n    }\n    scentNumber: metafield(namespace: "custom", key: "scent_number") {\n      type\n      value\n    }\n    scentSubtitle: metafield(namespace: "custom", key: "scent_subtitle") {\n      type\n      value\n    }\n    scentTagline: metafield(namespace: "custom", key: "scent_tagline") {\n      type\n      value\n    }\n    scentShortDescription: metafield(namespace: "custom", key: "scent_short_description") {\n      type\n      value\n    }\n    heroNotes: metafield(namespace: "custom", key: "hero_notes") {\n      type\n      value\n    }\n    topNotes: metafield(namespace: "custom", key: "top_notes") {\n      type\n      value\n    }\n    heartNotes: metafield(namespace: "custom", key: "heart_notes") {\n      type\n      value\n    }\n    baseNotes: metafield(namespace: "custom", key: "base_notes") {\n      type\n      value\n    }\n    ingredientList: metafield(namespace: "custom", key: "ingredient_list") {\n      type\n      value\n    }\n    olfactoryFamily: metafield(namespace: "custom", key: "olfactory_family") {\n      type\n      value\n    }\n    occasion: metafield(namespace: "shopify", key: "occasion") {\n      type\n      value\n      references(first: 10) {\n        nodes {\n          ... on Metaobject {\n            ...TaxonomyMetaobject\n          }\n        }\n      }\n    }\n    season: metafield(namespace: "shopify", key: "season") {\n      type\n      value\n      references(first: 10) {\n        nodes {\n          ... on Metaobject {\n            ...TaxonomyMetaobject\n          }\n        }\n      }\n    }\n  }\n  #graphql\n  fragment TaxonomyMetaobject on Metaobject {\n    handle\n    type\n    fields {\n      key\n      value\n    }\n  }\n\n  #graphql\n  fragment ProductVariant on ProductVariant {\n    availableForSale\n    compareAtPrice {\n      amount\n      currencyCode\n    }\n    id\n    image {\n      __typename\n      id\n      url\n      altText\n      width\n      height\n    }\n    price {\n      amount\n      currencyCode\n    }\n    product {\n      title\n      handle\n    }\n    selectedOptions {\n      name\n      value\n    }\n    sku\n    title\n    unitPrice {\n      amount\n      currencyCode\n    }\n  }\n\n\n': {
     return: ProductQuery;
     variables: ProductQueryVariables;
   };

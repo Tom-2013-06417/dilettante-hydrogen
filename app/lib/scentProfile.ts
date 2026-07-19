@@ -1,13 +1,15 @@
 /**
- * Scent profile builder — reads placeholder variables from
- * `scent-data.placeholder.txt` until Shopify metafields are wired.
- *
- * Copy source: Dilettante Perfumery Copy Sheet (approved taglines,
- * short descriptions, hero notes, Pau's fragrance notes).
+ * Scent profile builder — prefers Shopify product metafields, falls back to
+ * offline copy from `scent-data.placeholder.txt` when a field is missing.
  */
 import fig01 from '~/assets/design/fig-01.jpg';
 import fig02 from '~/assets/design/fig-02.jpg';
 import heroLandscape from '~/assets/design/hero-landscape.jpg';
+import {
+  parseScentMetafields,
+  type ParsedScentMetafields,
+  type ProductScentMetafields,
+} from '~/lib/scentMetafields';
 
 export type ScentTierId = 'top' | 'heart' | 'base';
 
@@ -20,22 +22,23 @@ export type ScentTier = {
 
 export type ScentProfile = {
   number: string;
-  /** Optional title parenthetical — e.g. "(on the crest of a wave)". */
-  titleSubtitle?: string;
   /** Format line under price — e.g. "Eau de Toilette — ℮ 30 ml · 1.01 fl oz". */
   subtitle: string;
   tagline: string;
   shortDescription: string;
-  /** From CSV "Hero Notes" — shown under the tagline. */
+  /** From metafield custom.hero_notes — shown under the short description. */
   heroNotes: string[];
   tiers: [ScentTier, ScentTier, ScentTier];
   detailImage: string;
+  ingredientList?: string;
+  occasion?: string[];
+  /** From metafield custom.olfactory_family — under the tagline. */
+  olfactoryFamily?: string[];
+  season?: string[];
 };
 
 type ScentOfflineData = {
   number: string;
-  /** Shopify metafield: custom.scent_title_subtitle */
-  titleSubtitle?: string;
   tagline: string;
   shortDescription: string;
   heroNotes: string[];
@@ -82,9 +85,8 @@ const SCENT_BY_HANDLE: Record<string, ScentOfflineData> = {
     heartNotes: ['Hyssop', 'Coffee', 'Lilac'],
     baseNotes: ['Incense', 'Amber', 'Spikenard', 'Musk'],
   },
-  'forever-on-the-crest-of-a-wave': {
+  forever: {
     number: '04',
-    titleSubtitle: '(on the crest of a wave)',
     tagline: "A widow's tears on a withered bouquet.",
     shortDescription:
       'From the aftermath of violent waves come tears and seafoam, sprinkled onto a wedding bouquet. A melancholic, olfactory expression of love found and love lost in the blink of an eye.',
@@ -107,35 +109,94 @@ const SCENT_BY_HANDLE: Record<string, ScentOfflineData> = {
 
 const DEFAULT_HANDLE = 'kids-on-the-slope';
 
-export function getScentProfile(handle = DEFAULT_HANDLE): ScentProfile {
-  const data = SCENT_BY_HANDLE[handle] ?? SCENT_BY_HANDLE[DEFAULT_HANDLE]!;
+function titleCaseNotes(notes: string[]): string[] {
+  return notes.map((note) =>
+    note
+      .split(' ')
+      .map((word) =>
+        word.length ? word[0]!.toUpperCase() + word.slice(1) : word,
+      )
+      .join(' '),
+  );
+}
+
+function pickNotes(
+  fromApi: string[] | undefined,
+  fallback: string[],
+): string[] {
+  if (!fromApi?.length) return fallback;
+  // Metafield lists are lowercase; keep offline title-case when using API.
+  return titleCaseNotes(fromApi);
+}
+
+export type ScentProductInput = {
+  handle: string;
+} & Partial<ProductScentMetafields>;
+
+export function getScentProfile(
+  productOrHandle: ScentProductInput | string = DEFAULT_HANDLE,
+): ScentProfile {
+  const handle =
+    typeof productOrHandle === 'string'
+      ? productOrHandle
+      : productOrHandle.handle;
+  const offline =
+    SCENT_BY_HANDLE[handle] ?? SCENT_BY_HANDLE[DEFAULT_HANDLE]!;
+
+  const parsed: ParsedScentMetafields =
+    typeof productOrHandle === 'string'
+      ? {}
+      : parseScentMetafields({
+          scentNumber: productOrHandle.scentNumber ?? null,
+          scentSubtitle: productOrHandle.scentSubtitle ?? null,
+          scentTagline: productOrHandle.scentTagline ?? null,
+          scentShortDescription:
+            productOrHandle.scentShortDescription ?? null,
+          heroNotes: productOrHandle.heroNotes ?? null,
+          topNotes: productOrHandle.topNotes ?? null,
+          heartNotes: productOrHandle.heartNotes ?? null,
+          baseNotes: productOrHandle.baseNotes ?? null,
+          ingredientList: productOrHandle.ingredientList ?? null,
+          olfactoryFamily: productOrHandle.olfactoryFamily ?? null,
+          occasion: productOrHandle.occasion ?? null,
+          season: productOrHandle.season ?? null,
+        });
+
+  const topNotes = pickNotes(parsed.topNotes, offline.topNotes);
+  const heartNotes = pickNotes(parsed.heartNotes, offline.heartNotes);
+  const baseNotes = pickNotes(parsed.baseNotes, offline.baseNotes);
 
   return {
-    number: data.number,
-    titleSubtitle: data.titleSubtitle,
-    subtitle: SCENT_SUBTITLE,
-    tagline: data.tagline,
-    shortDescription: data.shortDescription,
-    heroNotes: data.heroNotes,
+    number: parsed.number ?? offline.number,
+    subtitle: parsed.subtitle ?? SCENT_SUBTITLE,
+    tagline: parsed.tagline ?? offline.tagline,
+    shortDescription: parsed.shortDescription ?? offline.shortDescription,
+    heroNotes: parsed.heroNotes?.length
+      ? parsed.heroNotes
+      : offline.heroNotes,
     detailImage: DETAIL_IMAGE,
+    ingredientList: parsed.ingredientList,
+    occasion: parsed.occasion,
+    olfactoryFamily: parsed.olfactoryFamily,
+    season: parsed.season,
     tiers: [
       {
         id: 'top',
         label: 'Top',
         image: TOP_TIER_IMAGE,
-        notes: data.topNotes,
+        notes: topNotes,
       },
       {
         id: 'heart',
         label: 'Heart',
         image: HEART_TIER_IMAGE,
-        notes: data.heartNotes,
+        notes: heartNotes,
       },
       {
         id: 'base',
         label: 'Base',
         image: BASE_TIER_IMAGE,
-        notes: data.baseNotes,
+        notes: baseNotes,
       },
     ],
   };

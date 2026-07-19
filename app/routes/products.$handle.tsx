@@ -146,6 +146,17 @@ const PRODUCT_VARIANT_FRAGMENT = `#graphql
   }
 ` as const;
 
+const TAXONOMY_METAOBJECT_FRAGMENT = `#graphql
+  fragment TaxonomyMetaobject on Metaobject {
+    handle
+    type
+    fields {
+      key
+      value
+    }
+  }
+` as const;
+
 const PRODUCT_FRAGMENT = `#graphql
   fragment Product on Product {
     id
@@ -183,7 +194,70 @@ const PRODUCT_FRAGMENT = `#graphql
       description
       title
     }
+    scentNumber: metafield(namespace: "custom", key: "scent_number") {
+      type
+      value
+    }
+    scentSubtitle: metafield(namespace: "custom", key: "scent_subtitle") {
+      type
+      value
+    }
+    scentTagline: metafield(namespace: "custom", key: "scent_tagline") {
+      type
+      value
+    }
+    scentShortDescription: metafield(namespace: "custom", key: "scent_short_description") {
+      type
+      value
+    }
+    heroNotes: metafield(namespace: "custom", key: "hero_notes") {
+      type
+      value
+    }
+    topNotes: metafield(namespace: "custom", key: "top_notes") {
+      type
+      value
+    }
+    heartNotes: metafield(namespace: "custom", key: "heart_notes") {
+      type
+      value
+    }
+    baseNotes: metafield(namespace: "custom", key: "base_notes") {
+      type
+      value
+    }
+    ingredientList: metafield(namespace: "custom", key: "ingredient_list") {
+      type
+      value
+    }
+    olfactoryFamily: metafield(namespace: "custom", key: "olfactory_family") {
+      type
+      value
+    }
+    occasion: metafield(namespace: "shopify", key: "occasion") {
+      type
+      value
+      references(first: 10) {
+        nodes {
+          ... on Metaobject {
+            ...TaxonomyMetaobject
+          }
+        }
+      }
+    }
+    season: metafield(namespace: "shopify", key: "season") {
+      type
+      value
+      references(first: 10) {
+        nodes {
+          ... on Metaobject {
+            ...TaxonomyMetaobject
+          }
+        }
+      }
+    }
   }
+  ${TAXONOMY_METAOBJECT_FRAGMENT}
   ${PRODUCT_VARIANT_FRAGMENT}
 ` as const;
 

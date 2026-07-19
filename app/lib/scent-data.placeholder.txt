@@ -3,9 +3,10 @@
 # Source: "(For Diego & Tom) Dilettante Perfumery Copy Sheet … LONG DESCRIPTIONS.csv"
 #
 # Mapping:
+#   title_subtitle  ← optional title parenthetical (e.g. Forever)
 #   tagline         ← APPROVED tagline
-#   description     ← APPROVED short description
-#   summary_notes   ← Hero Notes
+#   short_description ← APPROVED short description
+#   hero_notes      ← Hero Notes
 #   top/heart/base  ← Pau's fragrance notes (3D cube)
 
 # Shared
@@ -18,8 +19,8 @@ base_tier_image = hero-landscape.jpg
 # ── 01. kids-on-the-slope ──────────────────────────────────────────
 scent_number = "01"
 scent_tagline = "For the purest of hearts."
-scent_description = "The laughter of children echoes through endless fields of citrus trees, as they run wildly with jasmine garlands tangled in their hair. To be young is to be free—our souls at their purest state."
-scent_summary_notes = [bergamot, jasmine, incense]
+scent_short_description = "The laughter of children echoes through endless fields of citrus trees, as they run wildly with jasmine garlands tangled in their hair. To be young is to be free—our souls at their purest state."
+hero_notes = [bergamot, jasmine, incense]
 top_notes = [bergamot, petitgrain, lemon]
 heart_notes = [jasmine sambac, elemi]
 base_notes = [incense, vetiver, musk]
@@ -27,8 +28,8 @@ base_notes = [incense, vetiver, musk]
 # ── 02. summer-cannibals ───────────────────────────────────────────
 scent_number = "02"
 scent_tagline = "Feral lovemaking on a bed of crushed fruit."
-scent_description = "A forbidden, torrid kiss in the garden, at the height of summer. The pungent flesh of hedonists melts into each other, uncertain where one ends and the other begins."
-scent_summary_notes = [foliage, mango, raspberry, lipstick, musk]
+scent_short_description = "A forbidden, torrid kiss in the garden, at the height of summer. The pungent flesh of hedonists melts into each other, uncertain where one ends and the other begins."
+hero_notes = [foliage, mango, raspberry, lipstick, musk]
 top_notes = [foliage, wet earth]
 heart_notes = [mango, raspberry, jasmine, rose]
 base_notes = [lipstick, skin, musk]
@@ -36,17 +37,18 @@ base_notes = [lipstick, skin, musk]
 # ── 03. temple-at-dawn ─────────────────────────────────────────────
 scent_number = "03"
 scent_tagline = "Sweetness made sacred."
-scent_description = "Servants of god take respite at the break of dawn, surrounded by the aroma of rich, freshly-brewed coffee. A most sacred morning ritual for those in need of momentary peace."
-scent_summary_notes = [coffee, incense, lilac, amber]
+scent_short_description = "Servants of god take respite at the break of dawn, surrounded by the aroma of rich, freshly-brewed coffee. A most sacred morning ritual for those in need of momentary peace."
+hero_notes = [coffee, incense, lilac, amber]
 top_notes = [cardamom, lavender]
 heart_notes = [hyssop, coffee, lilac]
 base_notes = [incense, amber, spikenard, musk]
 
 # ── 04. forever-on-the-crest-of-a-wave ─────────────────────────────
 scent_number = "04"
+scent_title_subtitle = "(on the crest of a wave)"
 scent_tagline = "A widow's tears on a withered bouquet."
-scent_description = "From the aftermath of violent waves come tears and seafoam, sprinkled onto a wedding bouquet. A melancholic, olfactory expression of love found and love lost in the blink of an eye."
-scent_summary_notes = [orange blossom, sea breeze, smoke, hay]
+scent_short_description = "From the aftermath of violent waves come tears and seafoam, sprinkled onto a wedding bouquet. A melancholic, olfactory expression of love found and love lost in the blink of an eye."
+hero_notes = [orange blossom, sea breeze, smoke, hay]
 top_notes = [bergamot, sweet orange]
 heart_notes = [orange blossom, neroli, sea breeze, honey]
 base_notes = [hay, vetiver, smoke, amber, vanilla]
@@ -54,18 +56,19 @@ base_notes = [hay, vetiver, smoke, amber, vanilla]
 # ── 05. creature-feature ───────────────────────────────────────────
 scent_number = "05"
 scent_tagline = "Who lurks there?"
-scent_description = '"See me," he whispers under tobacco-laced breath. An air of ancient forests and animalic musk looms heavy at three in the morning—is this creature of the night man or monster?'
-scent_summary_notes = [earth, queen of the night, tobacco]
+scent_short_description = '"See me," he whispers under tobacco-laced breath. An air of ancient forests and animalic musk looms heavy at three in the morning—is this creature of the night man or monster?'
+hero_notes = [earth, queen of the night, tobacco]
 top_notes = [black pepper, pink pepper, rosemary]
 heart_notes = [queen of the night, mimosa, violet leaf]
 base_notes = [tobacco, spices, cedar, patchouli, musk]
 
 # Future metafield keys (suggested)
 # custom.scent_number
+# custom.scent_title_subtitle
 # custom.scent_subtitle
 # custom.scent_tagline
-# custom.scent_description
-# custom.scent_summary_notes
+# custom.scent_short_description
+# custom.hero_notes
 # custom.scent_detail_image
 # custom.scent_top_notes
 # custom.scent_heart_notes

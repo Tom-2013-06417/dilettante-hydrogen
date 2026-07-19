@@ -84,7 +84,11 @@ export function ProductHero({
               className="pointer-events-none absolute inset-y-0 left-5 z-10 flex items-center justify-start overflow-visible sm:left-9"
               variants={fadeUpItem}
             >
-              <ProductTitle number={scentProfile.number} title={title} />
+              <ProductTitle
+                number={scentProfile.number}
+                title={title}
+                subtitle={scentProfile.titleSubtitle}
+              />
             </motion.div>
           </div>
         </div>

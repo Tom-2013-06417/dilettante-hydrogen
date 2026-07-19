@@ -64,14 +64,14 @@ export function ProductBottleBand({
               {scentProfile.tagline}
             </span>
             <span className="text-center font-['trust-3a'] text-[9px] lowercase leading-none tracking-[0.08em] text-inkwell-700/65 sm:text-[10px]">
-              {scentProfile.summaryNotes.join(' · ')}
+              {scentProfile.heroNotes.join(' · ')}
             </span>
           </div>
 
           {/* Description — remaining height */}
           <div className="flex min-h-0 flex-1 items-center py-0 pl-16 pr-8">
             <span className="max-w-[36ch] font-['trust-3a'] text-[11px] italic leading-[1.65] tracking-[0.02em] text-inkwell-700/70">
-              {scentProfile.description}
+              {scentProfile.shortDescription}
             </span>
           </div>
         </div>

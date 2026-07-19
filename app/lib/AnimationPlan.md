@@ -11,7 +11,7 @@
 - Square image with `PageContainer` padding
 - 3×3 dashed white grid overlay
 - Tap: `grid` → `rows` (top / heart / base) → `exploded` with annotation lines
-- Scent data: `scent-data.placeholder.txt` + `scentProfile.ts` (random 3 notes per tier; wire to metafields later)
+- Scent data: Shopify product metafields via `scentMetafields.ts` / `scentProfile.ts`
 
 ## Section 3 — Vessel (`BottleBoxReveal`)
 

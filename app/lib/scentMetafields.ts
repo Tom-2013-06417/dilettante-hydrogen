@@ -38,7 +38,8 @@ export type ShopifyCategoryMetafieldKey =
 
 export type TaxonomyMetaobjectField = {
   key: string;
-  value: string;
+  /** Storefront `MetaobjectField.value` is optional/nullable. */
+  value?: string | null;
 };
 
 /** Label entry from a Shopify taxonomy metaobject (e.g. shopify--occasion). */
@@ -51,10 +52,11 @@ export type TaxonomyMetaobject = {
 /**
  * Storefront metafield shape returned by aliased `metafield(...)` selections.
  * `references` is only populated for metaobject / list.metaobject_reference.
+ * Matches codegen nullability so `ProductFragment` is assignable here.
  */
 export type StorefrontScentMetafield = {
   type: string;
-  value: string;
+  value?: string | null;
   references?: {
     nodes: Array<TaxonomyMetaobject | null>;
   } | null;

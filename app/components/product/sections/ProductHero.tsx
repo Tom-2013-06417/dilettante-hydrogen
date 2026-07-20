@@ -49,7 +49,7 @@ export function ProductHero({
 
   return (
     <div className="relative flex w-full flex-col bg-vellum-100 text-inkwell-700">
-      <div className="relative z-1 flex min-h-dvh w-full flex-col">
+      <div className="relative z-1 flex min-h-svh w-full flex-col">
         {/* Title leads; rest of the page fades in shortly after */}
         <div className="relative shrink-0">
           <IntroFade>
@@ -60,7 +60,7 @@ export function ProductHero({
 
             <HeaderBar className="bg-vellum-100" showLeftRule={false} />
 
-            <div className="relative flex h-[35dvh] w-full">
+            <div className="relative flex h-[35svh] w-full">
               <div className="w-4 shrink-0 sm:w-8" aria-hidden />
               <div
                 className="relative flex shrink-0 items-center px-2 sm:px-4"
@@ -91,7 +91,7 @@ export function ProductHero({
           </IntroFade>
 
           {/* Title slides in first (overlaid on hero band) */}
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[35dvh]">
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[35svh]">
             <IntroTitleSlide
               className="absolute inset-y-0 left-5 flex items-center justify-start overflow-visible sm:left-9"
               onAnimationComplete={() => setTitleNoise(true)}
@@ -109,7 +109,7 @@ export function ProductHero({
         </div>
 
         <IntroFade>
-          <div className="relative flex h-[10dvh] w-full shrink-0">
+          <div className="relative flex min-h-[96px] w-full shrink-0">
             <BlueprintRule
               orientation="h"
               className="absolute inset-x-0 top-0 text-inkwell-700/35"
@@ -136,7 +136,7 @@ export function ProductHero({
 
             <div className="relative flex w-[40%] items-center justify-center">
               <AddToCartButton
-                className="cursor-pointer border-0 bg-[#152015] px-4 py-2 font-['config-mono-vf'] text-[12px] font-bold uppercase tracking-[0.08em] text-vellum-100 transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 sm:px-5 sm:text-[13px]"
+                className="cursor-pointer border-0 bg-[#152015] px-5 py-2.5 font-['config-mono-vf'] text-[13px] font-bold uppercase tracking-[0.08em] text-vellum-100 transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 sm:px-6 sm:py-3 sm:text-[14px]"
                 disabled={!selectedVariant?.availableForSale}
                 onClick={() => open('cart')}
                 lines={
@@ -157,54 +157,54 @@ export function ProductHero({
           </div>
         </IntroFade>
 
-        <IntroFade>
+        <IntroFade className="flex min-h-0 flex-1 flex-col">
           <ProductBottleBand
             title={title}
             image={image}
             scentProfile={scentProfile}
           />
         </IntroFade>
-      </div>
 
-      <motion.div
-        className="absolute bottom-6 left-1/2 z-1 flex -translate-x-1/2 flex-col items-center gap-3 text-inkwell-700/40"
-        initial={reducedMotion ? false : {opacity: 0}}
-        animate={{opacity: 1}}
-        transition={{
-          delay: PRODUCT_FADE_DELAY + PRODUCT_FADE_DURATION * 0.55,
-          duration: 0.45,
-          ease: 'easeOut',
-        }}
-      >
-        <span className="pointer-events-none font-['config-mono-vf'] text-[20px] uppercase tracking-[0.14em] sm:text-[22px]">
-          SCENT ANATOMY
-        </span>
-        <button
-          type="button"
-          className="cursor-pointer border-0 bg-transparent p-1 text-inherit transition-opacity hover:opacity-80"
-          aria-label="Scroll to scent anatomy"
-          onClick={() => {
-            document
-              .getElementById('scent-anatomy')
-              ?.scrollIntoView({behavior: 'smooth', block: 'start'});
+        <motion.div
+          className="relative z-1 flex min-h-[96px] w-full shrink-0 flex-col items-center justify-center gap-3 text-inkwell-700/40"
+          initial={reducedMotion ? false : {opacity: 0}}
+          animate={{opacity: 1}}
+          transition={{
+            delay: PRODUCT_FADE_DELAY + PRODUCT_FADE_DURATION * 0.55,
+            duration: 0.45,
+            ease: 'easeOut',
           }}
         >
-          <svg
-            className="h-5 w-5 animate-bounce"
-            viewBox="0 0 24 24"
-            fill="none"
-            aria-hidden
+          <span className="pointer-events-none font-['config-mono-vf'] text-[20px] uppercase tracking-[0.14em] sm:text-[22px]">
+            SCENT ANATOMY
+          </span>
+          <button
+            type="button"
+            className="cursor-pointer border-0 bg-transparent p-1 text-inherit transition-opacity hover:opacity-80"
+            aria-label="Scroll to scent anatomy"
+            onClick={() => {
+              document
+                .getElementById('scent-anatomy')
+                ?.scrollIntoView({behavior: 'smooth', block: 'start'});
+            }}
           >
-            <path
-              d="M12 5v14M19 12l-7 7-7-7"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
-      </motion.div>
+            <svg
+              className="h-5 w-5 animate-bounce"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden
+            >
+              <path
+                d="M12 5v14M19 12l-7 7-7-7"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+        </motion.div>
+      </div>
     </div>
   );
 }

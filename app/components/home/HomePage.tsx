@@ -57,7 +57,7 @@ function HomeHero({onScrollDown}: {onScrollDown: () => void}) {
   const reducedMotion = useReducedMotion();
 
   return (
-    <section className="relative flex h-dvh w-full flex-col items-stretch overflow-hidden bg-inkwell-800">
+    <section className="relative flex h-svh w-full flex-col items-stretch overflow-hidden bg-inkwell-800">
       <motion.div
         className="relative flex h-[20%] w-full items-start bg-inkwell-800 lg:h-[15%]"
         variants={heroStagger}
@@ -316,12 +316,12 @@ export function HomePage() {
   return (
     <div
       ref={containerRef}
-      className="relative h-dvh w-full overflow-hidden touch-none"
+      className="relative h-svh w-full overflow-hidden touch-none"
     >
       <motion.div
         className="w-full will-change-transform"
-        style={{height: `${SECTION_COUNT * 100}dvh`}}
-        animate={{y: `-${section * 100}dvh`}}
+        style={{height: `${SECTION_COUNT * 100}svh`}}
+        animate={{y: `-${section * 100}svh`}}
         transition={transition}
         onAnimationStart={() => {
           animatingRef.current = true;
@@ -333,13 +333,13 @@ export function HomePage() {
         onAnimationComplete={handleAnimationComplete}
       >
         <HomeHero onScrollDown={() => goToSection(1)} />
-        <section className="h-dvh w-full bg-vellum-100">
+        <section className="h-svh w-full bg-vellum-100">
           <BrandIntro active={section === 1} />
         </section>
-        <section id="scent-01" className="h-dvh w-full bg-inkwell-800">
+        <section id="scent-01" className="h-svh w-full bg-inkwell-800">
           <ScentFeature active={section === 2} />
         </section>
-        <section id="scent-01-anatomy" className="h-dvh w-full bg-inkwell-800">
+        <section id="scent-01-anatomy" className="h-svh w-full bg-inkwell-800">
           <ScentAnatomy active={section === 3} />
         </section>
       </motion.div>

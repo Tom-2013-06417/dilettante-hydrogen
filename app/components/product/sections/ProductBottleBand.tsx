@@ -22,10 +22,10 @@ export function ProductBottleBand({
 }: ProductBottleBandProps) {
   return (
     <div
-      className="relative h-[35dvh] w-full shrink-0 overflow-x-clip overflow-y-visible bg-vellum-100 text-inkwell-700"
+      className="relative flex min-h-0 w-full flex-1 flex-col overflow-x-clip overflow-y-visible bg-vellum-100 text-inkwell-700"
       aria-label={`${title} bottle`}
     >
-      <div className="relative flex h-full w-full">
+      <div className="relative flex min-h-0 w-full flex-1">
         <div className="relative flex shrink-0 self-stretch overflow-hidden">
           {image ? (
             <>
@@ -50,28 +50,28 @@ export function ProductBottleBand({
           </div>
         </div>
 
-        <div className="relative flex min-w-0 flex-1 flex-col">
+        <div className="relative flex min-h-0 min-w-0 flex-1 flex-col">
           <BlueprintRule
             orientation="v"
             className="absolute inset-y-0 left-0 z-1 text-inkwell-700/35"
           />
 
-          <div className="relative flex h-[10dvh] shrink-0 flex-col items-center justify-center gap-0.5 px-4 sm:px-6">
+          <div className="relative flex min-h-[96px] shrink-0 flex-col items-start justify-center gap-0.5 pl-16 pr-8">
             <BlueprintRule
               orientation="h"
               className="absolute inset-x-0 bottom-0 text-inkwell-700/35"
             />
-            <span className="text-center font-['trust-3a'] text-[13px] leading-snug tracking-[0.02em] text-inkwell-700 sm:text-[15px]">
+            <span className="text-left font-['trust-3a'] text-[13px] leading-snug tracking-[0.02em] text-inkwell-700 sm:text-[15px]">
               {scentProfile.tagline}
             </span>
             {scentProfile.olfactoryFamily?.length ? (
-              <span className="text-center font-['trust-3a'] text-[9px] lowercase leading-none tracking-[0.08em] text-inkwell-700/65 sm:text-[10px]">
+              <span className="text-left font-['trust-3a'] text-[9px] lowercase leading-none tracking-[0.08em] text-inkwell-700/65 sm:text-[10px]">
                 {scentProfile.olfactoryFamily.join(' · ')}
               </span>
             ) : null}
           </div>
 
-          <div className="flex min-h-0 flex-1 items-start pt-10 pl-16 pr-8">
+          <div className="flex min-h-0 flex-1 items-start pt-10 pb-10 pl-16 pr-8">
             <div className="flex max-w-[36ch] flex-col gap-2">
               <span className="mb-4 font-['trust-3a'] text-[11px] italic leading-[1.8] tracking-[0.02em] text-inkwell-700/70">
                 {scentProfile.shortDescription}
@@ -86,14 +86,16 @@ export function ProductBottleBand({
         </div>
       </div>
 
-      <Image
-        alt={`${title} bottle`}
-        className="pointer-events-none absolute bottom-0 left-0 z-2 h-full w-[50%] translate-x-[-25%] translate-y-[5%] object-contain object-bottom-left"
-        src={BOTTLE_IMAGE}
-        width={187}
-        height={178}
-        sizes="50vw"
-      />
+      <div className="pointer-events-none absolute bottom-0 left-0 z-2 h-1/2 max-h-44 aspect-[187/178] translate-x-[-25%] translate-y-[5%]">
+        <Image
+          alt={`${title} bottle`}
+          className="h-full w-full object-contain object-bottom-left"
+          src={BOTTLE_IMAGE}
+          width={187}
+          height={178}
+          sizes="50vw"
+        />
+      </div>
 
       <BlueprintRule
         orientation="h"

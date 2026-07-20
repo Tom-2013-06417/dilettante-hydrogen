@@ -56,7 +56,7 @@ export function ProductBottleBand({
             className="absolute inset-y-0 left-0 z-1 text-inkwell-700/35"
           />
 
-          <div className="relative flex min-h-[96px] shrink-0 flex-col items-start justify-center gap-0.5 pl-16 pr-8">
+          <div className="relative flex min-h-24 shrink-0 flex-col items-start justify-center gap-0.5 pl-16 pr-8">
             <BlueprintRule
               orientation="h"
               className="absolute inset-x-0 bottom-0 text-inkwell-700/35"
@@ -86,7 +86,7 @@ export function ProductBottleBand({
         </div>
       </div>
 
-      <div className="pointer-events-none absolute bottom-0 left-0 z-2 h-1/2 max-h-44 aspect-[187/178] translate-x-[-25%] translate-y-[5%]">
+      <div className="pointer-events-none absolute bottom-0 left-0 z-2 h-1/2 max-h-44 aspect-187/178 translate-x-[-25%] translate-y-[5%]">
         <Image
           alt={`${title} bottle`}
           className="h-full w-full object-contain object-bottom-left"

@@ -109,7 +109,7 @@ export function ProductHero({
         </div>
 
         <IntroFade>
-          <div className="relative flex min-h-[96px] w-full shrink-0">
+          <div className="relative flex min-h-24 w-full shrink-0">
             <BlueprintRule
               orientation="h"
               className="absolute inset-x-0 top-0 text-inkwell-700/35"
@@ -166,7 +166,7 @@ export function ProductHero({
         </IntroFade>
 
         <motion.div
-          className="relative z-1 flex min-h-[96px] w-full shrink-0 flex-col items-center justify-center gap-3 text-inkwell-700/40"
+          className="relative z-1 flex min-h-24 w-full shrink-0 flex-col items-center justify-center gap-3 text-inkwell-700/40"
           initial={reducedMotion ? false : {opacity: 0}}
           animate={{opacity: 1}}
           transition={{

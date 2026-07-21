@@ -60,7 +60,7 @@ export function ProductHero({
 
             <HeaderBar className="bg-vellum-100" showLeftRule={false} />
 
-            <div className="relative flex h-[35svh] w-full">
+            <div className="relative flex h-[30svh] w-full">
               <div className="w-4 shrink-0 sm:w-8" aria-hidden />
               <div
                 className="relative flex shrink-0 items-center px-2 sm:px-4"
@@ -91,7 +91,7 @@ export function ProductHero({
           </IntroFade>
 
           {/* Title slides in first (overlaid on hero band) */}
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[35svh]">
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[30svh]">
             <IntroTitleSlide
               className="absolute inset-y-0 left-5 flex items-center justify-start overflow-visible sm:left-9"
               onAnimationComplete={() => setTitleNoise(true)}
@@ -109,7 +109,7 @@ export function ProductHero({
         </div>
 
         <IntroFade>
-          <div className="relative flex min-h-24 w-full shrink-0">
+          <div className="relative flex min-h-20 w-full shrink-0">
             <BlueprintRule
               orientation="h"
               className="absolute inset-x-0 top-0 text-inkwell-700/35"
@@ -119,7 +119,7 @@ export function ProductHero({
               className="absolute inset-x-0 bottom-0 text-inkwell-700/35"
             />
 
-            <div className="relative flex w-[60%] flex-col items-start justify-center gap-[0.3rem] px-8 sm:px-10">
+            <div className="relative flex w-[60%] flex-col items-start justify-center gap-[0.3rem] px-6 sm:px-10">
               <BlueprintRule
                 orientation="v"
                 className="absolute inset-y-0 right-0 text-inkwell-700/35"
@@ -166,7 +166,7 @@ export function ProductHero({
         </IntroFade>
 
         <motion.div
-          className="relative z-1 flex min-h-24 w-full shrink-0 flex-col items-center justify-center gap-3 text-inkwell-700/40"
+          className="relative z-1 flex pt-4 min-h-20 w-full shrink-0 flex-col items-center justify-center gap-1 text-inkwell-700/40"
           initial={reducedMotion ? false : {opacity: 0}}
           animate={{opacity: 1}}
           transition={{

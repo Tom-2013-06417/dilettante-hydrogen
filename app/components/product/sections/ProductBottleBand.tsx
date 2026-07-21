@@ -56,33 +56,34 @@ export function ProductBottleBand({
             className="absolute inset-y-0 left-0 z-1 text-inkwell-700/35"
           />
 
-          <div className="relative flex min-h-24 shrink-0 flex-col items-start justify-center gap-0.5 pl-16 pr-8">
+          <div className="relative flex min-h-20 shrink-0 flex-col items-start justify-center gap-0.5 px-8">
             <BlueprintRule
               orientation="h"
               className="absolute inset-x-0 bottom-0 text-inkwell-700/35"
             />
-            <span className="text-left font-['trust-3a'] text-[13px] leading-snug tracking-[0.02em] text-inkwell-700 sm:text-[15px]">
+            <span className="text-left font-['trust-3a'] text-[14px] leading-snug tracking-[0.02em] text-inkwell-700 sm:text-[15px]">
               {scentProfile.tagline}
             </span>
             {scentProfile.olfactoryFamily?.length ? (
-              <span className="text-left font-['trust-3a'] text-[9px] lowercase leading-none tracking-[0.08em] text-inkwell-700/65 sm:text-[10px]">
+              <span className="text-left font-['trust-3a'] text-[11px] lowercase leading-none tracking-[0.08em] text-inkwell-700/65 sm:text-[10px]">
                 {scentProfile.olfactoryFamily.join(' · ')}
               </span>
             ) : null}
           </div>
 
-          <div className="flex min-h-0 flex-1 items-start pt-10 pb-10 pl-16 pr-8">
-            <div className="flex max-w-[36ch] flex-col gap-2">
-              <span className="mb-4 font-['trust-3a'] text-[11px] italic leading-[1.8] tracking-[0.02em] text-inkwell-700/70">
-                {scentProfile.shortDescription}
+          <div className="flex shrink-0 flex-col gap-3 px-8 py-4">
+            <span className="max-w-[36ch] font-['trust-3a'] text-[13px] italic leading-[1.4] tracking-[0.02em] text-inkwell-700/70">
+              {scentProfile.shortDescription}
+            </span>
+            {scentProfile.heroNotes.length ? (
+              <span className="max-w-[36ch] font-['trust-3a'] text-[11px] lowercase leading-snug tracking-[0.08em] text-inkwell-700/65 sm:text-[10px]">
+                {scentProfile.heroNotes.join(' · ')}
               </span>
-              {scentProfile.heroNotes.length ? (
-                <span className="font-['trust-3a'] text-[9px] lowercase leading-none tracking-[0.08em] text-inkwell-700/65 sm:text-[10px]">
-                  {scentProfile.heroNotes.join(' · ')}
-                </span>
-              ) : null}
-            </div>
+            ) : null}
           </div>
+
+          {/* Absorbs leftover band height so the image column can still stretch */}
+          <div className="min-h-0 flex-1" aria-hidden />
         </div>
       </div>
 

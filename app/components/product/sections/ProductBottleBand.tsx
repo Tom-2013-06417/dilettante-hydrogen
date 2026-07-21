@@ -56,12 +56,12 @@ export function ProductBottleBand({
             className="absolute inset-y-0 left-0 z-1 text-inkwell-700/35"
           />
 
-          <div className="relative flex min-h-20 shrink-0 flex-col items-start justify-center gap-0.5 px-8">
+          <div className="relative flex min-h-20 shrink-0 flex-col items-start justify-center gap-2 px-8">
             <BlueprintRule
               orientation="h"
               className="absolute inset-x-0 bottom-0 text-inkwell-700/35"
             />
-            <span className="text-left font-['trust-3a'] text-[14px] leading-snug tracking-[0.02em] text-inkwell-700 sm:text-[15px]">
+            <span className="text-left font-['trust-3a'] text-[14px] leading-none tracking-[0.02em] text-inkwell-700 sm:text-[15px]">
               {scentProfile.tagline}
             </span>
             {scentProfile.olfactoryFamily?.length ? (
@@ -76,7 +76,7 @@ export function ProductBottleBand({
               {scentProfile.shortDescription}
             </span>
             {scentProfile.heroNotes.length ? (
-              <span className="max-w-[36ch] font-['trust-3a'] text-[11px] lowercase leading-snug tracking-[0.08em] text-inkwell-700/65 sm:text-[10px]">
+              <span className="max-w-[36ch] font-['trust-3a'] text-[11px] lowercase leading-[1.4] tracking-[0.08em] text-inkwell-700/65 sm:text-[10px]">
                 {scentProfile.heroNotes.join(' · ')}
               </span>
             ) : null}

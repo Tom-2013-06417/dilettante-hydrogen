@@ -87,7 +87,7 @@ export function links() {
     },
     {
       rel: 'stylesheet',
-      href: 'https://use.typekit.net/anf0xzw.css',
+      href: 'https://use.typekit.net/djl3pem.css',
     },
     {rel: 'icon', type: 'image/svg+xml', href: favicon},
   ];

@@ -61,7 +61,7 @@ export function ProductBottleBand({
               orientation="h"
               className="absolute inset-x-0 bottom-0 text-inkwell-700/35"
             />
-            <span className="text-left font-['trust-3a'] text-[14px] leading-none tracking-[0.02em] text-inkwell-700 sm:text-[15px]">
+            <span className="text-left font-['trust-3a'] text-[14px] font-medium leading-none tracking-[0.02em] text-inkwell-700 sm:text-[15px]">
               {scentProfile.tagline}
             </span>
             {scentProfile.olfactoryFamily?.length ? (

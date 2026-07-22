@@ -16,7 +16,7 @@ import {
 /** Space between the label's marker dot and where the line starts */
 const GAP = 0;
 /** Length of the horizontal run leaving the label before the elbow */
-const H_RUN = 48;
+const H_RUN = 20;
 
 type CubeBlueprintAnnotationsProps = {
   tiers: [ScentTier, ScentTier, ScentTier];
@@ -229,7 +229,7 @@ export function CubeBlueprintAnnotations({
       className="pointer-events-none absolute inset-0 z-2"
       aria-hidden={!visible}
     >
-      <ul className="absolute inset-y-[12%] left-0 flex w-[min(30%,10rem)] flex-col items-end justify-evenly pl-1 sm:w-[min(28%,11rem)] sm:pl-3">
+      <ul className="absolute top-[8%] bottom-[10%] left-0 flex w-[min(30%,10rem)] flex-col items-end justify-evenly pl-1 sm:w-[min(28%,11rem)] sm:pl-3">
         {leftTiers.map((tier) => (
           <TierLabel
             key={tier.id}
@@ -241,7 +241,7 @@ export function CubeBlueprintAnnotations({
         ))}
       </ul>
 
-      <ul className="absolute inset-y-[12%] right-0 flex w-[min(30%,10rem)] flex-col items-start justify-evenly pr-1 sm:w-[min(28%,11rem)] sm:pr-3">
+      <ul className="absolute top-[8%] bottom-[10%] right-0 flex w-[min(30%,10rem)] flex-col items-start justify-evenly pr-1 sm:w-[min(28%,11rem)] sm:pr-3">
         {rightTiers.map((tier) => (
           <TierLabel
             key={tier.id}

@@ -65,7 +65,7 @@ export default function PackagingCubeCanvas({
         gl.setClearColor('#fff6e6', 1);
       }}
       flat
-      className="h-full w-full touch-none"
+      className="h-full w-full touch-pan-y"
       style={{width: '100%', height: '100%', display: 'block'}}
     >
       <Suspense fallback={null}>

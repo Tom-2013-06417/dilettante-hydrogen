@@ -17,6 +17,9 @@ import {
 const GAP = 0;
 /** Length of the horizontal run leaving the label before the elbow */
 const H_RUN = 20;
+/** Match `.blueprint-rule-*`: 4px dash, 5px gap */
+const DASH = 4;
+const DASH_GAP = 5;
 
 type CubeBlueprintAnnotationsProps = {
   tiers: [ScentTier, ScentTier, ScentTier];
@@ -59,6 +62,28 @@ function elbowPoints(
 
 function pointsAttr({ax1, ay1, ax2, ay2, bx, by}: ElbowPoints) {
   return `${ax1} ${ay1} ${ax2} ${ay2} ${bx} ${by}`;
+}
+
+/** Blueprint-style dashes, revealed up to `progress` (0–1). */
+function blueprintDashArray(length: number, progress: number) {
+  const drawn = Math.max(0, Math.min(1, progress)) * length;
+  if (drawn < 0.5) return '0 1';
+
+  const parts: number[] = [];
+  let pos = 0;
+  const period = DASH + DASH_GAP;
+  while (pos < drawn) {
+    const dash = Math.min(DASH, drawn - pos);
+    parts.push(dash);
+    pos += dash;
+    if (pos >= drawn) break;
+    const gap = Math.min(DASH_GAP, drawn - pos);
+    parts.push(gap);
+    pos += gap;
+  }
+  // Hide the undrawn remainder
+  parts.push(0, length + period);
+  return parts.join(' ');
 }
 
 function TierLabel({
@@ -188,8 +213,8 @@ export function CubeBlueprintAnnotations({
       const length =
         typeof line.getTotalLength === 'function' ? line.getTotalLength() : 0;
       if (length > 0) {
-        line.style.strokeDasharray = `${length}`;
-        line.style.strokeDashoffset = `${length * (1 - progress)}`;
+        line.style.strokeDasharray = blueprintDashArray(length, progress);
+        line.style.strokeDashoffset = '0';
       }
       line.style.opacity = progress > 0.02 ? '1' : '0';
 

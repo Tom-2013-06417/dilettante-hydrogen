@@ -1,5 +1,5 @@
 /* eslint-disable react/no-unknown-property -- R3F Three.js props */
-import {Outlines} from '@react-three/drei';
+import {Edges} from '@react-three/drei';
 import {useFrame, useThree} from '@react-three/fiber';
 import {useRef, type MutableRefObject} from 'react';
 import * as THREE from 'three';
@@ -18,14 +18,12 @@ const STACK_Y = [SLAB_H, 0, -SLAB_H] as const;
 const EXPLODE_Y = [0.38, 0, -0.38] as const;
 const EXPLODE_X = [-0.06, 0.1, -0.04] as const;
 
-/** Cel palette tuned to brand vellum + inkwell */
-const FILL = '#f5e6c8'; // near vellum-200
-const FILL_ALT = '#edd9b0'; // slightly deeper vellum
-const OUTLINE = '#152015'; // inkwell-700
-const OUTLINE_THICKNESS = 0.028;
+/** Flat unlit fill (matches page) + inkwell edge lines — no lighting */
+const FILL = '#fff6e6'; // vellum-100
+const EDGE = '#152015'; // inkwell-700
 
 type PackagingCubeSceneProps = {
-  /** Kept for API compatibility; toolbox style is solid gray (no photo maps). */
+  /** Kept for API compatibility; outline style ignores photo maps. */
   textureUrl: string;
   tiers: [ScentTier, ScentTier, ScentTier];
   /** 0 = stacked layers / solid cube, 1 = fully exploded */
@@ -43,45 +41,19 @@ type PackagingCubeSceneProps = {
   onAnchorsChange: (anchors: CubeAnchorsMap) => void;
 };
 
-/** 3-step nearest grayscale ramp for MeshToonMaterial banding. */
-function useToonGradient() {
-  const tex = useRef<THREE.DataTexture | null>(null);
-  if (!tex.current) {
-    const data = new Uint8Array([
-      210, 185, 140, 255, // shadow — warm vellum
-      235, 215, 175, 255, // mid
-      255, 246, 230, 255, // light — vellum-100
-    ]);
-    const created = new THREE.DataTexture(data, 3, 1);
-    created.magFilter = THREE.NearestFilter;
-    created.minFilter = THREE.NearestFilter;
-    created.needsUpdate = true;
-    tex.current = created;
-  }
-  return tex.current;
-}
-
-function ToolboxMesh({
+/** Unlit box: page-matched fill + dark edge lines only (no lights). */
+function OutlineBox({
   args,
-  color,
-  gradientMap,
   visible = true,
 }: {
   args: [number, number, number];
-  color: string;
-  gradientMap: THREE.DataTexture;
   visible?: boolean;
 }) {
   return (
-    <mesh castShadow={false} receiveShadow={false} visible={visible}>
+    <mesh visible={visible}>
       <boxGeometry args={args} />
-      <meshToonMaterial color={color} gradientMap={gradientMap} />
-      <Outlines
-        thickness={OUTLINE_THICKNESS}
-        color={OUTLINE}
-        opacity={1}
-        angle={Math.PI}
-      />
+      <meshBasicMaterial color={FILL} toneMapped={false} />
+      <Edges threshold={1} color={EDGE} linewidth={1} />
     </mesh>
   );
 }
@@ -91,7 +63,6 @@ function LayerSlab({
   index,
   explodeAmount,
   anchorRefs,
-  gradientMap,
 }: {
   tier: ScentTier;
   index: number;
@@ -99,7 +70,6 @@ function LayerSlab({
   anchorRefs: MutableRefObject<
     Partial<Record<ScentTierId, THREE.Object3D | null>>
   >;
-  gradientMap: THREE.DataTexture;
 }) {
   const groupRef = useRef<THREE.Group>(null);
   const side = tierLabelSide(tier.id);
@@ -111,7 +81,6 @@ function LayerSlab({
     const t = amountRef.current;
     const targetX = EXPLODE_X[index] * t;
     const targetY = STACK_Y[index] + EXPLODE_Y[index] * t;
-    // Follow scroll scrub closely for continuous feel
     groupRef.current.position.x = THREE.MathUtils.lerp(
       groupRef.current.position.x,
       targetX,
@@ -122,23 +91,24 @@ function LayerSlab({
       targetY,
       0.22,
     );
-  });
+  }, -1);
 
   return (
     <group ref={groupRef} position={[0, STACK_Y[index], 0]}>
-      <ToolboxMesh
-        args={[SIZE, SLAB_H * 0.96, SIZE]}
-        color={index % 2 === 0 ? FILL : FILL_ALT}
-        gradientMap={gradientMap}
-      />
+      <OutlineBox args={[SIZE, SLAB_H, SIZE]} />
+      {/*
+        Local −X face: with +Y (CCW) scroll spin, this side rotates into
+        the camera, so attach points stay on the near side instead of
+        riding the +Z face around to the back.
+      */}
       <group
         ref={(node) => {
           anchorRefs.current[tier.id] = node;
         }}
         position={[
-          side === 'left' ? -SIZE * 0.22 : SIZE * 0.22,
+          -SIZE * 0.5,
           0,
-          SIZE * 0.52,
+          side === 'left' ? SIZE * 0.28 : SIZE * 0.12,
         ]}
       />
     </group>
@@ -155,7 +125,6 @@ export function PackagingCubeScene({
   onAnchorsChange,
 }: PackagingCubeSceneProps) {
   const rootRef = useRef<THREE.Group>(null);
-  const gradientMap = useToonGradient();
   const anchorRefs = useRef<Partial<Record<ScentTierId, THREE.Object3D | null>>>(
     {},
   );
@@ -168,22 +137,25 @@ export function PackagingCubeScene({
     const targetY = scrollRotationY;
     const targetX = 0.22 + scrollRotationY * 0.15;
 
+    // Track scroll tightly — soft lerp was causing a catch-up pop on enter
     rootRef.current.rotation.y = THREE.MathUtils.lerp(
       rootRef.current.rotation.y,
       targetY,
-      0.12,
+      0.35,
     );
     rootRef.current.rotation.x = THREE.MathUtils.lerp(
       rootRef.current.rotation.x,
       targetX,
-      0.12,
+      0.35,
     );
     rootRef.current.rotation.z = THREE.MathUtils.lerp(
       rootRef.current.rotation.z,
       0,
-      0.14,
+      0.35,
     );
+  }, -2);
 
+  useFrame(() => {
     if (!showLayers || !stageElement) return;
 
     const stageRect = stageElement.getBoundingClientRect();
@@ -214,33 +186,21 @@ export function PackagingCubeScene({
   });
 
   return (
-    <>
-      <ambientLight intensity={0.55} />
-      <directionalLight position={[3.5, 5.5, 2.5]} intensity={1.35} />
-      <directionalLight position={[-2.5, 1.5, -1.5]} intensity={0.25} />
+    <group ref={rootRef}>
+      <OutlineBox args={[SIZE, SIZE, SIZE]} visible={showSolid} />
 
-      <group ref={rootRef}>
-        <ToolboxMesh
-          args={[SIZE, SIZE, SIZE]}
-          color={FILL}
-          gradientMap={gradientMap}
-          visible={showSolid}
-        />
-
-        {showLayers
-          ? tiers.map((tier, index) => (
-              <LayerSlab
-                key={tier.id}
-                tier={tier}
-                index={index}
-                explodeAmount={explodeAmount}
-                anchorRefs={anchorRefs}
-                gradientMap={gradientMap}
-              />
-            ))
-          : null}
-      </group>
-    </>
+      {showLayers
+        ? tiers.map((tier, index) => (
+            <LayerSlab
+              key={tier.id}
+              tier={tier}
+              index={index}
+              explodeAmount={explodeAmount}
+              anchorRefs={anchorRefs}
+            />
+          ))
+        : null}
+    </group>
   );
 }
 /* eslint-enable react/no-unknown-property */

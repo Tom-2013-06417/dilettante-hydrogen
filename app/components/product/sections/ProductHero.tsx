@@ -1,5 +1,5 @@
 import {Image} from '@shopify/hydrogen';
-import {motion, useReducedMotion} from 'motion/react';
+import {useReducedMotion} from 'motion/react';
 import {useState} from 'react';
 import type {
   ProductFragment,
@@ -9,10 +9,6 @@ import wordmarkInkwell from '~/assets/design/wordmark-inkwell.png';
 import {AddToCartButton} from '~/components/cart';
 import {useAside} from '~/components/layout';
 import {HeaderBar} from '~/components/home/sections/HeaderBar';
-import {
-  PRODUCT_FADE_DELAY,
-  PRODUCT_FADE_DURATION,
-} from '~/components/home/sections/animations';
 import {BlueprintRule} from '~/components/product/BlueprintRule';
 import {IntroFade} from '~/components/product/IntroFade';
 import {IntroTitleSlide} from '~/components/product/IntroTitleSlide';
@@ -48,8 +44,7 @@ export function ProductHero({
   const [titleNoise, setTitleNoise] = useState(Boolean(reducedMotion));
 
   return (
-    <div className="relative flex w-full flex-col bg-vellum-100 text-inkwell-700">
-      <div className="relative z-1 flex min-h-svh w-full flex-col">
+    <div className="relative z-1 flex min-h-0 w-full flex-1 flex-col bg-vellum-100 text-inkwell-700">
         {/* Title leads; rest of the page fades in shortly after */}
         <div className="relative shrink-0">
           <IntroFade>
@@ -164,47 +159,6 @@ export function ProductHero({
             scentProfile={scentProfile}
           />
         </IntroFade>
-
-        <motion.div
-          className="relative z-1 flex pt-4 min-h-20 w-full shrink-0 flex-col items-center justify-center gap-1 text-inkwell-700/40"
-          initial={reducedMotion ? false : {opacity: 0}}
-          animate={{opacity: 1}}
-          transition={{
-            delay: PRODUCT_FADE_DELAY + PRODUCT_FADE_DURATION * 0.55,
-            duration: 0.45,
-            ease: 'easeOut',
-          }}
-        >
-          <span className="pointer-events-none font-['config-mono-vf'] text-[20px] uppercase tracking-[0.14em] sm:text-[22px]">
-            SCENT ANATOMY
-          </span>
-          <button
-            type="button"
-            className="cursor-pointer border-0 bg-transparent p-1 text-inherit transition-opacity hover:opacity-80"
-            aria-label="Scroll to scent anatomy"
-            onClick={() => {
-              document
-                .getElementById('scent-anatomy')
-                ?.scrollIntoView({behavior: 'smooth', block: 'start'});
-            }}
-          >
-            <svg
-              className="h-5 w-5 animate-bounce"
-              viewBox="0 0 24 24"
-              fill="none"
-              aria-hidden
-            >
-              <path
-                d="M12 5v14M19 12l-7 7-7-7"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-        </motion.div>
-      </div>
     </div>
   );
 }

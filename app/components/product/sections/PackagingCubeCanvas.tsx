@@ -60,7 +60,10 @@ export default function PackagingCubeCanvas({
   return (
     <Canvas
       camera={{position: [0, 0.15, 3.7], fov: 42}}
-      gl={{antialias: true, alpha: true, toneMapping: THREE.NoToneMapping}}
+      gl={{antialias: true, alpha: false, toneMapping: THREE.NoToneMapping}}
+      onCreated={({gl}) => {
+        gl.setClearColor('#fff6e6', 1);
+      }}
       flat
       className="h-full w-full touch-none"
       style={{width: '100%', height: '100%', display: 'block'}}

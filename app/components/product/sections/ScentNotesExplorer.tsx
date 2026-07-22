@@ -126,10 +126,10 @@ export function ScentNotesExplorer({
       <div className="sticky top-0 z-10 h-svh overflow-hidden">
         <div className="flex h-full flex-col bg-vellum-100">
           <PageContainer className="flex h-full flex-col">
-            <div className="mx-auto flex h-full w-full max-w-4xl flex-col">
+            <div className="relative mx-auto h-full w-full max-w-4xl">
               <div
                 ref={setStageElement}
-                className="relative mx-auto min-h-0 w-full flex-1"
+                className="absolute inset-0"
               >
                 <CubeBlueprintAnnotations
                   tiers={scentProfile.tiers}
@@ -162,7 +162,7 @@ export function ScentNotesExplorer({
                 </div>
               </div>
 
-              <span className="relative z-2 mx-auto max-w-[36ch] shrink-0 pb-6 text-center text-[13px] italic leading-[1.6] tracking-[0.02em] text-inkwell-700/50 sm:pb-8">
+              <span className="pointer-events-none absolute inset-x-0 bottom-0 z-2 mx-auto max-w-[36ch] px-4 pb-6 text-center text-[13px] italic leading-[1.6] tracking-[0.02em] text-inkwell-700/50 sm:pb-8">
                 Top, heart, and base — the three registers that unfold as the
                 scent settles on skin.
               </span>

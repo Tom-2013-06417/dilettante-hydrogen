@@ -1,43 +1,44 @@
 import {
   motion,
-  useInView,
   useMotionValueEvent,
   useReducedMotion,
   useScroll,
   useTransform,
-  type Variants,
 } from 'motion/react';
-import {useCallback, useRef, useState} from 'react';
+import {useCallback, useEffect, useRef, useState} from 'react';
 import type {ScentProfile} from '~/lib/scentProfile';
 import {ClientOnly, PageContainer} from '~/components/shared';
-import type {CubePhase} from './PackagingCubeScene';
+import {CubeBlueprintAnnotations} from './CubeBlueprintAnnotations';
+import {EMPTY_CUBE_ANCHORS, type CubeAnchorsMap} from './cubeAnchors';
 import {PackagingCubeLoader} from './PackagingCubeLoader';
 
-const EASE = [0.32, 0.72, 0, 1] as const;
-const DEG_60 = (60 * Math.PI) / 180;
-const RESET_MS = 720;
-const ROWS_MS = 650;
-const EXPLODE_SETTLE_MS = 800;
+/**
+ * Scroll timeline (progress 0 → 1 while the sticky stage is pinned):
+ *  0.00–0.12  fade / scale in
+ *  0.08–0.30  solid cube orbiting
+ *  0.30–0.38  layers stacked
+ *  0.38–0.50  explode
+ *  0.48–0.58  draw annotations
+ *  0.58–0.70  hold exploded + notes
+ *  0.70–0.82  collapse + hide notes
+ *  0.82–0.88  solid cube again
+ *  0.88–1.00  fade out into next section
+ */
+const DEG_120 = (120 * Math.PI) / 180;
 
-const sectionReveal: Variants = {
-  hidden: {opacity: 0, y: 48},
-  show: {
-    opacity: 1,
-    y: 0,
-    transition: {duration: 0.9, ease: EASE},
-  },
-};
+function clamp01(n: number) {
+  return Math.min(1, Math.max(0, n));
+}
 
-function phaseHint(phase: CubePhase) {
-  switch (phase) {
-    case 'cube':
-      return 'Tap to unfold';
-    case 'resetting':
-    case 'rows':
-      return '';
-    case 'exploded':
-      return 'Tap to reset';
-  }
+function mapRange(
+  value: number,
+  inMin: number,
+  inMax: number,
+  outMin: number,
+  outMax: number,
+) {
+  if (inMax === inMin) return outMin;
+  return outMin + ((value - inMin) / (inMax - inMin)) * (outMax - outMin);
 }
 
 export function ScentNotesExplorer({
@@ -47,121 +48,160 @@ export function ScentNotesExplorer({
 }) {
   const reducedMotion = useReducedMotion();
   const sectionRef = useRef<HTMLElement>(null);
-  const inView = useInView(sectionRef, {once: true, margin: '-10% 0px'});
-  const [phase, setPhase] = useState<CubePhase>('cube');
-  const [isAnimating, setIsAnimating] = useState(false);
+  const anchorsRef = useRef(EMPTY_CUBE_ANCHORS);
+  const [stageElement, setStageElement] = useState<HTMLElement | null>(null);
+
   const [scrollRotationY, setScrollRotationY] = useState(
-    reducedMotion ? DEG_60 * 0.4 : 0,
+    reducedMotion ? DEG_120 * 0.35 : 0,
   );
+  const [explodeAmount, setExplodeAmount] = useState(0);
+  const [annotationDraw, setAnnotationDraw] = useState(0);
+  const [showSolid, setShowSolid] = useState(true);
+  const [showLayers, setShowLayers] = useState(false);
+  const [hint, setHint] = useState('Scroll');
 
   const {scrollYProgress} = useScroll({
     target: sectionRef,
-    offset: ['start end', 'end start'],
-  });
-  const scrollRotateY = useTransform(scrollYProgress, [0, 1], [0, DEG_60]);
-
-  useMotionValueEvent(scrollRotateY, 'change', (value) => {
-    if (phase === 'cube' && !reducedMotion) setScrollRotationY(value);
+    offset: ['start start', 'end end'],
   });
 
-  const resetToCube = useCallback(() => {
-    setIsAnimating(false);
-    setPhase('cube');
-    if (!reducedMotion) {
+  const scrollRotateY = useTransform(scrollYProgress, [0, 1], [0, DEG_120]);
+  const stageOpacity = useTransform(
+    scrollYProgress,
+    [0, 0.08, 0.9, 1],
+    [0, 1, 1, 0],
+  );
+  const stageScale = useTransform(
+    scrollYProgress,
+    [0, 0.1, 0.9, 1],
+    [0.92, 1, 1, 0.96],
+  );
+  const stageY = useTransform(
+    scrollYProgress,
+    [0, 0.1, 0.9, 1],
+    [36, 0, 0, -24],
+  );
+
+  const applyProgress = useCallback(
+    (p: number) => {
+      if (reducedMotion) {
+        setScrollRotationY(DEG_120 * 0.4);
+        setShowSolid(false);
+        setShowLayers(true);
+        setExplodeAmount(1);
+        setAnnotationDraw(1);
+        setHint('');
+        return;
+      }
+
       setScrollRotationY(scrollRotateY.get());
-    }
-  }, [reducedMotion, scrollRotateY]);
 
-  const unfold = useCallback(() => {
-    if (isAnimating || phase !== 'cube') return;
-    setIsAnimating(true);
+      const layersOn = p >= 0.3 && p <= 0.82;
+      setShowLayers(layersOn);
+      setShowSolid(!layersOn);
 
-    if (reducedMotion) {
-      setPhase('exploded');
-      setIsAnimating(false);
-      return;
-    }
+      let explode = 0;
+      if (p < 0.38) explode = 0;
+      else if (p < 0.5) explode = clamp01(mapRange(p, 0.38, 0.5, 0, 1));
+      else if (p < 0.7) explode = 1;
+      else if (p < 0.82) explode = clamp01(mapRange(p, 0.7, 0.82, 1, 0));
+      else explode = 0;
+      setExplodeAmount(explode);
 
-    setPhase('resetting');
-    window.setTimeout(() => {
-      setPhase('rows');
-      window.setTimeout(() => {
-        setPhase('exploded');
-        window.setTimeout(() => setIsAnimating(false), EXPLODE_SETTLE_MS);
-      }, ROWS_MS);
-    }, RESET_MS);
-  }, [isAnimating, phase, reducedMotion]);
+      let draw = 0;
+      if (p < 0.48) draw = 0;
+      else if (p < 0.56) draw = clamp01(mapRange(p, 0.48, 0.56, 0, 1));
+      else if (p < 0.68) draw = 1;
+      else if (p < 0.76) draw = clamp01(mapRange(p, 0.68, 0.76, 1, 0));
+      else draw = 0;
+      setAnnotationDraw(draw);
 
-  const handleTap = useCallback(() => {
-    if (phase === 'cube') {
-      unfold();
-      return;
-    }
-    if (phase === 'exploded' && !isAnimating) {
-      resetToCube();
-    }
-  }, [isAnimating, phase, resetToCube, unfold]);
+      if (p < 0.12) setHint('Scroll');
+      else if (p < 0.48) setHint('Scent anatomy');
+      else if (p < 0.7) setHint('Top · Heart · Base');
+      else if (p < 0.88) setHint('Scent anatomy');
+      else setHint('');
+    },
+    [reducedMotion, scrollRotateY],
+  );
+
+  useMotionValueEvent(scrollYProgress, 'change', applyProgress);
+
+  useEffect(() => {
+    applyProgress(scrollYProgress.get());
+  }, [applyProgress, scrollYProgress]);
+
+  const onAnchorsChange = useCallback((anchors: CubeAnchorsMap) => {
+    anchorsRef.current = anchors;
+  }, []);
 
   return (
     <section
       ref={sectionRef}
       id="scent-anatomy"
-      className="relative h-svh w-full overflow-x-clip bg-vellum-100 font-['trust-3a'] text-inkwell-700"
+      className="relative h-[320vh] w-full bg-vellum-100 font-['trust-3a'] text-inkwell-700"
     >
-      <PageContainer className="flex h-full flex-col">
-        <motion.div
-          className="mx-auto flex h-full w-full max-w-xl flex-col"
-          variants={sectionReveal}
-          initial={reducedMotion ? false : 'hidden'}
-          animate={inView || reducedMotion ? 'show' : 'hidden'}
-        >
-          <div className="relative z-2 flex shrink-0 items-center justify-between pt-6 sm:pt-8">
-            <p className="text-[14px] font-bold tracking-[0.04em]">
-              Scent anatomy
-            </p>
-            <p className="text-[12px] tracking-[0.06em] text-inkwell-700/55">
-              {phaseHint(phase)}
-            </p>
-          </div>
+      <div className="sticky top-0 h-svh overflow-x-clip">
+        <PageContainer className="flex h-full flex-col">
+          <motion.div
+            className="mx-auto flex h-full w-full max-w-4xl flex-col"
+            style={{
+              opacity: stageOpacity,
+              scale: stageScale,
+              y: stageY,
+            }}
+          >
+            <div className="relative z-2 flex shrink-0 items-center justify-between pt-6 sm:pt-8">
+              <p className="text-[14px] font-medium tracking-[0.04em] text-inkwell-700">
+                Scent anatomy
+              </p>
+              <p className="text-[12px] tracking-[0.06em] text-inkwell-700/55">
+                {hint}
+              </p>
+            </div>
 
-          {/* Tall viewport, original cube width — FramingCamera keeps proportions correct */}
-          <div className="relative mx-auto min-h-0 w-full max-w-[min(100%,22rem)] flex-1">
-            <ClientOnly
-              fallback={
-                <div
-                  className="flex h-full w-full items-center justify-center bg-inkwell-800/5"
-                  aria-hidden
-                />
-              }
+            <div
+              ref={setStageElement}
+              className="relative mx-auto min-h-0 w-full flex-1"
             >
-              <PackagingCubeLoader
-                textureUrl={scentProfile.detailImage}
+              <CubeBlueprintAnnotations
                 tiers={scentProfile.tiers}
-                phase={phase}
-                scrollRotationY={scrollRotationY}
+                drawProgress={annotationDraw}
+                anchorsRef={anchorsRef}
+                stageElement={stageElement}
+                active={showLayers}
               />
-            </ClientOnly>
-            <button
-              type="button"
-              onClick={handleTap}
-              disabled={
-                isAnimating || (phase !== 'cube' && phase !== 'exploded')
-              }
-              aria-label={
-                phase === 'cube'
-                  ? 'Unfold packaging into scent layers'
-                  : 'Reset to packaging cube'
-              }
-              className="absolute inset-0 z-1 border-0 bg-transparent p-0 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-inkwell-700 disabled:cursor-default enabled:cursor-pointer"
-            />
-          </div>
 
-          <p className="relative z-2 max-w-[36ch] shrink-0 pb-6 text-[13px] italic leading-[1.6] tracking-[0.02em] text-inkwell-700/50 sm:pb-8">
-            Top, heart, and base — the three registers that unfold as the scent
-            settles on skin.
-          </p>
-        </motion.div>
-      </PageContainer>
+              <div className="relative mx-auto h-full w-full max-w-[min(calc(100%-11rem),24rem)]">
+                <ClientOnly
+                  fallback={
+                    <div
+                      className="flex h-full w-full items-center justify-center bg-inkwell-800/5"
+                      aria-hidden
+                    />
+                  }
+                >
+                  <PackagingCubeLoader
+                    textureUrl={scentProfile.detailImage}
+                    tiers={scentProfile.tiers}
+                    explodeAmount={explodeAmount}
+                    showSolid={showSolid}
+                    showLayers={showLayers}
+                    scrollRotationY={scrollRotationY}
+                    stageElement={stageElement}
+                    onAnchorsChange={onAnchorsChange}
+                  />
+                </ClientOnly>
+              </div>
+            </div>
+
+            <span className="relative z-2 mx-auto max-w-[36ch] shrink-0 pb-6 text-center text-[13px] italic leading-[1.6] tracking-[0.02em] text-inkwell-700/50 sm:pb-8">
+              Top, heart, and base — the three registers that unfold as the
+              scent settles on skin.
+            </span>
+          </motion.div>
+        </PageContainer>
+      </div>
     </section>
   );
 }

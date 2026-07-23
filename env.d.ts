@@ -16,12 +16,17 @@ declare global {
     /** Password that unlocks the full site while PUBLIC_SITE_LAUNCHED is false. */
     SITE_PREVIEW_PASSWORD?: string;
     /**
-     * Admin API access token (custom app) with `write_customers`.
-     * Required for teaser mailing-list signup — Online Store /contact is
-     * blocked by Cloudflare from Oxygen/server requests.
+     * Dev Dashboard app credentials (client_credentials → Admin API token).
+     * https://shopify.dev/docs/apps/build/dev-dashboard/get-api-access-tokens
+     * Scopes: read_customers, write_customers. App must be installed on the shop.
+     */
+    SHOPIFY_APP_CLIENT_ID?: string;
+    SHOPIFY_APP_CLIENT_SECRET?: string;
+    /**
+     * Optional legacy static Admin API token (older custom apps).
+     * Prefer SHOPIFY_APP_CLIENT_ID / SHOPIFY_APP_CLIENT_SECRET.
      */
     SHOPIFY_ADMIN_API_ACCESS_TOKEN?: string;
-    /** Alias accepted by subscribe helper. */
     PRIVATE_ADMIN_API_ACCESS_TOKEN?: string;
   }
 }

@@ -1,9 +1,10 @@
 /**
- * Teaser mailing-list subscribe.
+ * Teaser mailing-list subscribe via Admin API.
  *
- * The Online Store `/contact` form (what Liquid uses) is blocked from Oxygen /
- * server-side fetches by Cloudflare bot challenges (403). Use the Admin API
- * instead — same destination (Shopify Customers + email marketing consent).
+ * Online Store `/contact` is blocked from Oxygen by Cloudflare (403).
+ * Dev Dashboard apps authenticate with Client ID + Secret (client_credentials),
+ * then call Admin GraphQL. See:
+ * https://shopify.dev/docs/apps/build/dev-dashboard/get-api-access-tokens
  */
 
 const ADMIN_API_VERSION = '2025-01';
@@ -17,12 +18,73 @@ type AdminGraphqlResponse<T> = {
   errors?: Array<{message: string}>;
 };
 
-function adminToken(env: Env) {
-  return (
+type TokenCache = {token: string; expiresAt: number};
+
+let cachedAdminToken: TokenCache | null = null;
+
+function shopSubdomain(storeDomain: string) {
+  return storeDomain.replace(/\.myshopify\.com$/i, '').trim();
+}
+
+/**
+ * Resolve an Admin API access token.
+ * Prefer Dev Dashboard client credentials; fall back to a static legacy token.
+ */
+async function getAdminAccessToken(
+  env: Env,
+  storeDomain: string,
+): Promise<string> {
+  const staticToken =
     env.SHOPIFY_ADMIN_API_ACCESS_TOKEN?.trim() ||
     env.PRIVATE_ADMIN_API_ACCESS_TOKEN?.trim() ||
-    ''
+    '';
+  if (staticToken) return staticToken;
+
+  const clientId = env.SHOPIFY_APP_CLIENT_ID?.trim();
+  const clientSecret = env.SHOPIFY_APP_CLIENT_SECRET?.trim();
+  if (!clientId || !clientSecret) {
+    throw new Error('MISSING_ADMIN_CREDENTIALS');
+  }
+
+  if (cachedAdminToken && Date.now() < cachedAdminToken.expiresAt - 60_000) {
+    return cachedAdminToken.token;
+  }
+
+  const shop = shopSubdomain(storeDomain);
+  const response = await fetch(
+    `https://${shop}.myshopify.com/admin/oauth/access_token`,
+    {
+      method: 'POST',
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body: new URLSearchParams({
+        grant_type: 'client_credentials',
+        client_id: clientId,
+        client_secret: clientSecret,
+      }),
+    },
   );
+
+  if (!response.ok) {
+    const body = await response.text().catch(() => '');
+    console.error('Admin token exchange failed', response.status, body);
+    throw new Error(`TOKEN_EXCHANGE_${response.status}`);
+  }
+
+  const json = (await response.json()) as {
+    access_token?: string;
+    expires_in?: number;
+  };
+
+  if (!json.access_token) {
+    throw new Error('TOKEN_EXCHANGE_EMPTY');
+  }
+
+  cachedAdminToken = {
+    token: json.access_token,
+    expiresAt: Date.now() + (json.expires_in ?? 86_399) * 1000,
+  };
+
+  return cachedAdminToken.token;
 }
 
 async function adminGraphql<T>(
@@ -151,13 +213,23 @@ export async function subscribeTeaserEmail(
     return {ok: false, error: 'Store is not linked yet', status: 503};
   }
 
-  const token = adminToken(env);
-  if (!token) {
+  let token: string;
+  try {
+    token = await getAdminAccessToken(env, shopDomain);
+  } catch (error) {
+    if (error instanceof Error && error.message === 'MISSING_ADMIN_CREDENTIALS') {
+      return {
+        ok: false,
+        error:
+          'Mailing list is not configured (set SHOPIFY_APP_CLIENT_ID and SHOPIFY_APP_CLIENT_SECRET)',
+        status: 503,
+      };
+    }
+    console.error('teaser admin auth failed', error);
     return {
       ok: false,
-      error:
-        'Mailing list is not configured (missing SHOPIFY_ADMIN_API_ACCESS_TOKEN)',
-      status: 503,
+      error: 'Could not authenticate mailing list. Try again.',
+      status: 502,
     };
   }
 

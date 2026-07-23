@@ -1,4 +1,5 @@
 import {Image} from '@shopify/hydrogen';
+import {AnimatePresence, motion} from 'motion/react';
 import {useCallback, useEffect, useRef, useState, type FormEvent} from 'react';
 import {useFetcher, useNavigation, useRevalidator} from 'react-router';
 import wordmarkVellum from '~/assets/design/wordmark-vellum.svg';
@@ -121,15 +122,18 @@ export function TeaserPage({slides: productSlides}: TeaserPageProps) {
   const [signupOpen, setSignupOpen] = useState(false);
   const [emailValue, setEmailValue] = useState('');
   const [emailError, setEmailError] = useState<string | null>(null);
+  const [subscribeKey, setSubscribeKey] = useState(0);
   const emailRef = useRef<HTMLInputElement>(null);
-  const subscribe = useFetcher<SubscribeData>();
+  const subscribe = useFetcher<SubscribeData>({
+    key: `teaser-subscribe-${subscribeKey}`,
+  });
   const unlock = useFetcher<UnlockData>();
   const navigation = useNavigation();
   const revalidator = useRevalidator();
 
   const slideCount = slides.length;
   const subscribed = subscribe.data?.ok === true;
-  const subscribeError = emailError ?? subscribe.data?.error;
+  const subscribeError = emailError;
   const subscribing = subscribe.state !== 'idle';
   const busy =
     subscribing || unlock.state !== 'idle' || navigation.state !== 'idle';
@@ -138,9 +142,14 @@ export function TeaserPage({slides: productSlides}: TeaserPageProps) {
     setIndex(next);
   }, []);
 
+  const clearEmailErrors = useCallback(() => {
+    setEmailError(null);
+    setSubscribeKey((key) => key + 1);
+  }, []);
+
   const validateAndClearError = useCallback((value: string) => {
     if (!value.trim()) {
-      setEmailError(null);
+      clearEmailErrors();
       return false;
     }
     if (!isValidEmail(value)) {
@@ -149,7 +158,7 @@ export function TeaserPage({slides: productSlides}: TeaserPageProps) {
     }
     setEmailError(null);
     return true;
-  }, []);
+  }, [clearEmailErrors]);
 
   const onSubscribeSubmit = useCallback(
     (event: FormEvent<HTMLFormElement>) => {
@@ -160,6 +169,13 @@ export function TeaserPage({slides: productSlides}: TeaserPageProps) {
     },
     [emailValue, validateAndClearError],
   );
+
+  useEffect(() => {
+    if (subscribe.state !== 'idle' || !subscribe.data) return;
+    if (subscribe.data.ok === false && subscribe.data.error) {
+      setEmailError(subscribe.data.error);
+    }
+  }, [subscribe.state, subscribe.data]);
 
   useEffect(() => {
     if (slideCount <= 1) return;
@@ -282,7 +298,7 @@ export function TeaserPage({slides: productSlides}: TeaserPageProps) {
                 method="post"
                 action="/teaser"
                 onSubmit={onSubscribeSubmit}
-                className="flex w-full flex-col gap-4 transition-opacity duration-200"
+                className="relative w-full transition-opacity duration-200"
               >
                 <input type="hidden" name="intent" value="subscribe" />
                 <label className="sr-only" htmlFor="teaser-email">
@@ -304,8 +320,13 @@ export function TeaserPage({slides: productSlides}: TeaserPageProps) {
                     disabled={busy}
                     value={emailValue}
                     onChange={(e) => {
-                      setEmailValue(e.target.value);
-                      if (emailError) setEmailError(null);
+                      const next = e.target.value;
+                      setEmailValue(next);
+                      if (!next.trim()) {
+                        clearEmailErrors();
+                      } else if (emailError) {
+                        setEmailError(null);
+                      }
                     }}
                     onBlur={() => {
                       if (emailValue.trim()) validateAndClearError(emailValue);
@@ -330,12 +351,22 @@ export function TeaserPage({slides: productSlides}: TeaserPageProps) {
                       <CtaArrowIcon />
                     )}
                   </button>
+                  <AnimatePresence>
+                    {subscribeError ? (
+                      <motion.p
+                        key="teaser-email-error"
+                        initial={{opacity: 0, y: -6}}
+                        animate={{opacity: 1, y: 0}}
+                        exit={{opacity: 0, y: -6}}
+                        transition={{duration: 0.15, ease: 'easeOut'}}
+                        className="pointer-events-none absolute top-[calc(100%+0.75rem)] right-0 left-0 m-0 text-center font-['trust-3a'] text-[11px] tracking-[0.02em] text-vellum-100/80"
+                        role="alert"
+                      >
+                        {subscribeError}
+                      </motion.p>
+                    ) : null}
+                  </AnimatePresence>
                 </div>
-                {subscribeError ? (
-                  <p className="m-0 text-center font-['trust-3a'] text-[11px] tracking-[0.02em] text-vellum-100/80">
-                    {subscribeError}
-                  </p>
-                ) : null}
               </subscribe.Form>
             ) : (
               <button

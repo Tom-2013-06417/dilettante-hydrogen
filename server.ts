@@ -1,6 +1,7 @@
 import * as serverBuild from 'virtual:react-router/server-build';
 import {createRequestHandler, storefrontRedirect} from '@shopify/hydrogen';
 import {createHydrogenRouterContext} from '~/lib/context';
+import {isSiteGated} from '~/lib/siteGate';
 
 /**
  * Export a fetch handler in module format.
@@ -17,6 +18,19 @@ export default {
         env,
         executionContext,
       );
+
+      const url = new URL(request.url);
+      const gated = isSiteGated(env, hydrogenContext.session);
+      const isTeaserEndpoint = url.pathname === '/teaser';
+
+      // While gated, only the teaser UI (/) and its action endpoint are reachable.
+      // Redirect every other path so product/collection loaders never run.
+      if (gated && !isTeaserEndpoint && url.pathname !== '/') {
+        return new Response(null, {
+          status: 302,
+          headers: {Location: '/'},
+        });
+      }
 
       /**
        * Create a Hydrogen request handler that internally

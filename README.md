@@ -34,6 +34,17 @@ npx shopify hydrogen env pull
 
 Restart the dev server after pulling environment variables.
 
+## Pre-launch gate
+
+While `PUBLIC_SITE_LAUNCHED` is unset/false, every URL shows only the teaser page. Other routes redirect to `/`.
+
+| Env var | Purpose |
+|---------|---------|
+| `PUBLIC_SITE_LAUNCHED` | Set to `true` to open the full storefront |
+| `SITE_PREVIEW_PASSWORD` | Optional password for “Enter using password” |
+
+Local defaults are in `.env` / `.env.example`. On Oxygen/Railway, set the same vars in the host’s environment.
+
 ## Scripts
 
 | Command             | Description                           |

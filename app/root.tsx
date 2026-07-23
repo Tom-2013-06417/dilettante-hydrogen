@@ -18,6 +18,8 @@ import appStyles from '~/styles/app.css?url';
 import tailwindCss from './styles/tailwind.css?url';
 import {PageLayout, TypekitFonts} from '~/components/layout';
 import {ClientOnly} from '~/components/shared';
+import {TeaserPage} from '~/components/teaser';
+import {isSiteGated} from '~/lib/siteGate';
 
 export type RootLoader = typeof loader;
 
@@ -94,15 +96,36 @@ export function links() {
 }
 
 export async function loader(args: Route.LoaderArgs) {
+  const {storefront, env, session} = args.context;
+  const gated = isSiteGated(env, session);
+
+  if (gated) {
+    return {
+      siteGated: true as const,
+      publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
+      cart: Promise.resolve(null),
+      isLoggedIn: Promise.resolve(false),
+      footer: Promise.resolve(null),
+      header: {shop: null, menu: null},
+      shop: null,
+      consent: {
+        checkoutDomain: env.PUBLIC_CHECKOUT_DOMAIN,
+        storefrontAccessToken: env.PUBLIC_STOREFRONT_API_TOKEN,
+        withPrivacyBanner: false,
+        country: storefront.i18n.country,
+        language: storefront.i18n.language,
+      },
+    };
+  }
+
   // Start fetching non-critical data without blocking time to first byte
   const deferredData = loadDeferredData(args);
 
-  // Await the critical data required to render initial state of the page
+  // Await the critical data required to render initial page
   const criticalData = await loadCriticalData(args);
 
-  const {storefront, env} = args.context;
-
   return {
+    siteGated: false as const,
     ...deferredData,
     ...criticalData,
     publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
@@ -201,6 +224,10 @@ export default function App() {
 
   if (!data) {
     return <Outlet />;
+  }
+
+  if (data.siteGated) {
+    return <TeaserPage />;
   }
 
   return (

@@ -11,6 +11,49 @@ import {
 const FILL = '#fff6e6';
 const EDGE = '#152015'; // inkwell-700
 
+/**
+ * Cel-shaded glossy black — hard-edged white specular “cutout”
+ * (anime / cell-shaded highlight, not a soft blur).
+ */
+const CAP_CEL_VERT = /* glsl */ `
+varying vec3 vNormal;
+varying vec3 vViewDir;
+void main() {
+  vec4 mv = modelViewMatrix * vec4(position, 1.0);
+  vNormal = normalize(normalMatrix * normal);
+  vViewDir = normalize(-mv.xyz);
+  gl_Position = projectionMatrix * mv;
+}
+`;
+
+const CAP_CEL_FRAG = /* glsl */ `
+uniform vec3 uLightDir;
+uniform float uIntensity;
+varying vec3 vNormal;
+varying vec3 vViewDir;
+
+void main() {
+  vec3 n = normalize(vNormal);
+  vec3 v = normalize(vViewDir);
+  vec3 l = normalize(uLightDir);
+  vec3 h = normalize(l + v);
+
+  float ndotl = max(dot(n, l), 0.0);
+  float ndoth = max(dot(n, h), 0.0);
+  float fresnel = 1.0 - max(dot(n, v), 0.0);
+
+  // Hard bands — white highlight reads as a flat graphic shape
+  float shade = step(0.55, ndotl) * 0.06;
+  float gloss = step(0.9, ndoth);
+  float rim = step(0.75, fresnel) * 0.06;
+
+  vec3 black = vec3(0.035);
+  vec3 white = vec3(1.0);
+  vec3 color = black + (shade + rim + gloss * white) * uIntensity;
+  gl_FragColor = vec4(color, 1.0);
+}
+`;
+
 /** Where the foot taper reaches full radius / shoulder taper begins */
 const FOOT_TAPER_END = 0.1;
 /** Late start = shorter shoulder = tighter “border-radius” */
@@ -146,6 +189,19 @@ export function PerfumeBottle({
   );
 
   const side = tierLabelSide('heart');
+  const capUniforms = useMemo(() => {
+    // ~45° off the camera axis (view +Z) — classic key from upper-right
+    const angle = Math.PI / 4;
+    const lightDir = new THREE.Vector3(
+      Math.sin(angle),
+      Math.sin(angle) * 0.55,
+      Math.cos(angle),
+    ).normalize();
+    return {
+      uLightDir: {value: lightDir},
+      uIntensity: {value: 0.65},
+    };
+  }, []);
 
   return (
     <group>
@@ -164,11 +220,16 @@ export function PerfumeBottle({
       <BlueprintRim radius={bodyRadius} y={yFootTaperEnd} color={EDGE} />
       <BlueprintRim radius={bodyRadius} y={yShoulderTaperStart} color={EDGE} />
 
-      {/* Cap — elevated curved rim groove + slight 90% recess */}
+      {/* Cap — cel-shaded black with hard white gloss cutout */}
       <group position={[0, yCapCenter, 0]}>
         <mesh>
           <latheGeometry args={[capLathePoints, 64]} />
-          <meshBasicMaterial color={FILL} toneMapped={false} />
+          <shaderMaterial
+            toneMapped={false}
+            uniforms={capUniforms}
+            vertexShader={CAP_CEL_VERT}
+            fragmentShader={CAP_CEL_FRAG}
+          />
         </mesh>
         <RevolvedBlueprintOutline profile={capOutlineProfile} color={EDGE} />
         {/* Full top circles so the back half of the cap still reads */}

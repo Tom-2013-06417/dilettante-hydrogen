@@ -1,11 +1,5 @@
 import {Image} from '@shopify/hydrogen';
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type FormEvent,
-} from 'react';
+import {useCallback, useEffect, useRef, useState, type FormEvent} from 'react';
 import {useFetcher, useNavigation, useRevalidator} from 'react-router';
 import wordmarkVellum from '~/assets/design/wordmark-vellum.svg';
 import fig01 from '~/assets/design/fig-01.jpg';
@@ -266,11 +260,11 @@ export function TeaserPage({slides: productSlides}: TeaserPageProps) {
 
           <div
             className="w-full shrink-0"
-            style={{height: 'clamp(1rem, 5svh, 2.5rem)'}}
+            style={{height: 'clamp(4svh, 6svh, 12svh)'}}
             aria-hidden
           />
 
-          <div className="w-full max-w-[14rem] shrink-0 pb-[clamp(3.5rem,8svh,6rem)] sm:max-w-[15rem]">
+          <div className="w-full max-w-[14rem] shrink-0 pb-[clamp(1svh,5svh,8svh)] sm:max-w-[15rem]">
             {subscribed ? (
               <div
                 className={`${CTA_SHELL} relative justify-center pr-9 text-center`}

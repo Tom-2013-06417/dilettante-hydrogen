@@ -1,5 +1,6 @@
 import {data, redirect} from 'react-router';
 import type {Route} from './+types/teaser';
+import {subscribeTeaserEmail} from '~/lib/newsletterSubscribe';
 import {
   isSiteGated,
   unlockSite,
@@ -33,46 +34,15 @@ export async function action({request, context}: Route.ActionArgs) {
       return data({ok: false, error: 'Enter a valid email'}, {status: 400});
     }
 
-    const storeDomain = context.env.PUBLIC_STORE_DOMAIN;
-    if (!storeDomain) {
+    const result = await subscribeTeaserEmail(context.env, email);
+    if (!result.ok) {
       return data(
-        {ok: false, error: 'Store is not linked yet'},
-        {status: 503},
+        {ok: false, error: result.error},
+        {status: result.status},
       );
     }
 
-    try {
-      const body = new URLSearchParams();
-      body.set('form_type', 'customer');
-      body.set('utf8', '✓');
-      body.set('contact[email]', email);
-      body.set('contact[tags]', 'newsletter, teaser');
-
-      const response = await fetch(`https://${storeDomain}/contact`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          Accept: 'application/json',
-        },
-        body,
-        redirect: 'manual',
-      });
-
-      // Shopify contact forms typically 302 on success; 422 on validation errors.
-      if (response.status >= 400 && response.status !== 302) {
-        return data(
-          {ok: false, error: 'Could not subscribe. Try again.'},
-          {status: 502},
-        );
-      }
-
-      return data({ok: true, message: 'Thanks for subscribing!'});
-    } catch {
-      return data(
-        {ok: false, error: 'Could not subscribe. Try again.'},
-        {status: 502},
-      );
-    }
+    return data({ok: true, message: result.message});
   }
 
   return data({ok: false, error: 'Unknown action'}, {status: 400});

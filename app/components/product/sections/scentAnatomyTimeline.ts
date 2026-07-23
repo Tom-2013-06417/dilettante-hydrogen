@@ -3,7 +3,7 @@
  * (progress 0 → 1 with offset start end → end start).
  *
  *  0.00–PIN            solid cube rotating into view / centering
- *  PIN+…               slice → notes, then hold while cube keeps rotating
+ *  PIN+…               split halves + bottle → notes, then hold while rotating
  *  STICKY_RELEASE–1    cube sticky panel scrolls up / leaves
  */
 export const SECTION_VH = 360;

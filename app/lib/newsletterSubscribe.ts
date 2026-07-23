@@ -210,7 +210,8 @@ export async function subscribeTeaserEmail(
 ): Promise<SubscribeResult> {
   const shopDomain = env.PUBLIC_STORE_DOMAIN?.trim();
   if (!shopDomain) {
-    return {ok: false, error: 'Store is not linked yet', status: 503};
+    console.error('teaser subscribe: PUBLIC_STORE_DOMAIN is not set');
+    return {ok: false, error: 'Signup unavailable', status: 503};
   }
 
   let token: string;
@@ -218,19 +219,13 @@ export async function subscribeTeaserEmail(
     token = await getAdminAccessToken(env, shopDomain);
   } catch (error) {
     if (error instanceof Error && error.message === 'MISSING_ADMIN_CREDENTIALS') {
-      return {
-        ok: false,
-        error:
-          'Mailing list is not configured (set SHOPIFY_APP_CLIENT_ID and SHOPIFY_APP_CLIENT_SECRET)',
-        status: 503,
-      };
+      console.error(
+        'teaser subscribe: missing SHOPIFY_APP_CLIENT_ID / SHOPIFY_APP_CLIENT_SECRET',
+      );
+      return {ok: false, error: 'Signup unavailable', status: 503};
     }
-    console.error('teaser admin auth failed', error);
-    return {
-      ok: false,
-      error: 'Could not authenticate mailing list. Try again.',
-      status: 502,
-    };
+    console.error('teaser subscribe: admin auth failed', error);
+    return {ok: false, error: "Couldn't subscribe", status: 502};
   }
 
   try {
@@ -251,16 +246,16 @@ export async function subscribeTeaserEmail(
     );
 
     if (create.errors?.length) {
-      return {
-        ok: false,
-        error: create.errors.map((e) => e.message).join('; '),
-        status: 502,
-      };
+      console.error(
+        'teaser subscribe: GraphQL errors',
+        create.errors.map((e) => e.message).join('; '),
+      );
+      return {ok: false, error: "Couldn't subscribe", status: 502};
     }
 
     const createErrors = create.data?.customerCreate?.userErrors ?? [];
     if (!createErrors.length && create.data?.customerCreate?.customer?.id) {
-      return {ok: true, message: 'Thanks for subscribing!'};
+      return {ok: true, message: 'Subscribed'};
     }
 
     const alreadyExists = createErrors.some((e) =>
@@ -268,11 +263,11 @@ export async function subscribeTeaserEmail(
     );
 
     if (!alreadyExists) {
-      return {
-        ok: false,
-        error: createErrors[0]?.message ?? 'Could not subscribe. Try again.',
-        status: 400,
-      };
+      console.error(
+        'teaser subscribe: customerCreate userErrors',
+        createErrors.map((e) => e.message).join('; ') || 'unknown',
+      );
+      return {ok: false, error: "Couldn't subscribe", status: 400};
     }
 
     const search = await adminGraphql<CustomerSearchData>(
@@ -284,21 +279,17 @@ export async function subscribeTeaserEmail(
 
     const existingId = search.data?.customers.nodes[0]?.id;
     if (!existingId) {
-      return {
-        ok: false,
-        error: 'Could not subscribe. Try again.',
-        status: 502,
-      };
+      console.error(
+        'teaser subscribe: existing customer email not found after conflict',
+        email,
+      );
+      return {ok: false, error: "Couldn't subscribe", status: 502};
     }
 
     await setMarketingConsent(shopDomain, token, existingId);
-    return {ok: true, message: 'Thanks for subscribing!'};
+    return {ok: true, message: 'Subscribed'};
   } catch (error) {
     console.error('teaser subscribe failed', error);
-    return {
-      ok: false,
-      error: 'Could not subscribe. Try again.',
-      status: 502,
-    };
+    return {ok: false, error: "Couldn't subscribe", status: 502};
   }
 }

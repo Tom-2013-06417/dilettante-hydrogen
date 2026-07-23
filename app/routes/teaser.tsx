@@ -31,7 +31,7 @@ export async function action({request, context}: Route.ActionArgs) {
 
     const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
     if (!emailOk) {
-      return data({ok: false, error: 'Enter a valid email'}, {status: 400});
+      return data({ok: false, error: 'Invalid email'}, {status: 400});
     }
 
     const result = await subscribeTeaserEmail(context.env, email);

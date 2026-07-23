@@ -153,7 +153,7 @@ export function TeaserPage({slides: productSlides}: TeaserPageProps) {
       return false;
     }
     if (!isValidEmail(value)) {
-      setEmailError('Enter a valid email');
+      setEmailError('Invalid email');
       return false;
     }
     setEmailError(null);
@@ -173,6 +173,7 @@ export function TeaserPage({slides: productSlides}: TeaserPageProps) {
   useEffect(() => {
     if (subscribe.state !== 'idle' || !subscribe.data) return;
     if (subscribe.data.ok === false && subscribe.data.error) {
+      console.error('teaser subscribe error', subscribe.data.error);
       setEmailError(subscribe.data.error);
     }
   }, [subscribe.state, subscribe.data]);
@@ -287,7 +288,7 @@ export function TeaserPage({slides: productSlides}: TeaserPageProps) {
                 role="status"
               >
                 <span className="min-w-0 truncate">
-                  {subscribe.data?.message ?? 'Thanks for subscribing!'}
+                  {subscribe.data?.message ?? 'Subscribed'}
                 </span>
                 <span className="pointer-events-none absolute top-1/2 right-2.5 -translate-y-1/2 text-vellum-100">
                   <CtaCheckIcon />

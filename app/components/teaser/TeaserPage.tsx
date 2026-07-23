@@ -1,21 +1,108 @@
-import {useCallback, useEffect, useRef, useState} from 'react';
+import {Image} from '@shopify/hydrogen';
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type FormEvent,
+} from 'react';
 import {useFetcher, useNavigation, useRevalidator} from 'react-router';
 import wordmarkVellum from '~/assets/design/wordmark-vellum.svg';
 import fig01 from '~/assets/design/fig-01.jpg';
 import fig02 from '~/assets/design/fig-02.jpg';
 import heroLandscape from '~/assets/design/hero-landscape.jpg';
+import type {TeaserSlide} from '~/lib/teaserProducts';
 
-const SLIDES = [
-  {src: fig01, alt: 'Dilettante teaser'},
-  {src: fig02, alt: 'Dilettante teaser'},
-  {src: heroLandscape, alt: 'Dilettante teaser'},
-  {src: fig01, alt: 'Dilettante teaser'},
-  {src: fig02, alt: 'Dilettante teaser'},
-] as const;
+const FALLBACK_SLIDES: TeaserSlide[] = [
+  {id: 'fallback-1', url: fig01, altText: 'Dilettante'},
+  {id: 'fallback-2', url: fig02, altText: 'Dilettante'},
+  {id: 'fallback-3', url: heroLandscape, altText: 'Dilettante'},
+  {id: 'fallback-4', url: fig01, altText: 'Dilettante'},
+  {id: 'fallback-5', url: fig02, altText: 'Dilettante'},
+];
+
+const AUTO_ADVANCE_MS = 200;
+
+/** Practical email check: local@domain.tld (not full RFC). */
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+function isValidEmail(value: string) {
+  return EMAIL_PATTERN.test(value.trim());
+}
 
 /** Shared shell so the CTA button and email input match exactly. */
 const CTA_SHELL =
-  "box-border w-full appearance-none border border-vellum-100/55 bg-transparent px-3 py-2.5 font-['config-mono-vf'] text-[11px] font-medium leading-none tracking-[0.06em] text-vellum-100 sm:py-3";
+  "box-border flex h-10 w-full appearance-none items-center border border-vellum-100/55 bg-transparent px-3 font-['config-mono-vf'] text-[11px] font-medium leading-none tracking-[0.06em] text-vellum-100 sm:h-11";
+
+function CtaArrowIcon({className}: {className?: string}) {
+  return (
+    <svg
+      className={className}
+      width="14"
+      height="14"
+      viewBox="0 0 14 14"
+      fill="none"
+      aria-hidden
+    >
+      <path
+        d="M2.5 7h9M7.5 3.5 11 7l-3.5 3.5"
+        stroke="currentColor"
+        strokeWidth="1.25"
+        strokeLinecap="square"
+        strokeLinejoin="miter"
+      />
+    </svg>
+  );
+}
+
+function CtaSpinnerIcon({className}: {className?: string}) {
+  return (
+    <svg
+      className={className}
+      width="14"
+      height="14"
+      viewBox="0 0 14 14"
+      fill="none"
+      aria-hidden
+    >
+      <circle
+        cx="7"
+        cy="7"
+        r="5.25"
+        stroke="currentColor"
+        strokeOpacity="0.25"
+        strokeWidth="1.25"
+      />
+      <path
+        d="M12.25 7a5.25 5.25 0 0 0-5.25-5.25"
+        stroke="currentColor"
+        strokeWidth="1.25"
+        strokeLinecap="square"
+      />
+    </svg>
+  );
+}
+
+function CtaCheckIcon({className}: {className?: string}) {
+  return (
+    <svg
+      className={className}
+      width="14"
+      height="14"
+      viewBox="0 0 14 14"
+      fill="none"
+      aria-hidden
+    >
+      <path
+        d="M2.5 7.25 5.5 10.25 11.5 3.75"
+        stroke="currentColor"
+        strokeWidth="1.25"
+        strokeLinecap="square"
+        strokeLinejoin="miter"
+      />
+    </svg>
+  );
+}
 
 type SubscribeData = {
   ok?: boolean;
@@ -28,54 +115,74 @@ type UnlockData = {
   error?: string;
 };
 
-export function TeaserPage() {
+type TeaserPageProps = {
+  slides?: TeaserSlide[];
+};
+
+export function TeaserPage({slides: productSlides}: TeaserPageProps) {
+  const slides =
+    productSlides && productSlides.length > 0 ? productSlides : FALLBACK_SLIDES;
+
   const [index, setIndex] = useState(0);
   const [signupOpen, setSignupOpen] = useState(false);
   const [emailValue, setEmailValue] = useState('');
-  const [unlockOpen, setUnlockOpen] = useState(false);
-  const scrollerRef = useRef<HTMLDivElement>(null);
+  const [emailError, setEmailError] = useState<string | null>(null);
   const emailRef = useRef<HTMLInputElement>(null);
   const subscribe = useFetcher<SubscribeData>();
   const unlock = useFetcher<UnlockData>();
   const navigation = useNavigation();
   const revalidator = useRevalidator();
 
-  const slideCount = SLIDES.length;
-  const label = String(index + 1).padStart(2, '0');
+  const slideCount = slides.length;
   const subscribed = subscribe.data?.ok === true;
-  const subscribeError = subscribe.data?.error;
-  const unlockError = unlock.data?.error;
+  const subscribeError = emailError ?? subscribe.data?.error;
+  const subscribing = subscribe.state !== 'idle';
   const busy =
-    subscribe.state !== 'idle' ||
-    unlock.state !== 'idle' ||
-    navigation.state !== 'idle';
+    subscribing || unlock.state !== 'idle' || navigation.state !== 'idle';
 
   const goTo = useCallback((next: number) => {
-    const el = scrollerRef.current;
-    if (!el) return;
-    const width = el.clientWidth;
-    el.scrollTo({left: next * width, behavior: 'smooth'});
     setIndex(next);
   }, []);
 
+  const validateAndClearError = useCallback((value: string) => {
+    if (!value.trim()) {
+      setEmailError(null);
+      return false;
+    }
+    if (!isValidEmail(value)) {
+      setEmailError('Enter a valid email');
+      return false;
+    }
+    setEmailError(null);
+    return true;
+  }, []);
+
+  const onSubscribeSubmit = useCallback(
+    (event: FormEvent<HTMLFormElement>) => {
+      if (!validateAndClearError(emailValue)) {
+        event.preventDefault();
+        emailRef.current?.focus();
+      }
+    },
+    [emailValue, validateAndClearError],
+  );
+
   useEffect(() => {
-    const el = scrollerRef.current;
-    if (!el) return;
+    if (slideCount <= 1) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
 
-    const onScroll = () => {
-      const width = el.clientWidth || 1;
-      const next = Math.round(el.scrollLeft / width);
-      setIndex(Math.max(0, Math.min(slideCount - 1, next)));
-    };
+    const timer = window.setInterval(() => {
+      goTo((index + 1) % slideCount);
+    }, AUTO_ADVANCE_MS);
 
-    el.addEventListener('scroll', onScroll, {passive: true});
-    return () => el.removeEventListener('scroll', onScroll);
-  }, [slideCount]);
+    return () => window.clearInterval(timer);
+  }, [goTo, index, slideCount]);
 
   useEffect(() => {
     if (unlock.data?.ok) {
-      setUnlockOpen(false);
-      revalidator.revalidate();
+      void revalidator.revalidate();
     }
   }, [unlock.data?.ok, revalidator]);
 
@@ -84,66 +191,52 @@ export function TeaserPage() {
   }, [signupOpen]);
 
   return (
-    <div className="flex h-svh max-h-svh flex-col items-center overflow-hidden bg-inkwell-800 px-[15svw] pt-[5svh] pb-5 text-vellum-100 sm:px-24 sm:pt-6 sm:pb-6 lg:px-40">
+    <div className="flex h-svh max-h-svh flex-col items-center overflow-hidden bg-inkwell-800 px-0 pt-0 pb-5 text-vellum-100 sm:px-24 sm:pt-6 sm:pb-6 lg:px-40">
       <div className="flex w-full min-h-0 flex-1 flex-col items-center sm:max-w-[22rem] lg:max-w-[24rem]">
-        <div className="mb-3 flex w-full shrink-0 items-center justify-between">
-          <p
-            className="m-0 font-['trust-3a'] text-[12px] font-medium tracking-[0.04em] tabular-nums sm:text-[13px]"
-            aria-live="polite"
-          >
-            <span className="sr-only">Slideshow</span>
-            {label}
-          </p>
-          <ol className="m-0 flex list-none items-stretch gap-1.5 p-0">
-            {SLIDES.map((_, i) => (
-              <li key={i}>
-                <button
-                  type="button"
-                  aria-label={`Slide ${i + 1} of ${slideCount}`}
-                  aria-selected={i === index}
-                  onClick={() => goTo(i)}
-                  className={`block border-0 p-0 transition-[width,background-color] duration-200 ${
-                    i === index
-                      ? 'h-3.5 w-[3px] bg-vellum-100 sm:h-4'
-                      : 'h-3.5 w-0.5 bg-vellum-100/40 sm:h-4'
-                  }`}
-                />
-              </li>
-            ))}
-          </ol>
-        </div>
-
-        {/* Image fills leftover height; logo hangs onto the seam without taking footer space. */}
-        <div className="relative min-h-0 w-full flex-1">
-          <div className="relative mx-auto h-full max-h-[clamp(42svh,60svh,68svh)] w-full">
-            <div
-              ref={scrollerRef}
-              className="flex h-full w-full snap-x snap-mandatory overflow-x-auto overflow-y-hidden [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-            >
-              {SLIDES.map((slide, i) => (
-                <div
-                  key={`${slide.src}-${i}`}
-                  className="flex h-full w-full shrink-0 snap-center justify-center"
-                >
-                  <div className="aspect-[2/3] h-full w-auto max-w-full overflow-hidden bg-vellum-100/10">
-                    <img
-                      src={slide.src}
-                      alt={slide.alt}
+        {/*
+          Mobile: image flush to top + side edges; height capped so date/CTA stay in view.
+          sm+: keep the inset column + height clamp.
+        */}
+        <div className="relative w-full shrink-0 sm:min-h-0 sm:flex-1">
+          <div className="relative mx-auto flex w-full justify-center sm:h-full sm:max-h-[clamp(42svh,60svh,68svh)]">
+            <div className="relative h-[65svh] w-full overflow-hidden bg-vellum-100/10 sm:aspect-[2/3] sm:h-full sm:w-auto sm:max-w-full">
+              {slides.map((slide, i) => {
+                const active = i === index;
+                return (
+                  <div
+                    key={slide.id}
+                    className={`absolute inset-0 ${
+                      active ? 'opacity-100' : 'pointer-events-none opacity-0'
+                    }`}
+                    aria-hidden={!active}
+                  >
+                    <Image
+                      data={{
+                        url: slide.url,
+                        altText: slide.altText,
+                        width: slide.width ?? 1200,
+                        height: slide.height ?? 1800,
+                      }}
+                      alt={active ? slide.altText : ''}
                       className="h-full w-full rounded-none object-cover"
-                      loading={i === 0 ? 'eager' : 'lazy'}
-                      fetchPriority={i === 0 ? 'high' : 'low'}
-                      draggable={false}
+                      sizes="(min-width: 1024px) 24rem, (min-width: 640px) 22rem, 100vw"
+                      loading={i <= 1 ? 'eager' : 'lazy'}
                     />
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
-            <img
-              src={wordmarkVellum}
-              alt="Dilettante"
-              className="pointer-events-none absolute bottom-0 left-1/2 z-1 block h-auto w-[90svw] max-w-none -translate-x-1/2 translate-y-[45%] rounded-none"
-            />
+            {/*
+              Logo width track: 90svw on mobile; capped on desktop.
+            */}
+            <div className="pointer-events-none absolute bottom-0 left-1/2 z-1 w-[min(90svw,42rem)] -translate-x-1/2 translate-y-[45%]">
+              <img
+                src={wordmarkVellum}
+                alt="Dilettante"
+                className="block h-auto w-full max-w-none rounded-none"
+              />
+            </div>
           </div>
         </div>
 
@@ -153,10 +246,12 @@ export function TeaserPage() {
           Date→CTA: clamp(1rem, 10svh - 3rem, 5.5rem) — ~equal on short screens,
           opens up on tall so the date sits nearer the wordmark.
         */}
-        <div className="flex w-full shrink-0 flex-col items-center">
+        <div className="flex w-full shrink-0 flex-col items-center px-[15svw] sm:px-0">
           <div
             className="w-full shrink-0"
-            style={{height: 'calc(90svw * 797 / 2881 * 0.45)'}}
+            style={{
+              height: 'calc(min(90svw, 42rem) * 797 / 2881 * 0.45)',
+            }}
             aria-hidden
           />
           <div
@@ -171,42 +266,79 @@ export function TeaserPage() {
 
           <div
             className="w-full shrink-0"
-            style={{height: 'clamp(1rem, 10svh - 3rem, 5.5rem)'}}
+            style={{height: 'clamp(1rem, 5svh, 2.5rem)'}}
             aria-hidden
           />
 
-          <div className="w-full max-w-[14rem] shrink-0 pb-[clamp(2.5rem,5svh,10svh)] sm:max-w-[15rem]">
+          <div className="w-full max-w-[14rem] shrink-0 pb-[clamp(3.5rem,8svh,6rem)] sm:max-w-[15rem]">
             {subscribed ? (
-              <p className="m-0 text-center font-['config-mono-vf'] text-[11px] tracking-[0.06em]">
-                {subscribe.data?.message ?? 'Thanks for subscribing!'}
-              </p>
+              <div
+                className={`${CTA_SHELL} relative justify-center pr-9 text-center`}
+                role="status"
+              >
+                <span className="min-w-0 truncate">
+                  {subscribe.data?.message ?? 'Thanks for subscribing!'}
+                </span>
+                <span className="pointer-events-none absolute top-1/2 right-2.5 -translate-y-1/2 text-vellum-100">
+                  <CtaCheckIcon />
+                </span>
+              </div>
             ) : signupOpen ? (
               <subscribe.Form
                 method="post"
                 action="/teaser"
-                className="w-full transition-opacity duration-200"
+                onSubmit={onSubscribeSubmit}
+                className="flex w-full flex-col gap-4 transition-opacity duration-200"
               >
                 <input type="hidden" name="intent" value="subscribe" />
                 <label className="sr-only" htmlFor="teaser-email">
                   Email
                 </label>
-                <input
-                  ref={emailRef}
-                  id="teaser-email"
-                  name="email"
-                  type="email"
-                  required
-                  autoComplete="email"
-                  autoCorrect="off"
-                  autoCapitalize="off"
-                  placeholder="Email address"
-                  disabled={busy}
-                  value={emailValue}
-                  onChange={(e) => setEmailValue(e.target.value)}
-                  className={`${CTA_SHELL} m-0 min-w-0 text-center outline-none placeholder:text-vellum-100/55`}
-                />
+                <div className="relative">
+                  <input
+                    ref={emailRef}
+                    id="teaser-email"
+                    name="email"
+                    type="email"
+                    inputMode="email"
+                    required
+                    autoComplete="email"
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    spellCheck={false}
+                    placeholder="Email address"
+                    disabled={busy}
+                    value={emailValue}
+                    onChange={(e) => {
+                      setEmailValue(e.target.value);
+                      if (emailError) setEmailError(null);
+                    }}
+                    onBlur={() => {
+                      if (emailValue.trim()) validateAndClearError(emailValue);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key !== 'Enter') return;
+                      // Ensure Enter submits the fetcher form (arrow = same path).
+                      e.preventDefault();
+                      e.currentTarget.form?.requestSubmit();
+                    }}
+                    className={`${CTA_SHELL} m-0 min-w-0 pr-9 text-left outline-none placeholder:text-vellum-100/55`}
+                  />
+                  <button
+                    type="submit"
+                    disabled={busy}
+                    aria-label={subscribing ? 'Submitting' : 'Subscribe'}
+                    className="absolute top-1/2 right-2.5 flex h-5 w-5 -translate-y-1/2 items-center justify-center border-0 bg-transparent p-0 text-vellum-100 disabled:opacity-70"
+                  >
+                    {subscribing ? (
+                      <CtaSpinnerIcon className="motion-safe:animate-[teaser-spin_0.7s_linear_infinite]" />
+                    ) : (
+                      <CtaArrowIcon />
+                    )}
+                  </button>
+                </div>
                 {subscribeError ? (
-                  <p className="mt-3 m-0 text-center font-['trust-3a'] text-[11px] tracking-[0.02em] text-vellum-100/80">
+                  <p className="m-0 text-center font-['trust-3a'] text-[11px] tracking-[0.02em] text-vellum-100/80">
                     {subscribeError}
                   </p>
                 ) : null}
@@ -215,7 +347,7 @@ export function TeaserPage() {
               <button
                 type="button"
                 onClick={() => setSignupOpen(true)}
-                className={`${CTA_SHELL} transition-[border-color,opacity] duration-200 hover:border-vellum-100 hover:opacity-90`}
+                className={`${CTA_SHELL} justify-center transition-[border-color,opacity] duration-200 hover:border-vellum-100 hover:opacity-90`}
               >
                 Join our mailing list
               </button>

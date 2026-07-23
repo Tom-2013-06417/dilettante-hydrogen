@@ -3,6 +3,19 @@ import {createRequestHandler, storefrontRedirect} from '@shopify/hydrogen';
 import {createHydrogenRouterContext} from '~/lib/context';
 import {isSiteGated} from '~/lib/siteGate';
 
+/** Paths the gated teaser still needs (UI, action, RR/Vite internals). */
+function isAllowedWhenGated(pathname: string) {
+  if (pathname === '/' || pathname === '/teaser') return true;
+  // React Router single-fetch / manifest / Vite HMR
+  if (pathname.startsWith('/__')) return true;
+  if (pathname.startsWith('/@')) return true;
+  if (pathname.endsWith('.data')) return true;
+  if (pathname.startsWith('/node_modules/')) return true;
+  if (pathname.startsWith('/app/')) return true;
+  if (pathname.startsWith('/assets/')) return true;
+  return /\.(js|css|map|svg|png|jpe?g|webp|woff2?|ico)$/i.test(pathname);
+}
+
 /**
  * Export a fetch handler in module format.
  */
@@ -21,11 +34,10 @@ export default {
 
       const url = new URL(request.url);
       const gated = isSiteGated(env, hydrogenContext.session);
-      const isTeaserEndpoint = url.pathname === '/teaser';
 
-      // While gated, only the teaser UI (/) and its action endpoint are reachable.
-      // Redirect every other path so product/collection loaders never run.
-      if (gated && !isTeaserEndpoint && url.pathname !== '/') {
+      // While gated, only the teaser UI + /teaser action (and framework assets)
+      // are reachable. Redirect real storefront paths so their loaders never run.
+      if (gated && !isAllowedWhenGated(url.pathname)) {
         return new Response(null, {
           status: 302,
           headers: {Location: '/'},

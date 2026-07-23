@@ -28,7 +28,8 @@ export async function action({request, context}: Route.ActionArgs) {
       .trim()
       .toLowerCase();
 
-    if (!email || !email.includes('@')) {
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+    if (!emailOk) {
       return data({ok: false, error: 'Enter a valid email'}, {status: 400});
     }
 

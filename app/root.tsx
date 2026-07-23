@@ -20,6 +20,7 @@ import {PageLayout, TypekitFonts} from '~/components/layout';
 import {ClientOnly} from '~/components/shared';
 import {TeaserPage} from '~/components/teaser';
 import {isSiteGated} from '~/lib/siteGate';
+import {loadTeaserSlides} from '~/lib/teaserProducts';
 
 export type RootLoader = typeof loader;
 
@@ -100,8 +101,11 @@ export async function loader(args: Route.LoaderArgs) {
   const gated = isSiteGated(env, session);
 
   if (gated) {
+    const teaserSlides = await loadTeaserSlides(storefront);
+
     return {
       siteGated: true as const,
+      teaserSlides,
       publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
       cart: Promise.resolve(null),
       isLoggedIn: Promise.resolve(false),
@@ -227,7 +231,7 @@ export default function App() {
   }
 
   if (data.siteGated) {
-    return <TeaserPage />;
+    return <TeaserPage slides={data.teaserSlides} />;
   }
 
   return (

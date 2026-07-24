@@ -132,7 +132,8 @@ type ConsentUpdateData = {
   };
 };
 
-const CUSTOMER_CREATE = `#graphql
+// Plain strings (not `#graphql`) — Admin API, not Storefront codegen.
+const CUSTOMER_CREATE = `
   mutation TeaserCustomerCreate($input: CustomerInput!) {
     customerCreate(input: $input) {
       customer {
@@ -146,7 +147,7 @@ const CUSTOMER_CREATE = `#graphql
   }
 `;
 
-const CUSTOMER_SEARCH = `#graphql
+const CUSTOMER_SEARCH = `
   query TeaserCustomerSearch($query: String!) {
     customers(first: 1, query: $query) {
       nodes {
@@ -156,7 +157,7 @@ const CUSTOMER_SEARCH = `#graphql
   }
 `;
 
-const CONSENT_UPDATE = `#graphql
+const CONSENT_UPDATE = `
   mutation TeaserConsentUpdate($input: CustomerEmailMarketingConsentUpdateInput!) {
     customerEmailMarketingConsentUpdate(input: $input) {
       customer {

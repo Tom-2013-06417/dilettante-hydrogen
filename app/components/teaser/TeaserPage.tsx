@@ -202,183 +202,178 @@ export function TeaserPage({slides: productSlides}: TeaserPageProps) {
   }, [signupOpen]);
 
   return (
-    <div className="flex h-svh max-h-svh flex-col items-center overflow-hidden bg-inkwell-800 px-0 pt-0 pb-5 text-vellum-100 sm:px-24 sm:pt-6 sm:pb-6 lg:px-40">
-      <div className="flex w-full min-h-0 flex-1 flex-col items-center sm:max-w-[22rem] lg:max-w-[24rem]">
-        {/*
-          Mobile: image flush to top + side edges; height capped so date/CTA stay in view.
-          sm+: keep the inset column + height clamp.
-        */}
-        <div className="relative w-full shrink-0 sm:min-h-0 sm:flex-1">
-          <div className="relative mx-auto flex w-full justify-center sm:h-full sm:max-h-[clamp(42svh,60svh,68svh)]">
-            <div className="relative h-[65svh] w-full overflow-hidden bg-vellum-100/10 sm:aspect-[2/3] sm:h-full sm:w-auto sm:max-w-full">
-              {slides.map((slide, i) => {
-                const active = i === index;
-                return (
-                  <div
-                    key={slide.id}
-                    className={`absolute inset-0 ${
-                      active ? 'opacity-100' : 'pointer-events-none opacity-0'
-                    }`}
-                    aria-hidden={!active}
-                  >
-                    <Image
-                      data={{
-                        url: slide.url,
-                        altText: slide.altText,
-                        width: slide.width ?? 1200,
-                        height: slide.height ?? 1800,
-                      }}
-                      alt={active ? slide.altText : ''}
-                      className="h-full w-full rounded-none object-cover"
-                      sizes="(min-width: 1024px) 24rem, (min-width: 640px) 22rem, 100vw"
-                      loading={i <= 1 ? 'eager' : 'lazy'}
-                    />
-                  </div>
-                );
-              })}
-            </div>
-
-            {/*
-              Logo width track: 90svw on mobile; capped on desktop.
-            */}
-            <div className="pointer-events-none absolute bottom-0 left-1/2 z-1 w-[min(90svw,42rem)] -translate-x-1/2 translate-y-[45%]">
-              <img
-                src={wordmarkVellum}
-                alt="Dilettante"
-                className="block h-auto w-full max-w-none rounded-none"
-              />
-            </div>
-          </div>
+    <div className="flex h-svh max-h-svh flex-col items-center overflow-hidden bg-inkwell-800 px-0 pt-0 pb-5 text-vellum-100 sm:pb-6">
+      {/*
+        Image: full-bleed to top + side edges at every breakpoint; wider than the
+        wordmark track (min(90svw, 42rem)). Height capped so date/CTA stay in view.
+      */}
+      <div className="relative w-full shrink-0 sm:min-h-0 sm:flex-1 sm:max-h-[clamp(42svh,60svh,68svh)]">
+        <div className="relative h-[65svh] w-full overflow-hidden bg-vellum-100/10 sm:h-full">
+          {slides.map((slide, i) => {
+            const active = i === index;
+            return (
+              <div
+                key={slide.id}
+                className={`absolute inset-0 ${
+                  active ? 'opacity-100' : 'pointer-events-none opacity-0'
+                }`}
+                aria-hidden={!active}
+              >
+                <Image
+                  data={{
+                    url: slide.url,
+                    altText: slide.altText,
+                    width: slide.width ?? 1200,
+                    height: slide.height ?? 1800,
+                  }}
+                  alt={active ? slide.altText : ''}
+                  className="h-full w-full rounded-none object-cover"
+                  sizes="100vw"
+                  loading={i <= 1 ? 'eager' : 'lazy'}
+                />
+              </div>
+            );
+          })}
         </div>
 
         {/*
-          Date stays in the mailing-list stack (shrink-0, always visible).
-          Logo→date: clamp(1rem, 3.5svh, 1.5rem) — stays compact.
-          Date→CTA: clamp(1rem, 10svh - 3rem, 5.5rem) — ~equal on short screens,
-          opens up on tall so the date sits nearer the wordmark.
+          Logo width track: 90svw on mobile; capped at 42rem on large screens.
         */}
-        <div className="flex w-full shrink-0 flex-col items-center px-[15svw] sm:px-0">
-          <div
-            className="w-full shrink-0"
-            style={{
-              height: 'calc(min(90svw, 42rem) * 797 / 2881 * 0.45)',
-            }}
-            aria-hidden
+        <div className="pointer-events-none absolute bottom-0 left-1/2 z-1 w-[min(90svw,42rem)] -translate-x-1/2 translate-y-[45%]">
+          <img
+            src={wordmarkVellum}
+            alt="Dilettante"
+            className="block h-auto w-full max-w-none rounded-none"
           />
-          <div
-            className="w-full shrink-0"
-            style={{height: 'clamp(1rem, 3.5svh, 1.5rem)'}}
-            aria-hidden
-          />
+        </div>
+      </div>
 
-          <p className="m-0 shrink-0 text-center font-['wayfinder-cf'] text-[28px] font-light tracking-[-0.04em] text-vellum-100 opacity-75">
-            08. 08. 2026
-          </p>
+      {/*
+        Date / CTA stack — narrower than the wordmark; not full-bleed.
+        Logo→date: clamp(1rem, 3.5svh, 1.5rem) — stays compact.
+        Date→CTA: clamp opens up on tall screens so the date sits nearer the wordmark.
+      */}
+      <div className="flex w-full shrink-0 flex-col items-center px-[15svw] sm:max-w-[22rem] sm:px-0 lg:max-w-[24rem]">
+        <div
+          className="w-full shrink-0"
+          style={{
+            height: 'calc(min(90svw, 42rem) * 797 / 2881 * 0.45)',
+          }}
+          aria-hidden
+        />
+        <div
+          className="w-full shrink-0"
+          style={{height: 'clamp(1rem, 3.5svh, 1.5rem)'}}
+          aria-hidden
+        />
 
-          <div
-            className="w-full shrink-0"
-            style={{height: 'clamp(4svh, 6svh, 12svh)'}}
-            aria-hidden
-          />
+        <p className="m-0 shrink-0 text-center font-['wayfinder-cf'] text-[28px] font-light tracking-[-0.04em] text-vellum-100 opacity-75">
+          08. 08. 2026
+        </p>
 
-          <div className="w-full max-w-[14rem] shrink-0 pb-[clamp(1svh,5svh,8svh)] sm:max-w-[15rem]">
-            {subscribed ? (
-              <div
-                className={`${CTA_SHELL} relative justify-center pr-9 text-center`}
-                role="status"
-              >
-                <span className="min-w-0 truncate">
-                  {subscribe.data?.message ?? 'Subscribed'}
-                </span>
-                <span className="pointer-events-none absolute top-1/2 right-2.5 -translate-y-1/2 text-vellum-100">
-                  <CtaCheckIcon />
-                </span>
+        <div
+          className="w-full shrink-0"
+          style={{height: 'clamp(4svh, 6svh, 12svh)'}}
+          aria-hidden
+        />
+
+        <div className="w-full max-w-[14rem] shrink-0 pb-[clamp(1svh,5svh,8svh)] sm:max-w-[15rem]">
+          {subscribed ? (
+            <div
+              className={`${CTA_SHELL} relative justify-center pr-9 text-center`}
+              role="status"
+            >
+              <span className="min-w-0 truncate">
+                {subscribe.data?.message ?? 'Subscribed'}
+              </span>
+              <span className="pointer-events-none absolute top-1/2 right-2.5 -translate-y-1/2 text-vellum-100">
+                <CtaCheckIcon />
+              </span>
+            </div>
+          ) : signupOpen ? (
+            <subscribe.Form
+              method="post"
+              action="/teaser"
+              onSubmit={onSubscribeSubmit}
+              className="relative w-full transition-opacity duration-200"
+            >
+              <input type="hidden" name="intent" value="subscribe" />
+              <label className="sr-only" htmlFor="teaser-email">
+                Email
+              </label>
+              <div className="relative">
+                <input
+                  ref={emailRef}
+                  id="teaser-email"
+                  name="email"
+                  type="email"
+                  inputMode="email"
+                  required
+                  autoComplete="email"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck={false}
+                  placeholder="Email address"
+                  disabled={busy}
+                  value={emailValue}
+                  onChange={(e) => {
+                    const next = e.target.value;
+                    setEmailValue(next);
+                    if (!next.trim()) {
+                      clearEmailErrors();
+                    } else if (emailError) {
+                      setEmailError(null);
+                    }
+                  }}
+                  onBlur={() => {
+                    if (emailValue.trim()) validateAndClearError(emailValue);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key !== 'Enter') return;
+                    // Ensure Enter submits the fetcher form (arrow = same path).
+                    e.preventDefault();
+                    e.currentTarget.form?.requestSubmit();
+                  }}
+                  className={`${CTA_SHELL} m-0 min-w-0 pr-9 text-left outline-none placeholder:text-vellum-100/55`}
+                />
+                <button
+                  type="submit"
+                  disabled={busy}
+                  aria-label={subscribing ? 'Submitting' : 'Subscribe'}
+                  className="absolute top-1/2 right-2.5 flex h-5 w-5 -translate-y-1/2 items-center justify-center border-0 bg-transparent p-0 text-vellum-100 disabled:opacity-70"
+                >
+                  {subscribing ? (
+                    <CtaSpinnerIcon className="motion-safe:animate-[teaser-spin_0.7s_linear_infinite]" />
+                  ) : (
+                    <CtaArrowIcon />
+                  )}
+                </button>
+                <AnimatePresence>
+                  {subscribeError ? (
+                    <motion.p
+                      key="teaser-email-error"
+                      initial={{opacity: 0, y: -6}}
+                      animate={{opacity: 1, y: 0}}
+                      exit={{opacity: 0, y: -6}}
+                      transition={{duration: 0.15, ease: 'easeOut'}}
+                      className="pointer-events-none absolute top-[calc(100%+0.75rem)] right-0 left-0 m-0 text-center font-['trust-3a'] text-[11px] tracking-[0.02em] text-vellum-100/80"
+                      role="alert"
+                    >
+                      {subscribeError}
+                    </motion.p>
+                  ) : null}
+                </AnimatePresence>
               </div>
-            ) : signupOpen ? (
-              <subscribe.Form
-                method="post"
-                action="/teaser"
-                onSubmit={onSubscribeSubmit}
-                className="relative w-full transition-opacity duration-200"
-              >
-                <input type="hidden" name="intent" value="subscribe" />
-                <label className="sr-only" htmlFor="teaser-email">
-                  Email
-                </label>
-                <div className="relative">
-                  <input
-                    ref={emailRef}
-                    id="teaser-email"
-                    name="email"
-                    type="email"
-                    inputMode="email"
-                    required
-                    autoComplete="email"
-                    autoCorrect="off"
-                    autoCapitalize="off"
-                    spellCheck={false}
-                    placeholder="Email address"
-                    disabled={busy}
-                    value={emailValue}
-                    onChange={(e) => {
-                      const next = e.target.value;
-                      setEmailValue(next);
-                      if (!next.trim()) {
-                        clearEmailErrors();
-                      } else if (emailError) {
-                        setEmailError(null);
-                      }
-                    }}
-                    onBlur={() => {
-                      if (emailValue.trim()) validateAndClearError(emailValue);
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key !== 'Enter') return;
-                      // Ensure Enter submits the fetcher form (arrow = same path).
-                      e.preventDefault();
-                      e.currentTarget.form?.requestSubmit();
-                    }}
-                    className={`${CTA_SHELL} m-0 min-w-0 pr-9 text-left outline-none placeholder:text-vellum-100/55`}
-                  />
-                  <button
-                    type="submit"
-                    disabled={busy}
-                    aria-label={subscribing ? 'Submitting' : 'Subscribe'}
-                    className="absolute top-1/2 right-2.5 flex h-5 w-5 -translate-y-1/2 items-center justify-center border-0 bg-transparent p-0 text-vellum-100 disabled:opacity-70"
-                  >
-                    {subscribing ? (
-                      <CtaSpinnerIcon className="motion-safe:animate-[teaser-spin_0.7s_linear_infinite]" />
-                    ) : (
-                      <CtaArrowIcon />
-                    )}
-                  </button>
-                  <AnimatePresence>
-                    {subscribeError ? (
-                      <motion.p
-                        key="teaser-email-error"
-                        initial={{opacity: 0, y: -6}}
-                        animate={{opacity: 1, y: 0}}
-                        exit={{opacity: 0, y: -6}}
-                        transition={{duration: 0.15, ease: 'easeOut'}}
-                        className="pointer-events-none absolute top-[calc(100%+0.75rem)] right-0 left-0 m-0 text-center font-['trust-3a'] text-[11px] tracking-[0.02em] text-vellum-100/80"
-                        role="alert"
-                      >
-                        {subscribeError}
-                      </motion.p>
-                    ) : null}
-                  </AnimatePresence>
-                </div>
-              </subscribe.Form>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setSignupOpen(true)}
-                className={`${CTA_SHELL} justify-center transition-[border-color,opacity] duration-200 hover:border-vellum-100 hover:opacity-90`}
-              >
-                Join our mailing list
-              </button>
-            )}
-          </div>
+            </subscribe.Form>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setSignupOpen(true)}
+              className={`${CTA_SHELL} justify-center transition-[border-color,opacity] duration-200 hover:border-vellum-100 hover:opacity-90`}
+            >
+              Join our mailing list
+            </button>
+          )}
         </div>
       </div>
     </div>

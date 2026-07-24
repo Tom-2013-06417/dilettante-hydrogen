@@ -201,34 +201,11 @@ export function TeaserPage({slides: productSlides}: TeaserPageProps) {
     if (signupOpen) emailRef.current?.focus();
   }, [signupOpen]);
 
-  // Lock document scroll + paint body inkwell so mobile Safari can't reveal
-  // white space below svh when the browser chrome collapses.
-  useEffect(() => {
-    const html = document.documentElement;
-    const {body} = document;
-    const prev = {
-      htmlOverflow: html.style.overflow,
-      bodyOverflow: body.style.overflow,
-      bodyBg: body.style.backgroundColor,
-      bodyOverscroll: body.style.overscrollBehavior,
-    };
-    html.style.overflow = 'hidden';
-    body.style.overflow = 'hidden';
-    body.style.backgroundColor = 'rgb(14 22 14)';
-    body.style.overscrollBehavior = 'none';
-    return () => {
-      html.style.overflow = prev.htmlOverflow;
-      body.style.overflow = prev.bodyOverflow;
-      body.style.backgroundColor = prev.bodyBg;
-      body.style.overscrollBehavior = prev.bodyOverscroll;
-    };
-  }, []);
-
   return (
-    <div className="fixed inset-0 flex flex-col items-center overflow-hidden bg-inkwell-800 px-0 pt-0 pb-5 text-vellum-100 sm:pb-6">
+    <div className="teaser-page flex flex-col items-center overflow-hidden bg-inkwell-800 px-0 pt-0 pb-5 text-vellum-100 sm:pb-6">
       {/*
         Image: full-bleed to top + side edges. Fills leftover space above the
-        date/CTA stack (no fixed 65svh) so short phones don't overflow.
+        date/CTA stack so short phones don't overflow the locked viewport.
       */}
       <div className="relative w-full min-h-0 flex-1 sm:max-h-[clamp(42svh,60svh,68svh)]">
         <div className="relative h-full w-full overflow-hidden bg-vellum-100/10">

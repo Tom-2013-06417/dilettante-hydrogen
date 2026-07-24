@@ -124,6 +124,33 @@ body:has(.main--product) {
   background-color: rgb(14 22 14);
 }
 
+/* Teaser: kill iOS Chrome/WebKit document scroll + white body under the fold.
+   app.css paints body white; reset.css sets min-height: 100vh — both show as a
+   white gap when the visual viewport and layout viewport disagree. */
+html:has(.teaser-page),
+body:has(.teaser-page) {
+  background-color: rgb(14 22 14);
+  height: 100%;
+  max-height: 100dvh;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+body:has(.teaser-page) {
+  min-height: 0;
+  position: fixed;
+  inset: 0;
+  width: 100%;
+}
+
+.teaser-page {
+  box-sizing: border-box;
+  height: 100%;
+  max-height: 100dvh;
+  min-height: 100dvh;
+  width: 100%;
+}
+
 .main--home,
 .main--product {
   margin: 0;

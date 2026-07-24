@@ -11,7 +11,6 @@ import {
   useRouteLoaderData,
 } from 'react-router';
 import type {Route} from './+types/root';
-import favicon from '~/assets/favicon.svg';
 import {FOOTER_QUERY, HEADER_QUERY} from '~/lib/fragments';
 import resetStyles from '~/styles/reset.css?url';
 import appStyles from '~/styles/app.css?url';
@@ -23,6 +22,12 @@ import {isSiteGated} from '~/lib/siteGate';
 import {loadTeaserSlides} from '~/lib/teaserProducts';
 
 export type RootLoader = typeof loader;
+
+export const meta: Route.MetaFunction = () => [
+  {name: 'msapplication-TileColor', content: '#ffffff'},
+  {name: 'msapplication-TileImage', content: '/ms-icon-144x144.png'},
+  {name: 'theme-color', content: '#ffffff'},
+];
 
 /**
  * This is important to avoid re-fetching root queries on sub-navigations
@@ -92,7 +97,77 @@ export function links() {
       rel: 'stylesheet',
       href: 'https://use.typekit.net/djl3pem.css',
     },
-    {rel: 'icon', type: 'image/svg+xml', href: favicon},
+    {
+      rel: 'apple-touch-icon',
+      sizes: '57x57',
+      href: '/apple-icon-57x57.png',
+    },
+    {
+      rel: 'apple-touch-icon',
+      sizes: '60x60',
+      href: '/apple-icon-60x60.png',
+    },
+    {
+      rel: 'apple-touch-icon',
+      sizes: '72x72',
+      href: '/apple-icon-72x72.png',
+    },
+    {
+      rel: 'apple-touch-icon',
+      sizes: '76x76',
+      href: '/apple-icon-76x76.png',
+    },
+    {
+      rel: 'apple-touch-icon',
+      sizes: '114x114',
+      href: '/apple-icon-114x114.png',
+    },
+    {
+      rel: 'apple-touch-icon',
+      sizes: '120x120',
+      href: '/apple-icon-120x120.png',
+    },
+    {
+      rel: 'apple-touch-icon',
+      sizes: '144x144',
+      href: '/apple-icon-144x144.png',
+    },
+    {
+      rel: 'apple-touch-icon',
+      sizes: '152x152',
+      href: '/apple-icon-152x152.png',
+    },
+    {
+      rel: 'apple-touch-icon',
+      sizes: '180x180',
+      href: '/apple-icon-180x180.png',
+    },
+    {
+      rel: 'icon',
+      type: 'image/png',
+      sizes: '192x192',
+      href: '/android-icon-192x192.png',
+    },
+    {
+      rel: 'icon',
+      type: 'image/png',
+      sizes: '32x32',
+      href: '/favicon-32x32.png',
+    },
+    {
+      rel: 'icon',
+      type: 'image/png',
+      sizes: '96x96',
+      href: '/favicon-96x96.png',
+    },
+    {
+      rel: 'icon',
+      type: 'image/png',
+      sizes: '16x16',
+      href: '/favicon-16x16.png',
+    },
+    {rel: 'shortcut icon', href: '/favicon.ico'},
+    {rel: 'manifest', href: '/manifest.json'},
   ];
 }
 

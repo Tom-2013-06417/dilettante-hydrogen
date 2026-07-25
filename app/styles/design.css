@@ -173,8 +173,6 @@ body:has(.teaser-page) {
 
 .teaser-page .teaser-email-submit {
   background-color: rgb(14 22 14);
-  /* Soft left fade so the pad blends into the field / covers blue under the icon */
-  box-shadow: -10px 0 8px 2px rgb(14 22 14);
 }
 
 .main--home,

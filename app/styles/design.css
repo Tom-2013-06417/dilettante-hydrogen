@@ -124,31 +124,26 @@ body:has(.main--product) {
   background-color: rgb(14 22 14);
 }
 
-/* Teaser: kill iOS Chrome/WebKit document scroll + white body under the fold.
-   app.css paints body white; reset.css sets min-height: 100vh — both show as a
-   white gap when the visual viewport and layout viewport disagree. */
+/* Teaser: paint html/body inkwell so overscroll isn't white (app.css body is
+   #fff). Do NOT lock overflow / position — that kills pull-to-refresh on iOS. */
 html:has(.teaser-page),
 body:has(.teaser-page) {
   background-color: rgb(14 22 14);
-  height: 100%;
-  max-height: 100dvh;
-  overflow: hidden;
-  overscroll-behavior: none;
 }
 
 body:has(.teaser-page) {
-  min-height: 0;
-  position: fixed;
-  inset: 0;
-  width: 100%;
+  /* Override reset.css min-height: 100vh so the document isn't taller than the
+     teaser shell (which caused a scrollable white gap below). */
+  min-height: 100svh;
 }
 
 .teaser-page {
   box-sizing: border-box;
-  height: 100%;
-  max-height: 100dvh;
-  min-height: 100dvh;
+  height: 100svh;
+  max-height: 100svh;
+  min-height: 100svh;
   width: 100%;
+  overflow: hidden;
 }
 
 .main--home,

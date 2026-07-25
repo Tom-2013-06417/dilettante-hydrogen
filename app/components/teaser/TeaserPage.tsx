@@ -340,7 +340,7 @@ export function TeaserPage({slides: productSlides}: TeaserPageProps) {
                   type="submit"
                   disabled={busy}
                   aria-label={subscribing ? 'Submitting' : 'Subscribe'}
-                  className="absolute top-1/2 right-2.5 flex h-5 w-5 -translate-y-1/2 items-center justify-center border-0 bg-transparent p-0 text-vellum-100 disabled:opacity-70"
+                  className="absolute top-1/2 right-2.5 flex h-5 w-5 -translate-y-1/2 cursor-pointer items-center justify-center border-0 bg-transparent p-0 text-vellum-100 disabled:opacity-70"
                 >
                   {subscribing ? (
                     <CtaSpinnerIcon className="motion-safe:animate-[teaser-spin_0.7s_linear_infinite]" />

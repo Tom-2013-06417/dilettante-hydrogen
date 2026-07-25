@@ -146,6 +146,17 @@ body:has(.teaser-page) {
   overflow: hidden;
 }
 
+/* Chrome paints autofill with a light blue fill that ignores background-color.
+   Cover it with an inset shadow so the light submit arrow stays visible. */
+.teaser-page #teaser-email:-webkit-autofill,
+.teaser-page #teaser-email:-webkit-autofill:hover,
+.teaser-page #teaser-email:-webkit-autofill:focus,
+.teaser-page #teaser-email:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px rgb(14 22 14) inset;
+  -webkit-text-fill-color: rgb(255 246 230);
+  caret-color: rgb(255 246 230);
+}
+
 .main--home,
 .main--product {
   margin: 0;

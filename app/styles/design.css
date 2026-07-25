@@ -147,8 +147,9 @@ body:has(.teaser-page) {
 }
 
 /* Autofill: Blink (desktop Chrome) accepts an inset shadow; WebKit (Safari /
-   Chrome iOS) often ignores it unless background-clip + transition delay are
-   also set. Keep the fill inkwell so the light submit arrow stays visible. */
+   Chrome iOS) often ignores author styles on the fill itself. Keep trying to
+   match inkwell on engines that allow it, and always pad the submit control
+   so the light arrow stays readable when the UA paints light blue. */
 .teaser-page #teaser-email {
   background-color: rgb(14 22 14);
 }
@@ -165,10 +166,15 @@ body:has(.teaser-page) {
   background-clip: content-box !important;
   box-shadow: 0 0 0 1000px rgb(14 22 14) inset !important;
   -webkit-box-shadow: 0 0 0 1000px rgb(14 22 14) inset !important;
-  /* UA autofill bg can't interrupt an in-flight transition */
   transition:
     background-color 99999s ease-out 0s,
     color 99999s ease-out 0s;
+}
+
+.teaser-page .teaser-email-submit {
+  background-color: rgb(14 22 14);
+  /* Soft left fade so the pad blends into the field / covers blue under the icon */
+  box-shadow: -10px 0 8px 2px rgb(14 22 14);
 }
 
 .main--home,

@@ -369,7 +369,7 @@ export function TeaserPage({slides: productSlides}: TeaserPageProps) {
             <button
               type="button"
               onClick={() => setSignupOpen(true)}
-              className={`${CTA_SHELL} justify-center transition-[border-color,opacity] duration-200 hover:border-vellum-100 hover:opacity-90`}
+              className={`${CTA_SHELL} cursor-pointer justify-center transition-[border-color,opacity] duration-200 hover:border-vellum-100 hover:opacity-90`}
             >
               Join our mailing list
             </button>

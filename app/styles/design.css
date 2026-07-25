@@ -146,15 +146,29 @@ body:has(.teaser-page) {
   overflow: hidden;
 }
 
-/* Chrome paints autofill with a light blue fill that ignores background-color.
-   Cover it with an inset shadow so the light submit arrow stays visible. */
+/* Autofill: Blink (desktop Chrome) accepts an inset shadow; WebKit (Safari /
+   Chrome iOS) often ignores it unless background-clip + transition delay are
+   also set. Keep the fill inkwell so the light submit arrow stays visible. */
+.teaser-page #teaser-email {
+  background-color: rgb(14 22 14);
+}
+
 .teaser-page #teaser-email:-webkit-autofill,
 .teaser-page #teaser-email:-webkit-autofill:hover,
 .teaser-page #teaser-email:-webkit-autofill:focus,
 .teaser-page #teaser-email:-webkit-autofill:active {
-  -webkit-box-shadow: 0 0 0 1000px rgb(14 22 14) inset;
-  -webkit-text-fill-color: rgb(255 246 230);
+  -webkit-text-fill-color: rgb(255 246 230) !important;
   caret-color: rgb(255 246 230);
+  color: rgb(255 246 230) !important;
+  background-color: rgb(14 22 14) !important;
+  background-image: none !important;
+  background-clip: content-box !important;
+  box-shadow: 0 0 0 1000px rgb(14 22 14) inset !important;
+  -webkit-box-shadow: 0 0 0 1000px rgb(14 22 14) inset !important;
+  /* UA autofill bg can't interrupt an in-flight transition */
+  transition:
+    background-color 99999s ease-out 0s,
+    color 99999s ease-out 0s;
 }
 
 .main--home,

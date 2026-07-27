@@ -124,6 +124,10 @@ body:has(.main--product) {
   background-color: rgb(14 22 14);
 }
 
+body:has(.main--collection) {
+  background-color: rgb(255 246 230);
+}
+
 /* Teaser: paint html/body inkwell so overscroll isn't white (app.css body is
    #fff). Do NOT lock overflow / position — that kills pull-to-refresh on iOS. */
 html:has(.teaser-page),
@@ -176,14 +180,16 @@ body:has(.teaser-page) {
 }
 
 .main--home,
-.main--product {
+.main--product,
+.main--collection {
   margin: 0;
   max-width: none;
   padding: 0;
   width: 100%;
 }
 
-.product-page img {
+.product-page img,
+.collection-page img {
   border-radius: 0;
 }
 

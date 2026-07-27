@@ -1,22 +1,16 @@
 import {redirect, useLoaderData} from 'react-router';
 import type {Route} from './+types/collections.$handle';
 import {getPaginationVariables, Analytics} from '@shopify/hydrogen';
-import {PaginatedResourceSection} from '~/components/shared';
+import {CollectionPage} from '~/components/collections';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
-import {ProductItem} from '~/components/product';
-import type {ProductItemFragment} from 'storefrontapi.generated';
-
 import {pageTitle} from '~/lib/constants';
 
 export const meta: Route.MetaFunction = ({data}) => {
-  return [{title: pageTitle(`${data?.collection.title ?? ''} Collection`)}];
+  return [{title: pageTitle(data?.collection.title)}];
 };
 
 export async function loader(args: Route.LoaderArgs) {
-  // Start fetching non-critical data without blocking time to first byte
   const deferredData = loadDeferredData(args);
-
-  // Await the critical data required to render initial state of the page
   const criticalData = await loadCriticalData(args);
 
   return {...deferredData, ...criticalData};
@@ -30,7 +24,7 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
   const {handle} = params;
   const {storefront} = context;
   const paginationVariables = getPaginationVariables(request, {
-    pageBy: 8,
+    pageBy: 24,
   });
 
   if (!handle) {
@@ -40,7 +34,6 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
   const [{collection}] = await Promise.all([
     storefront.query(COLLECTION_QUERY, {
       variables: {handle, ...paginationVariables},
-      // Add other queries here, so that they are loaded in parallel
     }),
   ]);
 
@@ -50,7 +43,6 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
     });
   }
 
-  // The API handle might be localized, so redirect to the localized handle
   redirectIfHandleIsLocalized(request, {handle, data: collection});
 
   return {
@@ -63,7 +55,7 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
  * fetched after the initial page load. If it's unavailable, the page should still 200.
  * Make sure to not throw any errors here, as it will cause the page to 500.
  */
-function loadDeferredData({context}: Route.LoaderArgs) {
+function loadDeferredData(_args: Route.LoaderArgs) {
   return {};
 }
 
@@ -71,21 +63,8 @@ export default function Collection() {
   const {collection} = useLoaderData<typeof loader>();
 
   return (
-    <div className="collection">
-      <h1>{collection.title}</h1>
-      <p className="collection-description">{collection.description}</p>
-      <PaginatedResourceSection<ProductItemFragment>
-        connection={collection.products}
-        resourcesClassName="products-grid"
-      >
-        {({node: product, index}) => (
-          <ProductItem
-            key={product.id}
-            product={product}
-            loading={index < 8 ? 'eager' : undefined}
-          />
-        )}
-      </PaginatedResourceSection>
+    <>
+      <CollectionPage collection={collection} />
       <Analytics.CollectionView
         data={{
           collection: {
@@ -94,16 +73,12 @@ export default function Collection() {
           },
         }}
       />
-    </div>
+    </>
   );
 }
 
-const PRODUCT_ITEM_FRAGMENT = `#graphql
-  fragment MoneyProductItem on MoneyV2 {
-    amount
-    currencyCode
-  }
-  fragment ProductItem on Product {
+const COLLECTION_PRODUCT_FRAGMENT = `#graphql
+  fragment CollectionProduct on Product {
     id
     handle
     title
@@ -114,20 +89,20 @@ const PRODUCT_ITEM_FRAGMENT = `#graphql
       width
       height
     }
-    priceRange {
-      minVariantPrice {
-        ...MoneyProductItem
-      }
-      maxVariantPrice {
-        ...MoneyProductItem
-      }
+    scentNumber: metafield(namespace: "custom", key: "scent_number") {
+      type
+      value
+    }
+    scentTagline: metafield(namespace: "custom", key: "scent_tagline") {
+      type
+      value
     }
   }
 ` as const;
 
-// NOTE: https://shopify.dev/docs/api/storefront/2022-04/objects/collection
+// NOTE: https://shopify.dev/docs/api/storefront/latest/objects/collection
 const COLLECTION_QUERY = `#graphql
-  ${PRODUCT_ITEM_FRAGMENT}
+  ${COLLECTION_PRODUCT_FRAGMENT}
   query Collection(
     $handle: String!
     $country: CountryCode
@@ -142,6 +117,14 @@ const COLLECTION_QUERY = `#graphql
       handle
       title
       description
+      launchDate: metafield(namespace: "custom", key: "launch_date") {
+        type
+        value
+      }
+      tagline: metafield(namespace: "custom", key: "tagline") {
+        type
+        value
+      }
       products(
         first: $first,
         last: $last,
@@ -149,7 +132,7 @@ const COLLECTION_QUERY = `#graphql
         after: $endCursor
       ) {
         nodes {
-          ...ProductItem
+          ...CollectionProduct
         }
         pageInfo {
           hasPreviousPage

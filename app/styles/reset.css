@@ -28,27 +28,13 @@ p {
 }
 
 h1 {
-  font-size: 1.6rem;
   font-weight: 700;
   line-height: 1.25;
-  margin-bottom: 2rem;
-  margin-top: 2rem;
 }
 
 h2 {
   font-weight: 700;
   line-height: 1.25;
-  margin-bottom: 1rem;
-}
-
-h4 {
-  margin-top: 0.5rem;
-  margin-bottom: 0.5rem;
-}
-
-h5 {
-  margin-bottom: 1rem;
-  margin-top: 0.5rem;
 }
 
 p {
@@ -60,8 +46,11 @@ a {
   text-decoration: none;
 }
 
-a:hover {
-  text-decoration: underline;
+a:hover,
+a:focus,
+a:active,
+a:focus-visible {
+  text-decoration: none;
   cursor: pointer;
 }
 

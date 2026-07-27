@@ -32,7 +32,7 @@ export function CollectionPage({collection}: CollectionPageProps) {
   const tagline = meta.tagline || collection.description?.trim() || undefined;
 
   return (
-    <article className="collection-page relative min-h-svh w-full bg-vellum-100 text-inkwell-700">
+    <article className="collection-page relative min-h-svh w-full text-inkwell-700">
       {/*
         Full-page left rule: above the navbar logo (z-20), under the cards
         (cards sit at z-30).

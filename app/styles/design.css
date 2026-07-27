@@ -109,6 +109,15 @@
   position: relative;
 }
 
+/*
+  Paper grain — body only (not on .bg-vellum-100 elements). Raster tile;
+  SVG feTurbulence in CSS data-URIs often doesn’t paint in browsers.
+*/
+:root {
+  --vellum-paper-size: 30px;
+  --vellum-paper-texture: url('/vellum-paper-grain.png');
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-fade-up,
   .animate-fade-in,
@@ -126,6 +135,9 @@ body:has(.main--product) {
 
 body:has(.main--collection) {
   background-color: rgb(255 246 230);
+  background-image: var(--vellum-paper-texture);
+  background-size: var(--vellum-paper-size) var(--vellum-paper-size);
+  background-repeat: repeat;
 }
 
 /* Teaser: paint html/body inkwell so overscroll isn't white (app.css body is

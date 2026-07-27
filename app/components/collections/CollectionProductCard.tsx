@@ -41,7 +41,7 @@ export function CollectionProductCard({
     <Link
       to={`/products/${product.handle}`}
       prefetch="intent"
-      className="relative mx-auto flex w-[96%] items-stretch gap-3 bg-vellum-100 py-4 pl-4 pr-3 shadow-[0_2px_3px_rgba(21,32,21,0.35)] sm:gap-5 sm:px-5 sm:py-5"
+      className="relative mx-auto flex w-full items-stretch gap-3 bg-vellum-100 py-4 px-4 shadow-[0_2px_3px_rgba(21,32,21,0.35)] sm:gap-5 sm:px-5 sm:py-5"
     >
       <BlueprintRule
         orientation="h"
@@ -49,11 +49,11 @@ export function CollectionProductCard({
       />
       <BlueprintRule
         orientation="v"
-        className="pointer-events-none absolute inset-y-0 left-2 z-0 text-inkwell-700/30"
+        className="pointer-events-none absolute inset-y-0 left-4 z-0 text-inkwell-700/30"
       />
       <BlueprintRule
         orientation="v"
-        className="pointer-events-none absolute inset-y-0 right-2 z-0 text-inkwell-700/30"
+        className="pointer-events-none absolute inset-y-0 right-4 z-0 text-inkwell-700/30"
       />
       <BlueprintRule
         orientation="h"
@@ -75,7 +75,7 @@ export function CollectionProductCard({
             orientation="h"
             className="pointer-events-none absolute inset-x-0 z-0 text-inkwell-700/30"
           />
-          <span className="relative z-1 -mt-0.5 -mb-1 block wrap-break-word font-['wayfinder-cf'] text-[clamp(1.75rem,10vw,4.25rem)] font-light leading-[0.86] tracking-[-6%]">
+          <span className="relative z-1 -mt-0.5 -mb-1 block wrap-break-word font-['wayfinder-cf'] text-[clamp(1.75rem,9vw,4.25rem)] font-light leading-[0.86] tracking-[-6%]">
             {title}
           </span>
           <BlueprintRule
@@ -85,13 +85,13 @@ export function CollectionProductCard({
         </div>
 
         {tagline ? (
-          <span className="mt-4 max-w-[28ch] font-['trust-3a'] text-[11px] font-normal leading-snug tracking-[0.01em] text-inkwell-700/75 sm:text-[12px]">
+          <span className="mt-3 font-['trust-3a'] text-[11px] font-normal leading-snug tracking-[0.01em] text-inkwell-700/75 sm:text-[12px]">
             {tagline}
           </span>
         ) : null}
       </div>
 
-      <div className="relative left-1 z-2 min-w-0 flex-1 self-start -mt-4 sm:-mt-5">
+      <div className="relative z-2 min-w-0 flex-1 self-start -mt-4 sm:-mt-4">
         <div className="relative aspect-square w-full overflow-hidden bg-inkwell-700/10">
           {image ? (
             <Image

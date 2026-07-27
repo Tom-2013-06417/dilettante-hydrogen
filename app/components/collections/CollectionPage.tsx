@@ -44,28 +44,24 @@ export function CollectionPage({collection}: CollectionPageProps) {
 
       <HeaderBar className="bg-vellum-paper" showLeftRule={false} />
 
-      <PageContainer>
+      <PageContainer className="relative z-30 pb-16 sm:pb-24">
         <CollectionHeader
           title={collection.title}
           launchDateLabel={meta.launchDateLabel}
           tagline={tagline}
         />
-      </PageContainer>
 
-      {/*
-        Side inset matches the page rule (left-4 / sm:left-8) so cards don’t
-        touch the screen edge. z-30 keeps cards above the page rule.
-      */}
-      <ul className="relative z-30 m-0 flex list-none flex-col gap-2 px-4 pb-16 sm:gap-2 sm:px-8 sm:pb-24">
-        {collection.products.nodes.map((product, index) => (
-          <li key={product.id}>
-            <CollectionProductCard
-              product={product}
-              loading={index < 4 ? 'eager' : 'lazy'}
-            />
-          </li>
-        ))}
-      </ul>
+        <ul className="m-0 flex list-none flex-col gap-2 p-0 sm:gap-2">
+          {collection.products.nodes.map((product, index) => (
+            <li key={product.id}>
+              <CollectionProductCard
+                product={product}
+                loading={index < 4 ? 'eager' : 'lazy'}
+              />
+            </li>
+          ))}
+        </ul>
+      </PageContainer>
     </article>
   );
 }

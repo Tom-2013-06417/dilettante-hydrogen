@@ -30,7 +30,7 @@ export function BottleBoxReveal({title}: {title: string}) {
   return (
     <section
       ref={sectionRef}
-      className="relative min-h-svh w-full overflow-hidden bg-vellum-100 py-20"
+      className="relative min-h-svh w-full overflow-hidden py-20"
     >
       <div className="blueprint-rule-h pointer-events-none absolute inset-x-0 top-16 text-inkwell-700/25" />
       <div className="blueprint-rule-h pointer-events-none absolute inset-x-0 bottom-16 text-inkwell-700/25" />

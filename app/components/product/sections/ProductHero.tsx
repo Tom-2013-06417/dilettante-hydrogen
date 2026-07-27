@@ -48,7 +48,7 @@ export function ProductHero({
   const [titleNoise, setTitleNoise] = useState(Boolean(reducedMotion));
 
   return (
-    <div className="relative flex w-full flex-col bg-vellum-100 text-inkwell-700">
+    <div className="relative flex w-full flex-col text-inkwell-700">
       <div className="relative z-1 flex min-h-svh w-full flex-col">
         {/* Title leads; rest of the page fades in shortly after */}
         <div className="relative shrink-0">
@@ -58,7 +58,7 @@ export function ProductHero({
               className="pointer-events-none absolute inset-y-0 left-4 z-20 text-inkwell-700/35 sm:left-8"
             />
 
-            <HeaderBar className="bg-vellum-100" showLeftRule={false} />
+            <HeaderBar showLeftRule={false} />
 
             <div className="relative flex h-[30svh] w-full">
               <div className="w-4 shrink-0 sm:w-8" aria-hidden />

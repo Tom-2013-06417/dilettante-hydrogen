@@ -110,12 +110,19 @@
 }
 
 /*
-  Paper grain — body only (not on .bg-vellum-100 elements). Raster tile;
-  SVG feTurbulence in CSS data-URIs often doesn’t paint in browsers.
+  Paper grain on body (product + collection). Use .bg-vellum-paper for
+  opaque surfaces that must match (e.g. sticky navbar) — not .bg-vellum-100.
 */
 :root {
   --vellum-paper-size: 30px;
   --vellum-paper-texture: url('/vellum-paper-grain.png');
+}
+
+.bg-vellum-paper {
+  background-color: rgb(255 246 230);
+  background-image: var(--vellum-paper-texture);
+  background-size: var(--vellum-paper-size) var(--vellum-paper-size);
+  background-repeat: repeat;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -128,11 +135,11 @@
   }
 }
 
-body:has(.main--home),
-body:has(.main--product) {
+body:has(.main--home) {
   background-color: rgb(14 22 14);
 }
 
+body:has(.main--product),
 body:has(.main--collection) {
   background-color: rgb(255 246 230);
   background-image: var(--vellum-paper-texture);

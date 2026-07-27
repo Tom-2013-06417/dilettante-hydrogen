@@ -17,7 +17,7 @@ export function HeaderBar({
 
   return (
     <header
-      className={`relative flex w-full flex-none flex-col bg-vellum-100 text-inkwell-700 ${className}`}
+      className={`relative flex w-full flex-none flex-col text-inkwell-700 ${className}`}
     >
       <BlueprintRule
         orientation="h"

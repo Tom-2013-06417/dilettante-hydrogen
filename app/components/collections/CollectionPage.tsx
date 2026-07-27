@@ -42,7 +42,7 @@ export function CollectionPage({collection}: CollectionPageProps) {
         className="pointer-events-none absolute inset-y-0 left-4 z-20 text-inkwell-700/35 sm:left-8"
       />
 
-      <HeaderBar className="bg-vellum-100" showLeftRule={false} />
+      <HeaderBar className="bg-vellum-paper" showLeftRule={false} />
 
       <PageContainer>
         <CollectionHeader

@@ -139,7 +139,7 @@ export function ScentNotesExplorer({
     <section
       ref={sectionRef}
       id="scent-anatomy"
-      className="relative h-[320vh] w-full bg-vellum-100 font-['trust-3a'] text-inkwell-700"
+      className="relative h-[320vh] w-full font-['trust-3a'] text-inkwell-700"
     >
       <div className="sticky top-0 h-svh overflow-x-clip">
         <PageContainer className="flex h-full flex-col">

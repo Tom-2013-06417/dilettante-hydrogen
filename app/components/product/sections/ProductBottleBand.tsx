@@ -22,7 +22,7 @@ export function ProductBottleBand({
 }: ProductBottleBandProps) {
   return (
     <div
-      className="relative flex min-h-0 w-full flex-1 flex-col overflow-x-clip overflow-y-visible bg-vellum-100 text-inkwell-700"
+      className="relative flex min-h-0 w-full flex-1 flex-col overflow-x-clip overflow-y-visible text-inkwell-700"
       aria-label={`${title} bottle`}
     >
       <div className="relative flex min-h-0 w-full flex-1">

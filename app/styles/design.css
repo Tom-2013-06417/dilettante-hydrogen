@@ -130,12 +130,20 @@
   Paper grain on body (product + collection) and .bg-vellum-paper (e.g. sticky
   navbar). Same stack everywhere so wash strength matches.
   --vellum-paper-wash is the solid veil over the texture (0.5 ≈ 50% grain).
+
+  Elevated plates (collection cards, product title) use .bg-vellusum with a
+  separate tile so they can differ from the page grain.
 */
 :root {
-  --vellum-paper-size: 300px;
+  --vellum-paper-size: 500px;
   --vellum-paper-texture: url('/vellum-test-1.jpg');
   --vellum-paper-wash: 0.3;
   --vellum-paper-base: 255 246 230;
+
+  --vellusum-size: 250px;
+  --vellusum-texture: url('/vellum-test-1.jpg');
+  --vellusum-wash: 0.5;
+  --vellusum-base: 255 246 230;
 }
 
 .bg-vellum-paper,
@@ -151,6 +159,20 @@ body:has(.main--collection) {
   background-size:
     auto,
     var(--vellum-paper-size) var(--vellum-paper-size);
+  background-repeat: repeat;
+}
+
+.bg-vellusum {
+  background-color: rgb(var(--vellusum-base));
+  background-image:
+    linear-gradient(
+      rgb(var(--vellusum-base) / var(--vellusum-wash)),
+      rgb(var(--vellusum-base) / var(--vellusum-wash))
+    ),
+    var(--vellusum-texture);
+  background-size:
+    auto,
+    var(--vellusum-size) var(--vellusum-size);
   background-repeat: repeat;
 }
 

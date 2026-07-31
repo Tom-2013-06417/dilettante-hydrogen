@@ -35,7 +35,7 @@ export function ProductTitle({
         </span>
       </div>
 
-      <div className="relative block w-fit min-w-50 max-w-full overflow-visible bg-vellum-100 pt-1 pb-3 shadow-[0_2px_3px_rgba(21,32,21,0.35)]">
+      <div className="relative block w-fit min-w-50 max-w-full overflow-visible bg-vellusum pt-1 pb-3 shadow-[0_2px_3px_rgba(21,32,21,0.35)]">
         {/*
           Figma mono noise (#FFF6E6, ~22% density, size ~0.5) via SVG filter.
           feTurbulence → cream speckles composited into the glyph fill.

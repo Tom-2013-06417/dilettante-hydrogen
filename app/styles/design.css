@@ -127,18 +127,30 @@
 }
 
 /*
-  Paper grain on body (product + collection). Use .bg-vellum-paper for
-  opaque surfaces that must match (e.g. sticky navbar) — not .bg-vellum-100.
+  Paper grain on body (product + collection) and .bg-vellum-paper (e.g. sticky
+  navbar). Same stack everywhere so wash strength matches.
+  --vellum-paper-wash is the solid veil over the texture (0.5 ≈ 50% grain).
 */
 :root {
-  --vellum-paper-size: 30px;
-  --vellum-paper-texture: url('/vellum-paper-grain.png');
+  --vellum-paper-size: 300px;
+  --vellum-paper-texture: url('/vellum-test-1.jpg');
+  --vellum-paper-wash: 0.3;
+  --vellum-paper-base: 255 246 230;
 }
 
-.bg-vellum-paper {
-  background-color: rgb(255 246 230);
-  background-image: var(--vellum-paper-texture);
-  background-size: var(--vellum-paper-size) var(--vellum-paper-size);
+.bg-vellum-paper,
+body:has(.main--product),
+body:has(.main--collection) {
+  background-color: rgb(var(--vellum-paper-base));
+  background-image:
+    linear-gradient(
+      rgb(var(--vellum-paper-base) / var(--vellum-paper-wash)),
+      rgb(var(--vellum-paper-base) / var(--vellum-paper-wash))
+    ),
+    var(--vellum-paper-texture);
+  background-size:
+    auto,
+    var(--vellum-paper-size) var(--vellum-paper-size);
   background-repeat: repeat;
 }
 
@@ -154,14 +166,6 @@
 
 body:has(.main--home) {
   background-color: rgb(14 22 14);
-}
-
-body:has(.main--product),
-body:has(.main--collection) {
-  background-color: rgb(255 246 230);
-  background-image: var(--vellum-paper-texture);
-  background-size: var(--vellum-paper-size) var(--vellum-paper-size);
-  background-repeat: repeat;
 }
 
 /* Teaser: paint html/body inkwell so overscroll isn't white (app.css body is

@@ -45,19 +45,23 @@ export function CollectionProductCard({
     >
       <BlueprintRule
         orientation="h"
-        className="pointer-events-none absolute inset-x-0 top-4 z-0 text-inkwell-700/30"
+        variant="dotted"
+        className="pointer-events-none absolute inset-x-0 top-4 z-0 text-inkwell-700/18"
       />
       <BlueprintRule
         orientation="v"
-        className="pointer-events-none absolute inset-y-0 left-4 z-0 text-inkwell-700/30"
+        variant="dotted"
+        className="pointer-events-none absolute inset-y-0 left-4 z-0 text-inkwell-700/18"
       />
       <BlueprintRule
         orientation="v"
-        className="pointer-events-none absolute inset-y-0 right-4 z-0 text-inkwell-700/30"
+        variant="dotted"
+        className="pointer-events-none absolute inset-y-0 right-4 z-0 text-inkwell-700/18"
       />
       <BlueprintRule
         orientation="h"
-        className="pointer-events-none absolute inset-x-0 bottom-4 z-0 text-inkwell-700/30"
+        variant="dotted"
+        className="pointer-events-none absolute inset-x-0 bottom-4 z-0 text-inkwell-700/18"
       />
 
       <div className="z-1 flex w-[65%] min-w-0 shrink-0 flex-col justify-center">
@@ -73,14 +77,16 @@ export function CollectionProductCard({
         <div className="overflow-visible" aria-hidden>
           <BlueprintRule
             orientation="h"
-            className="pointer-events-none absolute inset-x-0 z-0 text-inkwell-700/30"
+            variant="dotted"
+            className="pointer-events-none absolute inset-x-0 z-0 text-inkwell-700/18"
           />
           <span className="relative z-1 -mt-0.5 -mb-1 block wrap-break-word font-['wayfinder-cf'] text-[clamp(1.75rem,9vw,4.25rem)] font-light leading-[0.86] tracking-[-6%]">
             {title}
           </span>
           <BlueprintRule
             orientation="h"
-            className="pointer-events-none absolute inset-x-0 z-0 text-inkwell-700/30"
+            variant="dotted"
+            className="pointer-events-none absolute inset-x-0 z-0 text-inkwell-700/18"
           />
         </div>
 

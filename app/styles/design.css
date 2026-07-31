@@ -105,6 +105,23 @@
   );
 }
 
+/* Shorter, denser dashes — nearly square marks along the 1px rule. */
+.blueprint-rule-h.blueprint-rule--dotted {
+  background-image: repeating-linear-gradient(
+    to right,
+    currentColor 0 1.5px,
+    transparent 1.5px 4px
+  );
+}
+
+.blueprint-rule-v.blueprint-rule--dotted {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    currentColor 0 1.5px,
+    transparent 1.5px 4px
+  );
+}
+
 .page-transition-content--static {
   position: relative;
 }

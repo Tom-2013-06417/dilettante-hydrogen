@@ -60,13 +60,19 @@ export default function PackagingCubeCanvas({
   return (
     <Canvas
       camera={{position: [0, 0.15, 3.7], fov: 42}}
-      gl={{antialias: true, alpha: false, toneMapping: THREE.NoToneMapping}}
+      gl={{antialias: true, alpha: true, toneMapping: THREE.NoToneMapping}}
       onCreated={({gl}) => {
-        gl.setClearColor('#fff6e6', 1);
+        // Transparent clear so the page vellum texture shows through
+        gl.setClearColor(0x000000, 0);
       }}
       flat
       className="h-full w-full touch-pan-y"
-      style={{width: '100%', height: '100%', display: 'block'}}
+      style={{
+        width: '100%',
+        height: '100%',
+        display: 'block',
+        background: 'transparent',
+      }}
     >
       <Suspense fallback={null}>
         <FramingCamera distance={3.7} horizontalFovDeg={40} />

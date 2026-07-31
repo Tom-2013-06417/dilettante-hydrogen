@@ -123,7 +123,13 @@ export function ScentNotesExplorer({
       className="relative z-10 w-full font-['trust-3a'] text-inkwell-700"
       style={{height: `${SECTION_VH}vh`}}
     >
-      <div className="sticky top-0 z-10 h-svh overflow-hidden">
+      {/*
+        Paper fill lives on this sticky shell (not only body). Transparent
+        WebGL inside sticky + overflow:hidden often composites against the
+        local stacking context — without a local paint, the canvas reads as
+        flat solid cream instead of the page grain.
+      */}
+      <div className="sticky top-0 z-10 h-svh overflow-hidden bg-vellum-paper">
         <div className="flex h-full flex-col">
           <PageContainer className="flex h-full flex-col">
             <div className="relative mx-auto h-full w-full max-w-4xl">

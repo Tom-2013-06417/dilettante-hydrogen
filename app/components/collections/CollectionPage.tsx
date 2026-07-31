@@ -1,5 +1,4 @@
 import {HeaderBar} from '~/components/home/sections/HeaderBar';
-import {BlueprintRule} from '~/components/product/BlueprintRule';
 import {PageContainer} from '~/components/shared';
 import {parseCollectionMetafields} from '~/lib/collectionMetafields';
 import {CollectionHeader} from './CollectionHeader';
@@ -33,16 +32,7 @@ export function CollectionPage({collection}: CollectionPageProps) {
 
   return (
     <article className="collection-page relative min-h-svh w-full text-inkwell-700">
-      {/*
-        Full-page left rule: above the navbar logo (z-20), under the cards
-        (cards sit at z-30).
-      */}
-      <BlueprintRule
-        orientation="v"
-        className="pointer-events-none absolute inset-y-0 left-4 z-20 text-inkwell-700/35 sm:left-8"
-      />
-
-      <HeaderBar className="bg-vellum-paper" showLeftRule={false} />
+      <HeaderBar className="bg-vellum-paper" />
 
       <PageContainer className="relative z-30 pb-16 sm:pb-24">
         <CollectionHeader

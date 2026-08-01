@@ -77,13 +77,17 @@ function TierLabel({
   const side = tierLabelSide(tier.id);
   const onLeft = side === 'left';
   const opacity = Math.min(1, progress * 1.35);
-  const x = (1 - Math.min(1, progress * 1.2)) * (onLeft ? -8 : 8);
+  // Entrance slide, then a steady inset toward the cube
+  const enterX = (1 - Math.min(1, progress * 1.2)) * (onLeft ? -8 : 8);
+  const insetX = onLeft ? 28 : -28;
 
   return (
     <li
       ref={labelRef}
-      className="pointer-events-none flex max-w-44 flex-col items-center text-center"
-      style={{opacity, transform: `translateX(${x}px)`}}
+      className={`pointer-events-none flex max-w-44 flex-col ${
+        onLeft ? 'items-start text-left' : 'items-end text-right'
+      }`}
+      style={{opacity, transform: `translateX(${insetX + enterX}px)`}}
     >
       <span className="relative text-[11px] font-medium uppercase tracking-[0.12em] text-inkwell-700">
         {tier.label}
@@ -96,7 +100,11 @@ function TierLabel({
         />
       </span>
       {tier.notes.length ? (
-        <span className="mt-1 flex flex-col items-center gap-0 text-[11px] lowercase leading-tight tracking-[0.06em] text-inkwell-700/65">
+        <span
+          className={`mt-1 flex flex-col gap-0 text-[11px] lowercase leading-tight tracking-[0.06em] text-inkwell-700/65 ${
+            onLeft ? 'items-start' : 'items-end'
+          }`}
+        >
           {tier.notes.map((note) => (
             <span key={note}>{note}</span>
           ))}
@@ -227,7 +235,7 @@ export function CubeBlueprintAnnotations({
       className="pointer-events-none absolute inset-0 z-2"
       aria-hidden={!visible}
     >
-      <ul className="absolute top-[8%] bottom-[10%] left-0 flex w-[min(30%,10rem)] flex-col items-end justify-evenly pl-1 sm:w-[min(28%,11rem)] sm:pl-3">
+      <ul className="absolute top-[8%] bottom-[10%] left-0 flex w-[min(32%,11rem)] flex-col items-start justify-evenly py-2 pl-1 sm:w-[min(30%,12rem)] sm:pl-3">
         {leftTiers.map((tier) => (
           <TierLabel
             key={tier.id}
@@ -239,7 +247,7 @@ export function CubeBlueprintAnnotations({
         ))}
       </ul>
 
-      <ul className="absolute top-[8%] bottom-[10%] right-0 flex w-[min(30%,10rem)] flex-col items-start justify-evenly pr-1 sm:w-[min(28%,11rem)] sm:pr-3">
+      <ul className="absolute top-[8%] bottom-[10%] right-0 flex w-[min(32%,11rem)] flex-col items-end justify-evenly py-2 pr-1 sm:w-[min(30%,12rem)] sm:pr-3">
         {rightTiers.map((tier) => (
           <TierLabel
             key={tier.id}

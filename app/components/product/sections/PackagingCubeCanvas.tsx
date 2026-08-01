@@ -59,7 +59,7 @@ export default function PackagingCubeCanvas({
 }: PackagingCubeCanvasProps) {
   return (
     <Canvas
-      camera={{position: [0, 0.15, 3.7], fov: 42}}
+      camera={{position: [0, 0.15, 3.85], fov: 42}}
       gl={{antialias: true, alpha: true, toneMapping: THREE.NoToneMapping}}
       onCreated={({gl}) => {
         // Transparent clear so the page vellum texture shows through
@@ -75,7 +75,7 @@ export default function PackagingCubeCanvas({
       }}
     >
       <Suspense fallback={null}>
-        <FramingCamera distance={3.7} horizontalFovDeg={40} />
+        <FramingCamera distance={3.85} horizontalFovDeg={40} />
         <PackagingCubeScene
           textureUrl={textureUrl}
           tiers={tiers}

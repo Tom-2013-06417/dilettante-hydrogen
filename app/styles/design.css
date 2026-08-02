@@ -176,6 +176,22 @@ body:has(.main--collection) {
   background-repeat: repeat;
 }
 
+/*
+  Soft ink soak past glyph edges — as if the type wicked into paper fiber.
+  Uses text-shadow (not filter) so it stacks with SVG glyph filters
+  (e.g. product-title noise + patchy overflow). Scales with type size via em.
+  Parent needs overflow: visible so the fringe isn't clipped.
+*/
+.ink-bleed {
+  text-shadow:
+    /* near-edge soften */
+    0 0 0.01em currentColor,
+    /* asymmetric micro-spreads */
+    0.004em 0.003em 0.007em color-mix(in srgb, currentColor 28%, transparent),
+    -0.003em 0.002em 0.008em color-mix(in srgb, currentColor 16%, transparent),
+    0.002em -0.004em 0.009em color-mix(in srgb, currentColor 10%, transparent);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-fade-up,
   .animate-fade-in,

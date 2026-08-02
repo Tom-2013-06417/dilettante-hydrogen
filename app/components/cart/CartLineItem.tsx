@@ -1,9 +1,16 @@
-import type {CartLineUpdateInput} from '@shopify/hydrogen/storefront-api-types';
+import {MinusIcon, PlusIcon, TrashIcon} from '@heroicons/react/24/outline';
 import type {CartLayout, LineItemChildrenMap} from './CartMain';
-import {CartForm, Image, type OptimisticCartLine} from '@shopify/hydrogen';
+import {useCartLineUpdates} from './CartLineUpdates';
+import {
+  CartForm,
+  Image,
+  Money,
+  type OptimisticCartLine,
+} from '@shopify/hydrogen';
+import type {MoneyV2} from '@shopify/hydrogen/storefront-api-types';
+import {useEffect, useRef, useState} from 'react';
 import {useVariantUrl} from '~/lib/variants';
 import {Link} from 'react-router';
-import {ProductPrice} from '~/components/product';
 import {useAside} from '~/components/layout';
 import type {
   CartApiQueryFragment,
@@ -11,6 +18,69 @@ import type {
 } from 'storefrontapi.generated';
 
 export type CartLine = OptimisticCartLine<CartApiQueryFragment>;
+
+/**
+ * How long the unit price takes to slide in or out.
+ * Must match the animation duration in `.cart-line-unit-price` (app.css).
+ */
+const UNIT_PRICE_ANIMATION_MS = 240;
+
+/**
+ * Keeps a element rendered for `ms` after it stops being wanted, so it can
+ * animate out — React would otherwise drop it from the tree the same frame and
+ * there would be nothing left to animate.
+ *
+ * Returns whether to render it at all, separately from whether it is on its way
+ * out, so the caller can swap the animation.
+ */
+function useRetreat(visible: boolean, ms: number) {
+  const [rendered, setRendered] = useState(visible);
+
+  useEffect(() => {
+    if (visible) {
+      setRendered(true);
+      return;
+    }
+    const timer = setTimeout(() => setRendered(false), ms);
+    return () => clearTimeout(timer);
+  }, [ms, visible]);
+
+  return {rendered, retreating: rendered && !visible};
+}
+
+/**
+ * Measures the line's text block so the thumbnail can be a square of exactly
+ * that height.
+ *
+ * This cannot be done in CSS. Flex sizes the main axis (width) before the cross
+ * axis (height) and never revisits it, so a width derived from the text's height
+ * is unavailable: an `<img>` ends up sizing the square from its own intrinsic
+ * width and stretching the row, and an `aspect-ratio` wrapper has no width to
+ * resolve. Grid has the same ordering. Hence the observer.
+ *
+ * The text block must be `align-self: flex-start` (see `.cart-line-inner`) — if
+ * it stretched to the row it would report the row's height, which the square
+ * sets, and any starting size would look self-consistent.
+ */
+function useTextBlockSquare() {
+  const textRef = useRef<HTMLDivElement>(null);
+  const [side, setSide] = useState<number | null>(null);
+
+  useEffect(() => {
+    const element = textRef.current;
+    if (!element || typeof ResizeObserver === 'undefined') return;
+
+    const observer = new ResizeObserver(() => {
+      // Rounded up: a fractional height would leave a hairline of background
+      // below the image.
+      setSide(Math.ceil(element.getBoundingClientRect().height));
+    });
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+
+  return {textRef, side};
+}
 
 /**
  * A single line item in the cart. It displays the product image, title, price.
@@ -33,22 +103,53 @@ export function CartLineItem({
   const {close} = useAside();
   const lineItemChildren = childrenMap[id];
   const childrenLabelId = `cart-line-children-${id}`;
+  const scentNumber = product.scentNumber?.value?.trim();
+  const {getDraftQuantity} = useCartLineUpdates();
+  // A queued quantity has not reached the server yet, so it wins over the
+  // server value for both the stepper and the subtotal below.
+  const quantity = getDraftQuantity(id) ?? line.quantity;
+  const unitPrice = line?.cost?.amountPerQuantity ?? merchandise.price;
+  const {textRef, side} = useTextBlockSquare();
+  // At quantity 1 the per-piece price would only restate the subtotal.
+  const {rendered: showUnitPrice, retreating} = useRetreat(
+    quantity > 1 && !!unitPrice,
+    UNIT_PRICE_ANIMATION_MS,
+  );
 
   return (
-    <li key={id} className="cart-line">
+    <li key={id} className="cart-line relative">
+      <CartLineRemoveButton
+        className="absolute right-0 top-2 z-10"
+        lineIds={[id]}
+        disabled={!!line.isOptimistic}
+      />
+
       <div className="cart-line-inner">
+        {/* Side comes from the measured text height; the CSS default covers the
+            first paint. The <Image> dimensions only pick the asset resolution. */}
         {image && (
-          <Image
-            alt={title}
-            aspectRatio="1/1"
-            data={image}
-            height={100}
-            loading="lazy"
-            width={100}
-          />
+          <div
+            className="cart-line-media"
+            style={side ? {height: side, width: side} : undefined}
+          >
+            <Image
+              alt={title}
+              aspectRatio="1/1"
+              data={image}
+              height={96}
+              loading="lazy"
+              width={96}
+            />
+          </div>
         )}
 
-        <div>
+        <div className="min-w-0 flex-1" ref={textRef}>
+          {scentNumber ? (
+            <span className="block font-['config-mono-vf'] text-[12px] font-medium leading-none tracking-[0.02em] [font-variant-numeric:slashed-zero]">
+              No. {scentNumber}
+            </span>
+          ) : null}
+
           <Link
             prefetch="intent"
             to={lineItemUrl}
@@ -58,22 +159,46 @@ export function CartLineItem({
               }
             }}
           >
-            <p>
-              <strong>{product.title}</strong>
+            {/* Important modifiers: reset.css is unlayered, so its `p` rules
+                (line-height: 1.25, margin: 0) outrank layered utilities. */}
+            <p className="mt-1! font-['wayfinder-cf'] text-[36px] font-thin leading-none! tracking-[-5%]">
+              {product.title}
             </p>
           </Link>
-          <ProductPrice price={line?.cost?.totalAmount} />
-          <ul>
-            {selectedOptions.map((option) => (
-              <li key={option.name}>
-                <small>
-                  {option.name}: {option.value}
-                </small>
-              </li>
-            ))}
-          </ul>
-          <CartLineQuantity line={line} />
+
+          {/* The per-piece price only earns its space once there is more than
+              one piece; at quantity 1 it just restates the subtotal. */}
+          <span className="cart-line-size mt-1 block text-[13px] leading-none">
+            {showUnitPrice && unitPrice ? (
+              <span
+                className={`cart-line-unit-price text-vellum-100/80 ${
+                  retreating ? 'is-retreating' : ''
+                }`.trim()}
+              >
+                <Money as="span" data={unitPrice} />
+                {' / '}
+              </span>
+            ) : null}
+            {title}
+          </span>
         </div>
+      </div>
+
+      {/* Prices stack on the left, stepper on the right. */}
+      <div className="mt-3 flex items-end justify-between gap-3">
+        {unitPrice ? (
+          <div className="min-w-0 font-['config-mono-vf'] tracking-[0.04em]">
+            <span className="block text-[10px] uppercase tracking-[0.08em] text-vellum-100/60">
+              Subtotal
+            </span>
+            <Money
+              as="span"
+              className="mt-px block text-[16px]"
+              data={lineSubtotal(unitPrice, quantity)}
+            />
+          </div>
+        ) : null}
+        <CartLineQuantity line={line} quantity={quantity} />
       </div>
 
       {lineItemChildren ? (
@@ -98,42 +223,66 @@ export function CartLineItem({
 }
 
 /**
- * Provides the controls to update the quantity of a line item in the cart.
- * These controls are disabled when the line item is new, and the server
- * hasn't yet responded that it was successfully added to the cart.
+ * The line subtotal, multiplied in the browser so a quantity change prices
+ * itself immediately instead of waiting for the cart mutation to come back.
+ * `Money` formats through Intl at the currency's own precision, so the float
+ * multiply here can never surface as a wrong cent.
  */
-function CartLineQuantity({line}: {line: CartLine}) {
+function lineSubtotal(unitPrice: MoneyV2, quantity: number): MoneyV2 {
+  return {...unitPrice, amount: String(Number(unitPrice.amount) * quantity)};
+}
+
+/**
+ * Provides the controls to update the quantity of a line item in the cart.
+ * They stay live on a line the server has not saved yet — the drawer opens
+ * mid-add and a dead stepper is exactly what a shopper reaches for first. The
+ * provider holds the request back until the line has a real id.
+ *
+ * `quantity` is passed in rather than read off the line so the stepper and the
+ * subtotal beside it can never disagree.
+ */
+function CartLineQuantity({
+  line,
+  quantity: displayed,
+}: {
+  line: CartLine;
+  quantity: number;
+}) {
+  const {setQuantity} = useCartLineUpdates();
   if (!line || typeof line?.quantity === 'undefined') return null;
-  const {id: lineId, quantity, isOptimistic} = line;
-  const prevQuantity = Number(Math.max(0, quantity - 1).toFixed(0));
-  const nextQuantity = Number((quantity + 1).toFixed(0));
+
+  // The box's width comes from --cart-line-stepper-width, so the three cells
+  // divide that width rather than setting their own and overflowing it.
+  // The glyph dips on press — the button's own box is transparent inside the
+  // bordered group, so scaling it reads as the icon being pushed in.
+  const buttonClassName =
+    'flex h-8 flex-1 cursor-pointer items-center justify-center transition-transform duration-100 ease-out active:scale-75 disabled:cursor-default disabled:opacity-40';
 
   return (
-    <div className="cart-line-quantity">
-      <small>Quantity: {quantity} &nbsp;&nbsp;</small>
-      <CartLineUpdateButton lines={[{id: lineId, quantity: prevQuantity}]}>
-        <button
-          aria-label="Decrease quantity"
-          disabled={quantity <= 1 || !!isOptimistic}
-          name="decrease-quantity"
-          value={prevQuantity}
-        >
-          <span>&#8722; </span>
-        </button>
-      </CartLineUpdateButton>
-      &nbsp;
-      <CartLineUpdateButton lines={[{id: lineId, quantity: nextQuantity}]}>
-        <button
-          aria-label="Increase quantity"
-          name="increase-quantity"
-          value={nextQuantity}
-          disabled={!!isOptimistic}
-        >
-          <span>&#43;</span>
-        </button>
-      </CartLineUpdateButton>
-      &nbsp;
-      <CartLineRemoveButton lineIds={[lineId]} disabled={!!isOptimistic} />
+    <div className="cart-line-quantity items-center border border-current">
+      <button
+        aria-label="Decrease quantity"
+        className={buttonClassName}
+        disabled={displayed <= 1}
+        onClick={() => setQuantity(line, displayed - 1)}
+        type="button"
+      >
+        <MinusIcon className="h-3 w-3" aria-hidden="true" />
+      </button>
+      <span
+        aria-live="polite"
+        className="flex-1 text-center font-['config-mono-vf'] text-[12px] leading-none [font-variant-numeric:slashed-zero]"
+      >
+        {displayed}
+      </span>
+      <button
+        aria-label="Increase quantity"
+        className={buttonClassName}
+        onClick={() => setQuantity(line, displayed + 1)}
+        type="button"
+      >
+        <PlusIcon className="h-3 w-3" aria-hidden="true" />
+      </button>
     </div>
   );
 }
@@ -146,52 +295,41 @@ function CartLineQuantity({line}: {line: CartLine}) {
 function CartLineRemoveButton({
   lineIds,
   disabled,
+  className = '',
 }: {
   lineIds: string[];
   disabled: boolean;
+  className?: string;
 }) {
+  const {cancelQuantity} = useCartLineUpdates();
+
   return (
     <CartForm
-      fetcherKey={getUpdateKey(lineIds)}
+      fetcherKey={getLineActionKey(CartForm.ACTIONS.LinesRemove, lineIds)}
       route="/cart"
       action={CartForm.ACTIONS.LinesRemove}
       inputs={{lineIds}}
     >
-      <button disabled={disabled} type="submit">
-        Remove
+      <button
+        aria-label="Remove from cart"
+        className={`flex h-6 w-6 cursor-pointer items-center justify-center opacity-70 transition-opacity hover:opacity-100 disabled:opacity-40 ${className}`.trim()}
+        disabled={disabled}
+        // Drop any pending draft so the debounce cannot resurrect this line.
+        onClick={() => lineIds.forEach(cancelQuantity)}
+        type="submit"
+      >
+        <TrashIcon className="h-4 w-4" aria-hidden="true" />
       </button>
     </CartForm>
   );
 }
 
-function CartLineUpdateButton({
-  children,
-  lines,
-}: {
-  children: React.ReactNode;
-  lines: CartLineUpdateInput[];
-}) {
-  const lineIds = lines.map((line) => line.id);
-
-  return (
-    <CartForm
-      fetcherKey={getUpdateKey(lineIds)}
-      route="/cart"
-      action={CartForm.ACTIONS.LinesUpdate}
-      inputs={{lines}}
-    >
-      {children}
-    </CartForm>
-  );
-}
-
 /**
- * Returns a unique key for the update action. This is used to make sure actions modifying the same line
- * items are not run concurrently, but cancel each other. For example, if the user clicks "Increase quantity"
- * and "Decrease quantity" in rapid succession, the actions will cancel each other and only the last one will run.
- * @param lineIds - line ids affected by the update
- * @returns
+ * Returns a unique key per action + line, so that actions modifying the same
+ * line items are not run concurrently but cancel each other.
+ * @param action - the cart action being performed
+ * @param lineIds - line ids affected by the action
  */
-function getUpdateKey(lineIds: string[]) {
-  return [CartForm.ACTIONS.LinesUpdate, ...lineIds].join('-');
+function getLineActionKey(action: string, lineIds: string[]) {
+  return [action, ...lineIds].join('-');
 }

@@ -3,6 +3,8 @@ import type {CartLayout} from './CartMain';
 import {CartForm, Money, type OptimisticCart} from '@shopify/hydrogen';
 import {useEffect, useId, useRef, useState} from 'react';
 import {useFetcher} from 'react-router';
+import {Spinner} from '~/components/shared';
+import {useCartLineUpdates} from './CartLineUpdates';
 
 type CartSummaryProps = {
   cart: OptimisticCart<CartApiQueryFragment | null>;
@@ -13,49 +15,46 @@ export function CartSummary({cart, layout}: CartSummaryProps) {
   const className =
     layout === 'page' ? 'cart-summary-page' : 'cart-summary-aside';
   const summaryId = useId();
-  const discountsHeadingId = useId();
-  const discountCodeInputId = useId();
-  const giftCardHeadingId = useId();
-  const giftCardInputId = useId();
 
+  // Totals, discounts and gift cards are cleared until the design is finalized.
+  // CartDiscounts / CartGiftCard below are kept for when they are reinstated.
   return (
     <div aria-labelledby={summaryId} className={className}>
-      <h4 id={summaryId}>Totals</h4>
-      <dl role="group" className="cart-subtotal">
-        <dt>Subtotal</dt>
-        <dd>
-          {cart?.cost?.subtotalAmount?.amount ? (
-            <Money data={cart?.cost?.subtotalAmount} />
-          ) : (
-            '-'
-          )}
-        </dd>
-      </dl>
-      <CartDiscounts
-        discountCodes={cart?.discountCodes}
-        discountsHeadingId={discountsHeadingId}
-        discountCodeInputId={discountCodeInputId}
-      />
-      <CartGiftCard
-        giftCardCodes={cart?.appliedGiftCards}
-        giftCardHeadingId={giftCardHeadingId}
-        giftCardInputId={giftCardInputId}
-      />
+      <h4 id={summaryId} className="sr-only">
+        Totals
+      </h4>
       <CartCheckoutActions checkoutUrl={cart?.checkoutUrl} />
     </div>
   );
 }
 
 function CartCheckoutActions({checkoutUrl}: {checkoutUrl?: string}) {
+  const {isCartBusy} = useCartLineUpdates();
   if (!checkoutUrl) return null;
 
+  // Stays an anchor: checkout is a cross-origin navigation, so keeping the href
+  // preserves middle-click / open-in-new-tab and works without JS. `disabled` is
+  // not valid on an anchor, hence aria-disabled plus the click guard — CSS
+  // pointer-events alone would not stop keyboard activation.
   return (
-    <div>
-      <a href={checkoutUrl} target="_self">
-        <p>Continue to Checkout &rarr;</p>
-      </a>
-      <br />
-    </div>
+    <a
+      aria-busy={isCartBusy || undefined}
+      aria-disabled={isCartBusy || undefined}
+      className={`checkout-button mb-12 mt-4 flex items-center justify-center gap-2 bg-vellum-100 px-6 py-4 text-center font-heading text-base font-bold uppercase tracking-[0.2em] text-inkwell-700! no-underline transition-colors ${
+        isCartBusy
+          ? 'pointer-events-none opacity-60'
+          : 'hover:bg-inkwell-700 hover:text-vellum-100!'
+      }`}
+      href={checkoutUrl}
+      onClick={(event) => {
+        if (isCartBusy) event.preventDefault();
+      }}
+      tabIndex={isCartBusy ? -1 : undefined}
+      target="_self"
+    >
+      {isCartBusy ? <Spinner /> : null}
+      Checkout
+    </a>
   );
 }
 

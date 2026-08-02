@@ -17,6 +17,7 @@
   },
   "prettier": "@shopify/prettier-config",
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
     "@react-three/drei": "^9.122.0",
     "@react-three/fiber": "^8.18.0",
     "@shopify/hydrogen": "2026.4.3",

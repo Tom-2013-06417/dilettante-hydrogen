@@ -6,6 +6,7 @@ import wordmarkVellum from '~/assets/design/wordmark-vellum.svg';
 import fig01 from '~/assets/design/fig-01.jpg';
 import fig02 from '~/assets/design/fig-02.jpg';
 import heroLandscape from '~/assets/design/hero-landscape.jpg';
+import {Spinner} from '~/components/shared';
 import type {TeaserSlide} from '~/lib/teaserProducts';
 
 const FALLBACK_SLIDES: TeaserSlide[] = [
@@ -45,34 +46,6 @@ function CtaArrowIcon({className}: {className?: string}) {
         strokeWidth="1.25"
         strokeLinecap="square"
         strokeLinejoin="miter"
-      />
-    </svg>
-  );
-}
-
-function CtaSpinnerIcon({className}: {className?: string}) {
-  return (
-    <svg
-      className={className}
-      width="14"
-      height="14"
-      viewBox="0 0 14 14"
-      fill="none"
-      aria-hidden
-    >
-      <circle
-        cx="7"
-        cy="7"
-        r="5.25"
-        stroke="currentColor"
-        strokeOpacity="0.25"
-        strokeWidth="1.25"
-      />
-      <path
-        d="M12.25 7a5.25 5.25 0 0 0-5.25-5.25"
-        stroke="currentColor"
-        strokeWidth="1.25"
-        strokeLinecap="square"
       />
     </svg>
   );
@@ -147,18 +120,21 @@ export function TeaserPage({slides: productSlides}: TeaserPageProps) {
     setSubscribeKey((key) => key + 1);
   }, []);
 
-  const validateAndClearError = useCallback((value: string) => {
-    if (!value.trim()) {
-      clearEmailErrors();
-      return false;
-    }
-    if (!isValidEmail(value)) {
-      setEmailError('Invalid email');
-      return false;
-    }
-    setEmailError(null);
-    return true;
-  }, [clearEmailErrors]);
+  const validateAndClearError = useCallback(
+    (value: string) => {
+      if (!value.trim()) {
+        clearEmailErrors();
+        return false;
+      }
+      if (!isValidEmail(value)) {
+        setEmailError('Invalid email');
+        return false;
+      }
+      setEmailError(null);
+      return true;
+    },
+    [clearEmailErrors],
+  );
 
   const onSubscribeSubmit = useCallback(
     (event: FormEvent<HTMLFormElement>) => {
@@ -343,7 +319,7 @@ export function TeaserPage({slides: productSlides}: TeaserPageProps) {
                   className="teaser-email-submit absolute top-1/2 right-2.5 flex h-5 w-5 -translate-y-1/2 cursor-pointer items-center justify-center border-0 p-0 text-vellum-100 disabled:opacity-70"
                 >
                   {subscribing ? (
-                    <CtaSpinnerIcon className="motion-safe:animate-[teaser-spin_0.7s_linear_infinite]" />
+                    <Spinner className="motion-safe:animate-[teaser-spin_0.7s_linear_infinite]" />
                   ) : (
                     <CtaArrowIcon />
                   )}

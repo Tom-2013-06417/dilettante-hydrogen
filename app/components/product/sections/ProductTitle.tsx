@@ -12,7 +12,7 @@ type ProductTitleProps = {
 };
 
 const titleTypeClassName =
-  "ink-bleed relative z-0 -m-0.5 block pr-2 font-['wayfinder-cf'] font-light tracking-[-6%]";
+  "relative z-0 -m-0.5 block pr-2 font-['wayfinder-cf'] font-light tracking-[-6%]";
 
 /** Product-page scent title: No. badge + vellum plate with dashed cap/baseline rules. */
 export function ProductTitle({
@@ -38,10 +38,8 @@ export function ProductTitle({
       <div className="relative block w-fit min-w-50 max-w-full overflow-visible bg-vellusum pt-1 pb-3 shadow-[0_2px_3px_rgba(21,32,21,0.35)]">
         {/*
           SVG ink treatment:
-          1) Patchy overflow — low-freq turbulence masks a soft dilated fringe
-             so only some edges wick (heavy-ink blotches).
+          1) Circular ink dots grown off the glyph edge (not an outline fringe).
           2) Cream mono noise speckles inside the glyph fill.
-          Layers under .ink-bleed text-shadow (even edge soften).
         */}
         {enableNoise ? (
           <svg
@@ -50,99 +48,120 @@ export function ProductTitle({
           >
             <filter
               id="product-title-noise"
-              x="-20%"
-              y="-20%"
-              width="140%"
-              height="140%"
+              x="-40%"
+              y="-50%"
+              width="180%"
+              height="200%"
               filterUnits="objectBoundingBox"
+              primitiveUnits="userSpaceOnUse"
               colorInterpolationFilters="sRGB"
             >
               {/*
-                Sparse ink overflows — not a full outline fringe.
-                Low-freq noise is hard-thresholded into a few islands; only
-                where those islands meet the dilated edge do blotches appear.
-                Opacity still varies inside each island.
+                Circular ink dots off the glyph (not an outline fringe).
+                Seeds are generated only near the letters, then grown into
+                hard round lobes; interior is cut away so they stick out.
               */}
               <feTurbulence
                 type="fractalNoise"
-                baseFrequency="0.08"
-                numOctaves="2"
+                baseFrequency="0.16"
+                numOctaves="1"
                 seed="11"
                 stitchTiles="stitch"
-                result="inkMap"
+                result="dotNoise"
               />
-              {/* Hard cutoff: sparse islands, but denser than a few dots */}
+              {/* R → A */}
               <feColorMatrix
-                in="inkMap"
+                in="dotNoise"
                 type="matrix"
                 values="
                 0 0 0 0 0
                 0 0 0 0 0
                 0 0 0 0 0
-                2.2 0 0 0 -1.3"
-                result="islandsRaw"
+                1 0 0 0 0"
+                result="noiseAlpha"
               />
-              {/* Soften island edges; lift alphas toward solid ink */}
+              {/* Soft proximity field around glyphs */}
               <feGaussianBlur
-                in="islandsRaw"
-                stdDeviation="0.55"
-                result="islandsSoft"
+                in="SourceAlpha"
+                stdDeviation="2.8"
+                result="nearBlur"
               />
-              <feComponentTransfer in="islandsSoft" result="inkIslands">
-                <feFuncA
-                  type="gamma"
-                  amplitude="1"
-                  exponent="0.45"
-                  offset="0"
-                />
+              <feComponentTransfer in="nearBlur" result="nearZone">
+                <feFuncA type="linear" slope="5" intercept="-0.35" />
               </feComponentTransfer>
+              {/* Noise only near letters, then keep the stronger peaks */}
+              <feComposite
+                in="noiseAlpha"
+                in2="nearZone"
+                operator="in"
+                result="nearNoise"
+              />
+              <feComponentTransfer in="nearNoise" result="seedsRaw">
+                <feFuncA type="discrete" tableValues="0 0 1" />
+              </feComponentTransfer>
+              <feComponentTransfer in="seedsRaw" result="seeds">
+                <feFuncA type="discrete" tableValues="0 1" />
+              </feComponentTransfer>
+              {/* Grow into round dots via blur, then hard snap to solid ink */}
+              <feGaussianBlur
+                in="seeds"
+                stdDeviation="0.55"
+                result="grownDots"
+              />
+              <feComponentTransfer in="grownDots" result="blobsHard">
+                <feFuncA type="linear" slope="5" intercept="-3.2" />
+              </feComponentTransfer>
+              <feComponentTransfer in="blobsHard" result="roundBlobs">
+                <feFuncA type="discrete" tableValues="0 1" />
+              </feComponentTransfer>
+              {/*
+                Cut with an eroded glyph mask so lobes tuck under the
+                outline; SourceGraphic paints on top → continuous join.
+              */}
               <feMorphology
                 in="SourceAlpha"
-                operator="dilate"
-                radius="1.2"
-                result="dilated"
-              />
-              <feGaussianBlur
-                in="dilated"
-                stdDeviation="0.5"
-                result="dilatedSoft"
+                operator="erode"
+                radius="1.4"
+                result="insetCut"
               />
               <feComposite
-                in="dilatedSoft"
-                in2="SourceAlpha"
+                in="roundBlobs"
+                in2="insetCut"
                 operator="out"
-                result="halo"
+                result="edgeBlobs"
               />
-              {/* Only fringe that intersects an island — gaps stay clean */}
-              <feComposite
-                in="halo"
-                in2="inkIslands"
-                operator="in"
-                result="sparseHalo"
+              {/* Noisy edge jitter — displace, then re-snap so it stays crisp */}
+              <feTurbulence
+                type="turbulence"
+                baseFrequency="1.1"
+                numOctaves="3"
+                seed="23"
+                stitchTiles="stitch"
+                result="edgeJitter"
               />
               <feDisplacementMap
-                in="sparseHalo"
-                in2="inkMap"
-                scale="1.4"
+                in="edgeBlobs"
+                in2="edgeJitter"
+                scale="1.35"
                 xChannelSelector="R"
                 yChannelSelector="G"
-                result="patchyHalo"
+                result="jitteredBlobs"
               />
-              {/* inkwell-700 — matches product title ink */}
+              <feComponentTransfer in="jitteredBlobs" result="crispJitter">
+                <feFuncA type="discrete" tableValues="0 1" />
+              </feComponentTransfer>
+              {/* Same ink as text-inkwell-700 */}
               <feFlood
-                flood-color="rgb(21 32 21)"
+                flood-color="rgb(21, 32, 21)"
                 flood-opacity="1"
                 result="inkFill"
               />
               <feComposite
                 in="inkFill"
-                in2="patchyHalo"
+                in2="crispJitter"
                 operator="in"
-                result="coloredOverflow"
+                result="faintOverflow"
               />
-              <feComponentTransfer in="coloredOverflow" result="faintOverflow">
-                <feFuncA type="linear" slope="1.35" />
-              </feComponentTransfer>
 
               {/* Figma mono noise (#FFF6E6) inside glyph fill */}
               <feTurbulence

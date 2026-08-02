@@ -1,7 +1,12 @@
 import {Image} from '@shopify/hydrogen';
 import {motion, useReducedMotion} from 'motion/react';
 import {useCallback, useEffect, useRef, useState} from 'react';
-import type {VhsSlide} from '~/lib/vhsMetafields';
+import {
+  shopifyImageUrl,
+  VHS_BLOOM_WIDTH,
+  VHS_PLATE_WIDTH,
+  type VhsSlide,
+} from '~/lib/vhsMetafields';
 
 const AUTO_ADVANCE_MS = 4000;
 /** Exit crop + enter slam share the same gate speed. */
@@ -10,6 +15,33 @@ const GATE_MS = 90;
 const GATE_GAP_MS = 80;
 
 const BLOOM_OPACITY = 0.22;
+
+/** Cap srcset so mobile never races 3–4k masters (400…1400). */
+const PLATE_SRCSET = {
+  intervals: 6,
+  startingWidth: 400,
+  incrementSize: 200,
+  placeholderWidth: 200,
+} as const;
+
+function plateUrl(url: string, width = VHS_PLATE_WIDTH) {
+  // Match Hydrogen Image fluid srcset (`width` + default `crop=center`).
+  return shopifyImageUrl(url, {width, crop: 'center'});
+}
+
+function bloomUrl(url: string) {
+  return shopifyImageUrl(url, {width: VHS_BLOOM_WIDTH});
+}
+
+function prefetchPlate(url: string) {
+  if (typeof window === 'undefined') return;
+  // Warm the sizes mobile + retina typically pick from our capped srcset.
+  for (const width of [800, VHS_PLATE_WIDTH] as const) {
+    const img = new window.Image();
+    img.decoding = 'async';
+    img.src = plateUrl(url, width);
+  }
+}
 
 /** Soft vellum glow for chrome (number + ticks) — slightly stronger than stage bloom. */
 const CHROME_GLOW = `drop-shadow(0 0 6px rgb(255 246 230 / 0.4)) drop-shadow(0 0 14px rgb(255 246 230 / 0.28))`;
@@ -77,7 +109,7 @@ function VhsStageBloom({slide, mode}: {slide: VhsSlide; mode: LayerMode}) {
       aria-hidden
     >
       <img
-        src={slide.url}
+        src={bloomUrl(slide.url)}
         alt=""
         className="absolute top-1/2 left-1/2 h-[70vmax] w-[50vmax] max-w-none rounded-none object-cover"
         style={{
@@ -85,6 +117,8 @@ function VhsStageBloom({slide, mode}: {slide: VhsSlide; mode: LayerMode}) {
           transform: 'translate(-50%, -50%)',
         }}
         decoding="async"
+        loading="eager"
+        fetchPriority="low"
       />
     </motion.div>
   );
@@ -136,13 +170,16 @@ function VhsSlideLayer({
             data={{
               url: slide.url,
               altText: slide.altText,
-              width: slide.width ?? 1200,
-              height: slide.height ?? 1800,
+              // Cap reported width so Hydrogen filters srcset above plate max.
+              // Omit height so CDN resize stays width-only (CSS object-cover crops).
+              width: VHS_PLATE_WIDTH,
             }}
             alt={active ? slide.altText : ''}
             className="h-full w-full rounded-none object-cover"
-            sizes="(min-width: 1024px) 42rem, 70vw"
+            sizes="(min-width: 1024px) 42rem, (min-width: 640px) 55vw, 70vw"
+            srcSetOptions={PLATE_SRCSET}
             loading="eager"
+            fetchPriority={active ? 'high' : 'low'}
           />
         </motion.div>
       </div>
@@ -158,8 +195,11 @@ type Phase = 'idle' | 'exiting' | 'entering';
  */
 export function VhsSection({slides}: VhsSectionProps) {
   const stageRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLDivElement>(null);
   const busyRef = useRef(false);
   const reducedMotion = useReducedMotion();
+  /** Latch: mount bloom/plates only when near — avoids decode jank during scent anatomy. */
+  const [mediaArmed, setMediaArmed] = useState(false);
   const [carouselActive, setCarouselActive] = useState(false);
   const [index, setIndex] = useState(0);
   const [phase, setPhase] = useState<Phase>('idle');
@@ -169,21 +209,99 @@ export function VhsSection({slides}: VhsSectionProps) {
   const slideCount = slides.length;
   const label = String(index + 1).padStart(2, '0');
 
+  // Arm media only once the VHS block is approaching — not on first paint.
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el || mediaArmed) return;
+
+    const arm = () => setMediaArmed(true);
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting) return;
+        arm();
+        observer.disconnect();
+      },
+      {rootMargin: '50% 0px', threshold: 0},
+    );
+    observer.observe(el);
+
+    // DevTools device mode can miss IO; scroll check is a reliable backup.
+    const onScroll = () => {
+      const top = el.getBoundingClientRect().top;
+      if (top < window.innerHeight * 1.5) {
+        arm();
+        observer.disconnect();
+        window.removeEventListener('scroll', onScroll);
+      }
+    };
+    window.addEventListener('scroll', onScroll, {passive: true});
+    onScroll();
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('scroll', onScroll);
+    };
+  }, [mediaArmed]);
+
   useEffect(() => {
     const el = stageRef.current;
     if (!el) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        setCarouselActive(
-          Boolean(entry?.isIntersecting && entry.intersectionRatio >= 0.55),
+        const next = Boolean(
+          entry?.isIntersecting && entry.intersectionRatio >= 0.55,
         );
+        setCarouselActive((prev) => (prev === next ? prev : next));
       },
       {threshold: [0.55, 0.75, 1]},
     );
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
+
+  // Prefetch after arming, on idle — don't fight the scent-anatomy scroll thread.
+  useEffect(() => {
+    if (!mediaArmed || slideCount === 0) return;
+
+    let cancelled = false;
+    let idleId = 0;
+    let timeoutId = 0;
+
+    const warm = () => {
+      if (cancelled) return;
+      prefetchPlate(slides[0]!.url);
+      if (slides[1]) prefetchPlate(slides[1].url);
+      timeoutId = window.setTimeout(() => {
+        if (cancelled) return;
+        for (let i = 2; i < slides.length; i++) {
+          prefetchPlate(slides[i]!.url);
+        }
+      }, 600);
+    };
+
+    if (typeof window.requestIdleCallback === 'function') {
+      idleId = window.requestIdleCallback(warm, {timeout: 900});
+    } else {
+      timeoutId = window.setTimeout(warm, 120);
+    }
+
+    return () => {
+      cancelled = true;
+      if (idleId && typeof window.cancelIdleCallback === 'function') {
+        window.cancelIdleCallback(idleId);
+      }
+      window.clearTimeout(timeoutId);
+    };
+  }, [mediaArmed, slideCount, slides]);
+
+  // Keep the upcoming plate warm while the carousel runs.
+  useEffect(() => {
+    if (!carouselActive || slideCount <= 1) return;
+    const next = slides[(index + 1) % slideCount];
+    if (next) prefetchPlate(next.url);
+  }, [carouselActive, index, slideCount, slides]);
 
   const advanceTo = useCallback(
     (next: number) => {
@@ -271,6 +389,7 @@ export function VhsSection({slides}: VhsSectionProps) {
 
   return (
     <div
+      ref={sectionRef}
       className="vhs-section relative w-full text-vellum-100"
       aria-label="VHS"
     >
@@ -292,8 +411,8 @@ export function VhsSection({slides}: VhsSectionProps) {
       />
 
       <div className="relative w-full overflow-hidden bg-inkwell-900">
-        {/* Stage-level bloom — fills the inkwell field behind the plate */}
-        {bloomSlide && !reducedMotion ? (
+        {/* Bloom + plates stay unmounted until near — heavy blur/decode fights sticky WebGL. */}
+        {mediaArmed && bloomSlide && !reducedMotion ? (
           <VhsStageBloom
             key={`bloom-${bloomSlide.id}-${bloomMode}`}
             slide={bloomSlide}
@@ -350,7 +469,7 @@ export function VhsSection({slides}: VhsSectionProps) {
 
               <div className="relative min-h-0 w-full flex-1">
                 <div className="relative mx-auto aspect-2/3 h-full max-h-[clamp(42svh,70svh,78svh)] w-full">
-                  {outgoingSlide ? (
+                  {mediaArmed && outgoingSlide ? (
                     <VhsSlideLayer
                       key={`out-${outgoingSlide.id}`}
                       slide={outgoingSlide}
@@ -359,7 +478,7 @@ export function VhsSection({slides}: VhsSectionProps) {
                     />
                   ) : null}
 
-                  {currentSlide ? (
+                  {mediaArmed && currentSlide ? (
                     <VhsSlideLayer
                       key={currentSlide.id}
                       slide={currentSlide}

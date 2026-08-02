@@ -1,3 +1,4 @@
+import {ShoppingBagIcon, XMarkIcon} from '@heroicons/react/24/outline';
 import {
   createContext,
   type ReactNode,
@@ -61,11 +62,18 @@ export function Aside({
       aria-labelledby={headingId}
     >
       <button className="close-outside" onClick={close} />
-      <aside>
+      <aside className={type === 'cart' ? 'aside-cart' : ''}>
         <header>
-          <h3 id={headingId}>{heading}</h3>
+          <div className="aside-heading">
+            {type === 'cart' ? (
+              <ShoppingBagIcon className="h-5 w-5" aria-hidden="true" />
+            ) : null}
+            <h3 id={headingId} className="text-base">
+              {heading}
+            </h3>
+          </div>
           <button className="close reset" onClick={close} aria-label="Close">
-            &times;
+            <XMarkIcon className="h-5 w-5" aria-hidden="true" />
           </button>
         </header>
         <div className="aside-panel">

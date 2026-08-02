@@ -2,6 +2,10 @@
   --aside-width: 400px;
   --cart-aside-summary-height-with-discount: 300px;
   --cart-aside-summary-height: 250px;
+  /* See .cart-line-media — the text block's single-line height. */
+  --cart-line-media-size: 69px;
+  /* Wide enough for "- 18 +"; the thumbnail is no longer a usable width for it. */
+  --cart-line-stepper-width: 100px;
   --grid-item-width: 355px;
   --header-height: 64px;
   --color-dark: #000;
@@ -121,11 +125,38 @@ aside {
   background: var(--color-light);
   box-shadow: 0 0 50px rgba(0, 0, 0, 0.3);
   height: 100vh;
+  /* Mobile browser chrome overlaps the bottom of a 100vh box, which would hide
+     anything anchored to the drawer's bottom edge. */
+  height: 100dvh;
   width: min(var(--aside-width), 100vw);
   position: fixed;
   right: calc(-1 * var(--aside-width));
   top: 0;
   transition: transform 200ms ease-in-out;
+}
+
+/* The drawer and the /cart route share one inkwell/vellum treatment, so the
+   line item's vellum text reads on both surfaces. */
+aside.aside-cart,
+.cart {
+  background: var(--color-inkwell-700);
+  color: var(--color-vellum-100);
+}
+
+.cart {
+  padding: 1rem;
+}
+
+aside.aside-cart header {
+  border-bottom-color: var(--color-vellum-100);
+}
+
+/* Both override an explicit color set by the global h1-h6 rule. */
+aside.aside-cart header h3,
+.cart h1,
+aside.aside-cart a,
+.cart a {
+  color: var(--color-vellum-100);
 }
 
 aside header {
@@ -139,6 +170,12 @@ aside header {
 
 aside header h3 {
   margin: 0;
+}
+
+aside header .aside-heading {
+  align-items: center;
+  display: flex;
+  gap: 0.75rem;
 }
 
 aside header .close {
@@ -389,13 +426,91 @@ main {
 }
 
 .cart-line-inner {
+  /* Not stretch: useTextBlockSquare measures the text block, so its box has to
+     stay content-sized or it would just report back the height it caused. */
+  align-items: flex-start;
   display: flex;
 }
 
-.cart-line img {
-  height: 100%;
-  display: block;
+/* A square whose side is the height of the text block beside it. The side is set
+   inline by useTextBlockSquare; the values here are the first-paint default, and
+   what a client without ResizeObserver keeps. --cart-line-media-size is the
+   text block's single-line height, so the common case does not move on hydration:
+   12px No. + 4 + 36px title + 4 + 13px size line. */
+.cart-line-media {
+  aspect-ratio: 1 / 1;
+  flex: none;
+  height: var(--cart-line-media-size);
   margin-right: 0.75rem;
+  position: relative;
+  width: var(--cart-line-media-size);
+}
+
+/* The per-piece price slides in and carries the size label right with it, rather
+   than the label jumping the moment quantity passes 1. The negative margin is
+   what animates the push: it shortens the inline space the price occupies, so
+   shrinking it to zero moves everything after it. -12ch is about one price wide
+   in this line's monospace face; .cart-line-size clips the part still hanging off
+   to the left, so being a character out either way never shows. */
+@keyframes cart-line-unit-price-in {
+  from {
+    margin-left: -12ch;
+    opacity: 0;
+  }
+  to {
+    margin-left: 0;
+    opacity: 1;
+  }
+}
+
+.cart-line-size {
+  overflow: hidden;
+  /* Room for descenders inside the clip box — the line is set at leading-none, so
+     hiding overflow would otherwise shave the tails off. Cancelled by the margin
+     so the measured text height, and the square that follows it, do not change. */
+  margin-bottom: -0.3em;
+  padding-bottom: 0.3em;
+}
+
+/* Keep the 240ms in step with UNIT_PRICE_ANIMATION_MS in CartLineItem.tsx, which
+   is how long the span stays mounted after the quantity drops back to 1. */
+.cart-line-unit-price {
+  animation: cart-line-unit-price-in 240ms ease-out;
+}
+
+/* Retreating runs the same keyframes backwards, so the price slides back off to
+   the left and the size label follows it. `forwards` holds the hidden end state
+   for the moment between the animation finishing and React dropping the span. */
+.cart-line-unit-price.is-retreating {
+  animation: cart-line-unit-price-in 240ms ease-in reverse forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cart-line-unit-price {
+    animation: none;
+  }
+
+  /* No animation to wait on, so jump straight to the hidden state rather than
+     leaving the price on screen until the span unmounts. */
+  .cart-line-unit-price.is-retreating {
+    animation: none;
+    margin-left: -12ch;
+    opacity: 0;
+  }
+}
+
+.cart-line-media img {
+  display: block;
+  height: 100%;
+  inset: 0;
+  object-fit: cover;
+  position: absolute;
+  width: 100%;
+}
+
+.cart-line-quantity {
+  display: flex;
+  width: var(--cart-line-stepper-width);
 }
 
 .cart-summary-page {
@@ -411,8 +526,50 @@ main {
   width: calc(var(--aside-width) - 40px);
 }
 
-.cart-line-quantity {
+/* The drawer is one flex column from the aside down to the summary. The summary
+   used to be absolutely positioned at `bottom: 0` with a width derived from
+   --aside-width, which clipped it two ways on a phone: the fixed 360px overhung
+   a narrower drawer, and `bottom` resolved against a viewport taller than the
+   visible one. Sizing it in flow fixes both. */
+aside.aside-cart,
+aside.aside-cart .aside-panel,
+aside.aside-cart .cart-main,
+aside.aside-cart .cart-details {
   display: flex;
+  flex-direction: column;
+}
+
+aside.aside-cart .aside-panel,
+aside.aside-cart .cart-main,
+aside.aside-cart .cart-details {
+  flex: 1;
+  /* Without this the list refuses to shrink and pushes the summary off-screen. */
+  min-height: 0;
+}
+
+aside.aside-cart .cart-main {
+  max-height: none;
+  overflow: hidden;
+  /* .cart-main is a <section>, and the global section rule adds bottom padding
+     that used to fall outside the absolutely positioned summary. In flow it
+     would stack under the checkout button instead. */
+  padding-bottom: 0;
+}
+
+/* Scroll the lines, not the whole drawer, so the summary stays put. */
+aside.aside-cart .cart-line-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+aside.aside-cart .cart-summary-aside {
+  background: transparent;
+  border-top-color: var(--color-vellum-100);
+  flex-shrink: 0;
+  padding-bottom: 0.75rem;
+  position: static;
+  width: auto;
 }
 
 /* Child line components (warranties, gift wrapping, etc.) */

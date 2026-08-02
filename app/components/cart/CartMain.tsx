@@ -3,6 +3,7 @@ import {Link} from 'react-router';
 import type {CartApiQueryFragment} from 'storefrontapi.generated';
 import {useAside} from '~/components/layout';
 import {CartLineItem, type CartLine} from './CartLineItem';
+import {CartLineUpdatesProvider} from './CartLineUpdates';
 import {CartSummary} from './CartSummary';
 
 export type CartLayout = 'page' | 'aside';
@@ -47,7 +48,8 @@ export function CartMain({layout, cart: originalCart}: CartMainProps) {
     Boolean(cart?.discountCodes?.filter((code) => code.applicable)?.length);
   const className = `cart-main ${withDiscount ? 'with-discount' : ''}`;
   const cartHasItems = cart?.totalQuantity ? cart.totalQuantity > 0 : false;
-  const childrenMap = getLineItemChildrenMap(cart?.lines?.nodes ?? []);
+  const lines = cart?.lines?.nodes ?? [];
+  const childrenMap = getLineItemChildrenMap(lines);
 
   return (
     <section
@@ -55,33 +57,35 @@ export function CartMain({layout, cart: originalCart}: CartMainProps) {
       aria-label={layout === 'page' ? 'Cart page' : 'Cart drawer'}
     >
       <CartEmpty hidden={linesCount} layout={layout} />
-      <div className="cart-details">
-        <p id="cart-lines" className="sr-only">
-          Line items
-        </p>
-        <div>
-          <ul aria-labelledby="cart-lines">
-            {(cart?.lines?.nodes ?? []).map((line) => {
-              // we do not render non-parent lines at the root of the cart
-              if (
-                'parentRelationship' in line &&
-                line.parentRelationship?.parent
-              ) {
-                return null;
-              }
-              return (
-                <CartLineItem
-                  key={line.id}
-                  line={line}
-                  layout={layout}
-                  childrenMap={childrenMap}
-                />
-              );
-            })}
-          </ul>
+      <CartLineUpdatesProvider layout={layout} lines={lines}>
+        <div className="cart-details">
+          <p id="cart-lines" className="sr-only">
+            Line items
+          </p>
+          <div className="cart-line-list">
+            <ul aria-labelledby="cart-lines">
+              {lines.map((line) => {
+                // we do not render non-parent lines at the root of the cart
+                if (
+                  'parentRelationship' in line &&
+                  line.parentRelationship?.parent
+                ) {
+                  return null;
+                }
+                return (
+                  <CartLineItem
+                    key={line.id}
+                    line={line}
+                    layout={layout}
+                    childrenMap={childrenMap}
+                  />
+                );
+              })}
+            </ul>
+          </div>
+          {cartHasItems && <CartSummary cart={cart} layout={layout} />}
         </div>
-        {cartHasItems && <CartSummary cart={cart} layout={layout} />}
-      </div>
+      </CartLineUpdatesProvider>
     </section>
   );
 }

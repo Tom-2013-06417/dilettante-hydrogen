@@ -47,6 +47,9 @@ export const CART_QUERY_FRAGMENT = `#graphql
           title
           id
           vendor
+          scentNumber: metafield(namespace: "custom", key: "scent_number") {
+            value
+          }
         }
         selectedOptions {
           name
@@ -102,6 +105,9 @@ export const CART_QUERY_FRAGMENT = `#graphql
           title
           id
           vendor
+          scentNumber: metafield(namespace: "custom", key: "scent_number") {
+            value
+          }
         }
         selectedOptions {
           name

@@ -1,4 +1,3 @@
-import {Image} from '@shopify/hydrogen';
 import {useReducedMotion} from 'motion/react';
 import {useState} from 'react';
 import type {
@@ -12,7 +11,10 @@ import {HeaderBar} from '~/components/home/sections/HeaderBar';
 import {BlueprintRule} from '~/components/product/BlueprintRule';
 import {IntroFade} from '~/components/product/IntroFade';
 import {IntroTitleSlide} from '~/components/product/IntroTitleSlide';
-import {ProductHeroImageVeil} from '~/components/product/ProductHeroImageVeil';
+import {
+  HERO_BAND_IMAGE_SIZES,
+  ProductHeroPhoto,
+} from '~/components/product/ProductHeroPhoto';
 import {ProductPrice} from '~/components/product/ProductPrice';
 import {ScentFormatLine} from '~/components/shared/ScentFormatLine';
 import type {ScentProfile} from '~/lib/scentProfile';
@@ -67,17 +69,15 @@ export function ProductHero({
                   alt=""
                 />
               </div>
-              <div className="relative min-w-0 flex-1 overflow-hidden">
+              <div className="relative min-w-0 flex-1 overflow-hidden bg-vellum-100">
                 {image ? (
-                  <>
-                    <Image
-                      alt={image.altText || title}
-                      className="h-full w-full object-cover"
-                      data={image}
-                      sizes="(min-width: 768px) 85vw, 100vw"
-                    />
-                    <ProductHeroImageVeil />
-                  </>
+                  <ProductHeroPhoto
+                    image={image}
+                    alt={image.altText || title}
+                    className="h-full w-full object-cover"
+                    sizes={HERO_BAND_IMAGE_SIZES}
+                    fetchPriority="high"
+                  />
                 ) : (
                   <div className="h-full w-full bg-inkwell-700/15" />
                 )}

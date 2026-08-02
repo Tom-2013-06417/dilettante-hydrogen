@@ -11,6 +11,40 @@ export type ProductHalfTextures = {
 };
 
 /**
+ * Face textures bake at 512×256. Request slightly above that from Shopify
+ * CDN so square-center crops stay sharp without pulling the full master
+ * (~750KB+). 640 ≈ 6× smaller than the untransformed product photo.
+ */
+export const CUBE_FACE_SOURCE_WIDTH = 640;
+
+/**
+ * Append `width=` for Shopify CDN URLs. Local / bundled assets are unchanged.
+ */
+export function sizedCubeFaceImageUrl(
+  url: string,
+  width = CUBE_FACE_SOURCE_WIDTH,
+): string {
+  try {
+    const parsed = new URL(
+      url,
+      typeof window !== 'undefined'
+        ? window.location.origin
+        : 'https://localhost',
+    );
+    if (
+      parsed.hostname === 'cdn.shopify.com' ||
+      parsed.hostname.endsWith('.shopify.com')
+    ) {
+      parsed.searchParams.set('width', String(width));
+      return parsed.toString();
+    }
+  } catch {
+    // non-URL / relative — leave as-is
+  }
+  return url;
+}
+
+/**
  * Square-center the source image, then split into top / bottom halves
  * (2:1) matching the packaging cube side-face aspect.
  */
@@ -57,6 +91,7 @@ export function canvasesToHalfTextures(
 export function loadProductHalfCanvases(
   url: string,
 ): Promise<ProductHalfCanvases> {
+  const src = sizedCubeFaceImageUrl(url);
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.crossOrigin = 'anonymous';
@@ -67,7 +102,7 @@ export function loadProductHalfCanvases(
       }
       resolve(bakeProductHalfCanvases(img));
     };
-    img.onerror = () => reject(new Error(`failed to load ${url}`));
-    img.src = url;
+    img.onerror = () => reject(new Error(`failed to load ${src}`));
+    img.src = src;
   });
 }

@@ -45,7 +45,6 @@ const TOP_EXPLODE_Y = HALF_GAP;
 const BASE_EXPLODE_Y = -HALF_GAP;
 
 const FILL = '#fff6e6'; // vellum-100
-const INKWELL = '#152015'; // inkwell-700
 const EDGE = '#152015'; // inkwell-700
 const HATCH_FILL = '#152015'; // inkwell-700
 const HATCH_STROKE = '#fff6e6'; // vellum-100
@@ -230,24 +229,25 @@ type AnchorRefs = MutableRefObject<
   Partial<Record<ScentTierId, THREE.Object3D | null>>
 >;
 
-function InkwellSidePlanes({half}: {half: number}) {
+/** Cream stand-in while photo faces load — avoids a dark half-cube flash. */
+function PlaceholderSidePlanes({half}: {half: number}) {
   return (
     <>
       <mesh position={[0, 0, half + 0.002]}>
         <planeGeometry args={[SIZE, HALF_H]} />
-        <meshBasicMaterial color={INKWELL} toneMapped={false} />
+        <meshBasicMaterial color={FILL} toneMapped={false} />
       </mesh>
       <mesh position={[0, 0, -half - 0.002]} rotation={[0, Math.PI, 0]}>
         <planeGeometry args={[SIZE, HALF_H]} />
-        <meshBasicMaterial color={INKWELL} toneMapped={false} />
+        <meshBasicMaterial color={FILL} toneMapped={false} />
       </mesh>
       <mesh position={[half + 0.002, 0, 0]} rotation={[0, Math.PI / 2, 0]}>
         <planeGeometry args={[SIZE, HALF_H]} />
-        <meshBasicMaterial color={INKWELL} toneMapped={false} />
+        <meshBasicMaterial color={FILL} toneMapped={false} />
       </mesh>
       <mesh position={[-half - 0.002, 0, 0]} rotation={[0, -Math.PI / 2, 0]}>
         <planeGeometry args={[SIZE, HALF_H]} />
-        <meshBasicMaterial color={INKWELL} toneMapped={false} />
+        <meshBasicMaterial color={FILL} toneMapped={false} />
       </mesh>
     </>
   );
@@ -433,7 +433,7 @@ function BaseHalfBody({
       {halfCanvases ? (
         <PhotoSidePlanes halfCanvases={halfCanvases} half={half} />
       ) : (
-        <InkwellSidePlanes half={half} />
+        <PlaceholderSidePlanes half={half} />
       )}
 
       <group position={[0, HALF_H / 2 - HOLE_DEPTH / 2, 0]}>

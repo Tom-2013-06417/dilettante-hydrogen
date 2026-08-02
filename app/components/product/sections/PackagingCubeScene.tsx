@@ -1,5 +1,4 @@
 /* eslint-disable react/no-unknown-property -- R3F Three.js props */
-import {Edges} from '@react-three/drei';
 import {useFrame, useThree} from '@react-three/fiber';
 import {useEffect, useMemo, useRef, type MutableRefObject} from 'react';
 import * as THREE from 'three';
@@ -10,11 +9,13 @@ import {
   type CubeAnchorsMap,
 } from './cubeAnchors';
 import {CylinderBlueprintOutline} from './CylinderBlueprintOutline';
+import {HandDrawnBoxEdges} from './HandDrawnBoxEdges';
 import {bottleDimsForCube, PerfumeBottle} from './PerfumeBottle';
 import {
   canvasesToHalfTextures,
   type ProductHalfCanvases,
 } from './productHalfCrops';
+import {createHatchTamMaps, type HatchTamMaps} from './hatchTam';
 
 const SIZE = 1.2;
 const HALF_H = SIZE / 2;
@@ -43,162 +44,167 @@ const HALF_GAP = BOTTLE_H / 2 + EXPLODE_CLEARANCE;
 const TOP_EXPLODE_Y = HALF_GAP;
 const BASE_EXPLODE_Y = -HALF_GAP;
 
-/** Flat unlit fill (matches page) — assembled cube before split */
 const FILL = '#fff6e6'; // vellum-100
-/** Packaging green — inkwell-700 */
-const INKWELL = '#152015';
-/** Cube / packaging edge outlines */
+const INKWELL = '#152015'; // inkwell-700
 const EDGE = '#152015'; // inkwell-700
-/** Halftone dots: inkwell at half strength over vellum */
-const HALFTONE_DOT_RGBA = 'rgba(21, 32, 21, 0.5)';
+const HATCH_FILL = '#152015'; // inkwell-700
+const HATCH_STROKE = '#fff6e6'; // vellum-100
+const HATCH_EDGE = '#fff6e6'; // vellum-100
 
-/** Uniform comic-book screen — one size, one spacing, everywhere. */
-const HALFTONE_DOT_RADIUS = 4.35;
-/** Center-to-center spacing (125% of prior 9.5). */
-const HALFTONE_SPACING = 11.875;
+/** Screen-space TAM hatch (Halladay-style nested tones + camera spotlight). */
+const HATCH_TAM_SCALE = 160;
+const HATCH_WOBBLE = 0.004;
+const HATCH_SPOT_INNER_DEG = 0.5;
+const HATCH_SPOT_OUTER_DEG = 14;
+const HATCH_SPOT_ABOVE = 1.1;
+const HATCH_SPOT_AIM = new THREE.Vector3(0, SIZE / 2, 0);
 
-/**
- * Monotonous halftone: equal inkwell dots on a regular lattice over vellum.
- * No size / density / position jitter — a pure even print screen.
- */
-function createHalftoneTexture() {
-  const size = 512;
-  const canvas = document.createElement('canvas');
-  canvas.width = size;
-  canvas.height = size;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) {
-    return new THREE.Texture();
-  }
+const HATCH_VERT = /* glsl */ `
+varying vec3 vWorldPos;
+varying vec3 vWorldNormal;
 
-  ctx.fillStyle = FILL;
-  ctx.fillRect(0, 0, size, size);
-  ctx.fillStyle = HALFTONE_DOT_RGBA;
+void main() {
+  vec4 world = modelMatrix * vec4(position, 1.0);
+  vWorldPos = world.xyz;
+  vWorldNormal = normalize(mat3(modelMatrix) * normal);
+  gl_Position = projectionMatrix * viewMatrix * world;
+}
+`;
 
-  const cols = Math.max(1, Math.round(size / HALFTONE_SPACING));
-  const rows = Math.max(1, Math.round(size / HALFTONE_SPACING));
-  const stepX = size / cols;
-  const stepY = size / rows;
-  const r = HALFTONE_DOT_RADIUS;
+const HATCH_FRAG = /* glsl */ `
+uniform vec3 uFill;
+uniform vec3 uInk;
+uniform vec3 uSpotPos;
+uniform vec3 uSpotDir;
+uniform float uSpotInner;
+uniform float uSpotOuter;
+uniform sampler2D uHatch0;
+uniform sampler2D uHatch1;
+uniform float uTamScale;
+uniform float uWobble;
 
-  for (let j = 0; j < rows; j++) {
-    for (let i = 0; i < cols; i++) {
-      const x = (i + 0.5) * stepX;
-      const y = (j + 0.5) * stepY;
-      // Wrap copies so RepeatWrapping doesn’t flash a seam
-      for (let oy = -1; oy <= 1; oy++) {
-        for (let ox = -1; ox <= 1; ox++) {
-          const px = x + ox * size;
-          const py = y + oy * size;
-          if (px < -r || py < -r || px > size + r || py > size + r) continue;
-          ctx.beginPath();
-          ctx.arc(px, py, r, 0, Math.PI * 2);
-          ctx.fill();
-        }
-      }
-    }
-  }
+varying vec3 vWorldPos;
+varying vec3 vWorldNormal;
 
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.colorSpace = THREE.SRGBColorSpace;
-  texture.wrapS = THREE.RepeatWrapping;
-  texture.wrapT = THREE.RepeatWrapping;
-  texture.anisotropy = 8;
-  texture.repeat.set(1, 1);
-  texture.needsUpdate = true;
-  return texture;
+float hash21(vec2 p) {
+  return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
 }
 
-/**
- * BoxGeometry maps every face to a full 0–1 UV square, which stretches
- * dots on non-square sides. Scale each face’s UVs to its aspect so circles
- * stay round and spacing matches across faces.
- */
-function boxGeometryWithAspectUVs(
-  width: number,
-  height: number,
-  depth: number,
-) {
-  const geometry = new THREE.BoxGeometry(width, height, depth);
-  const uvAttr = geometry.getAttribute('uv');
-  if (!(uvAttr instanceof THREE.BufferAttribute)) return geometry;
-
-  // Face order in three.js BoxGeometry: +x, -x, +y, -y, +z, -z
-  const faceSizes: [number, number][] = [
-    [depth, height],
-    [depth, height],
-    [width, depth],
-    [width, depth],
-    [width, height],
-    [width, height],
-  ];
-
-  for (let f = 0; f < 6; f++) {
-    const [fw, fh] = faceSizes[f]!;
-    const max = Math.max(fw, fh);
-    const uScale = fw / max;
-    const vScale = fh / max;
-    for (let i = 0; i < 4; i++) {
-      const vi = f * 4 + i;
-      uvAttr.setXY(vi, uvAttr.getX(vi) * uScale, uvAttr.getY(vi) * vScale);
-    }
-  }
-
-  uvAttr.needsUpdate = true;
-  return geometry;
+float valueNoise(vec2 p) {
+  vec2 i = floor(p);
+  vec2 f = fract(p);
+  float a = hash21(i);
+  float b = hash21(i + vec2(1.0, 0.0));
+  float c = hash21(i + vec2(0.0, 1.0));
+  float d = hash21(i + vec2(1.0, 1.0));
+  vec2 u = f * f * (3.0 - 2.0 * f);
+  return mix(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
 }
 
-/**
- * Collar UVs: caps keep ExtrudeGeometry’s denser shape-space scale
- * (raw XZ as UV). Vertical well wall unwraps by arc-length + height so
- * dots stay round — planar mapping on a cylinder collapses into streaks.
- */
-function applyCollarHalftoneUVs(geometry: THREE.BufferGeometry) {
-  geometry.computeVertexNormals();
-  const pos = geometry.getAttribute('position');
-  const normal = geometry.getAttribute('normal');
-  if (
-    !(pos instanceof THREE.BufferAttribute) ||
-    !(normal instanceof THREE.BufferAttribute)
-  ) {
-    return geometry;
-  }
+/** intensity 1 = sparse/blank, 0 = dense; returns paper luminance. */
+float hatching(vec2 uv, float intensity) {
+  vec3 hatch0 = texture2D(uHatch0, uv).rgb;
+  vec3 hatch1 = texture2D(uHatch1, uv).rgb;
 
-  let uv = geometry.getAttribute('uv');
-  if (!(uv instanceof THREE.BufferAttribute) || uv.count !== pos.count) {
-    uv = new THREE.BufferAttribute(new Float32Array(pos.count * 2), 2);
-    geometry.setAttribute('uv', uv);
-  }
+  float overbright = max(0.0, intensity - 1.0);
+  float i = intensity * 6.0;
+  vec3 weightsA = clamp(vec3(i) - vec3(0.0, 1.0, 2.0), 0.0, 1.0);
+  vec3 weightsB = clamp(vec3(i) - vec3(3.0, 4.0, 5.0), 0.0, 1.0);
 
-  for (let i = 0; i < pos.count; i++) {
-    const x = pos.getX(i);
-    const y = pos.getY(i);
-    const z = pos.getZ(i);
-    const ny = normal.getY(i);
+  weightsA.xy -= weightsA.yz;
+  weightsA.z -= weightsB.x;
+  weightsB.xy -= weightsB.yz;
 
-    if (Math.abs(ny) > 0.55) {
-      // Denser lid scale (pre–planar-match ExtrudeGeometry top UVs)
-      uv.setXY(i, x, z);
-      continue;
-    }
+  hatch0 *= weightsA;
+  hatch1 *= weightsB;
 
-    const radius = Math.hypot(x, z);
-    if (Math.abs(radius - HOLE_R) < HOLE_R * 0.2) {
-      // 1 UV ≡ 1 world unit — same denser scale as the caps
-      uv.setXY(i, Math.atan2(z, x) * radius, y);
-    } else {
-      const nx = normal.getX(i);
-      const nz = normal.getZ(i);
-      if (Math.abs(nx) >= Math.abs(nz)) {
-        uv.setXY(i, z, y);
-      } else {
-        uv.setXY(i, x, y);
-      }
-    }
-  }
+  return overbright + hatch0.r + hatch0.g + hatch0.b + hatch1.r + hatch1.g + hatch1.b;
+}
 
-  uv.needsUpdate = true;
-  return geometry;
+void main() {
+  vec3 nWorld = normalize(vWorldNormal);
+  if (!gl_FrontFacing) nWorld = -nWorld;
+
+  vec3 toFrag = vWorldPos - uSpotPos;
+  float spot = smoothstep(
+    uSpotOuter,
+    uSpotInner,
+    dot(normalize(toFrag), normalize(uSpotDir))
+  );
+  vec3 L = normalize(-toFrag);
+  float facing = smoothstep(0.0, 0.35, clamp(dot(nWorld, L), 0.0, 1.0));
+  float lit = spot * facing;
+
+  vec2 uv = gl_FragCoord.xy / max(uTamScale, 1.0);
+  float wob =
+    valueNoise(uv * 6.0) * 2.0 - 1.0 +
+    (valueNoise(uv * 14.0 + 17.0) * 2.0 - 1.0) * 0.5;
+  uv += wob * uWobble;
+
+  float intensity = mix(0.66, 0.80, smoothstep(0.0, 0.95, lit));
+  float paper = clamp(hatching(uv, intensity), 0.0, 1.0);
+  float blank = smoothstep(0.88, 1.0, lit);
+  paper = mix(paper, 1.0, blank * 0.3);
+  float mask = smoothstep(0.40, 0.55, 1.0 - paper);
+
+  vec3 color = mix(uFill, uInk, mask);
+  gl_FragColor = vec4(color, 1.0);
+  #include <colorspace_fragment>
+}
+`;
+
+function createHatchMaterial(tam: HatchTamMaps) {
+  return new THREE.ShaderMaterial({
+    uniforms: {
+      uFill: {value: new THREE.Color(HATCH_FILL)},
+      uInk: {value: new THREE.Color(HATCH_STROKE)},
+      uSpotPos: {value: new THREE.Vector3()},
+      uSpotDir: {value: new THREE.Vector3(0, 0, -1)},
+      uSpotInner: {
+        value: Math.cos(THREE.MathUtils.degToRad(HATCH_SPOT_INNER_DEG)),
+      },
+      uSpotOuter: {
+        value: Math.cos(THREE.MathUtils.degToRad(HATCH_SPOT_OUTER_DEG)),
+      },
+      uHatch0: {value: tam.hatch0},
+      uHatch1: {value: tam.hatch1},
+      uTamScale: {value: HATCH_TAM_SCALE},
+      uWobble: {value: HATCH_WOBBLE},
+    },
+    vertexShader: HATCH_VERT,
+    fragmentShader: HATCH_FRAG,
+    toneMapped: false,
+    side: THREE.DoubleSide,
+  });
+}
+
+let sharedTam: HatchTamMaps | null = null;
+
+function getSharedTamMaps(): HatchTamMaps {
+  if (!sharedTam) sharedTam = createHatchTamMaps();
+  return sharedTam;
+}
+
+function useHatchMaterial() {
+  const material = useMemo(() => createHatchMaterial(getSharedTamMaps()), []);
+  const {camera} = useThree();
+  const spotUp = useRef(new THREE.Vector3());
+
+  useFrame(() => {
+    const pos = material.uniforms.uSpotPos.value as THREE.Vector3;
+    const dir = material.uniforms.uSpotDir.value as THREE.Vector3;
+    camera.getWorldPosition(pos);
+    spotUp.current.set(0, 1, 0).transformDirection(camera.matrixWorld);
+    pos.addScaledVector(spotUp.current, HATCH_SPOT_ABOVE);
+    dir.copy(HATCH_SPOT_AIM).sub(pos).normalize();
+  });
+
+  useEffect(() => {
+    return () => {
+      material.dispose();
+    };
+  }, [material]);
+  return material;
 }
 
 type PackagingCubeSceneProps = {
@@ -308,7 +314,6 @@ function PhotoSidePlanes({
   );
 }
 
-/** Unlit box: page-matched fill + dark edge lines only (no lights). */
 function OutlineBox({
   args,
   visible = true,
@@ -317,17 +322,17 @@ function OutlineBox({
   visible?: boolean;
 }) {
   return (
-    <mesh visible={visible}>
-      <boxGeometry args={args} />
-      <meshBasicMaterial color={FILL} toneMapped={false} />
-      <Edges threshold={1} color={EDGE} linewidth={1} />
-    </mesh>
+    <group visible={visible}>
+      <mesh>
+        <boxGeometry args={args} />
+        <meshBasicMaterial color={FILL} toneMapped={false} />
+      </mesh>
+      <HandDrawnBoxEdges args={args} color={EDGE} />
+    </group>
   );
 }
 
-/**
- * Top half: uniform vellum + inkwell-dot screen + light edge outlines.
- */
+/** Top half with screen-space hatch + hand-inked edges. */
 function HalftoneOutlineBox({
   args,
   visible = true,
@@ -335,40 +340,21 @@ function HalftoneOutlineBox({
   args: [number, number, number];
   visible?: boolean;
 }) {
-  const [width, height, depth] = args;
-  const geometry = useMemo(
-    () => boxGeometryWithAspectUVs(width, height, depth),
-    [depth, height, width],
-  );
-  const map = useHalftoneMap();
-
-  useEffect(() => {
-    return () => {
-      geometry.dispose();
-    };
-  }, [geometry]);
+  const material = useHatchMaterial();
 
   return (
-    <mesh visible={visible} geometry={geometry}>
-      <meshBasicMaterial map={map} toneMapped={false} />
-      <Edges threshold={1} color={EDGE} linewidth={1} />
-    </mesh>
+    <group visible={visible}>
+      <mesh material={material}>
+        <boxGeometry args={args} />
+      </mesh>
+      <HandDrawnBoxEdges args={args} color={HATCH_EDGE} />
+    </group>
   );
-}
-
-function useHalftoneMap() {
-  const map = useMemo(() => createHalftoneTexture(), []);
-  useEffect(() => {
-    return () => {
-      map.dispose();
-    };
-  }, [map]);
-  return map;
 }
 
 /**
- * Base-half body: halftone inkwell top (hole + recess) + product-photo side walls.
- * Top image crop → ±Z faces; bottom crop → ±X faces.
+ * Base half: plain fill collar/well + product-photo sides.
+ * (Hatching on the base is off for now.)
  */
 function BaseHalfBody({
   halfCanvases,
@@ -393,21 +379,19 @@ function BaseHalfBody({
       bevelEnabled: false,
       curveSegments: 32,
     });
-    // Extrude along +Z → rotate so depth runs downward (−Y) from the top face
     geo.rotateX(Math.PI / 2);
     geo.translate(0, HALF_H / 2, 0);
-    applyCollarHalftoneUVs(geo);
     return geo;
   }, []);
 
-  const halftoneMap = useHalftoneMap();
+  useEffect(() => {
+    return () => {
+      collarGeo.dispose();
+    };
+  }, [collarGeo]);
 
   const holeFloorY = HALF_H / 2 - HOLE_DEPTH;
   const half = SIZE / 2;
-  /**
-   * Keep the solid lower body’s top below the well floor so we never
-   * z-fight a flat inkwell against the halftone disc on scroll.
-   */
   const floorClearance = 0.006;
   const lowerTopY = holeFloorY - floorClearance;
   const lowerBottomY = -HALF_H / 2;
@@ -416,7 +400,6 @@ function BaseHalfBody({
 
   return (
     <group>
-      {/* Outer silhouette — edges only */}
       <mesh>
         <boxGeometry args={[SIZE, HALF_H, SIZE]} />
         <meshBasicMaterial
@@ -426,38 +409,33 @@ function BaseHalfBody({
           opacity={0}
           depthWrite={false}
         />
-        <Edges threshold={1} color={EDGE} linewidth={1} />
       </mesh>
+      <HandDrawnBoxEdges args={[SIZE, HALF_H, SIZE]} color={EDGE} />
 
-      {/* Lower body under the well — same even screen as the floor */}
       <mesh position={[0, lowerCenterY, 0]}>
         <boxGeometry args={[SIZE * 0.998, lowerBoxH, SIZE * 0.998]} />
-        <meshBasicMaterial map={halftoneMap} toneMapped={false} />
+        <meshBasicMaterial color={FILL} toneMapped={false} />
       </mesh>
 
-      {/* Collar — denser Extrude-style lid UVs; cylinder unwrapped for dots */}
       <mesh geometry={collarGeo}>
         <meshBasicMaterial
-          map={halftoneMap}
+          color={FILL}
           toneMapped={false}
           side={THREE.DoubleSide}
         />
       </mesh>
 
-      {/* Circular recess floor — default circle UVs (denser screen) */}
       <mesh position={[0, holeFloorY, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <circleGeometry args={[HOLE_R, 48]} />
-        <meshBasicMaterial map={halftoneMap} toneMapped={false} />
+        <meshBasicMaterial color={FILL} toneMapped={false} />
       </mesh>
 
-      {/* Side walls: top crop on ±Z, bottom crop on ±X */}
       {halfCanvases ? (
         <PhotoSidePlanes halfCanvases={halfCanvases} half={half} />
       ) : (
         <InkwellSidePlanes half={half} />
       )}
 
-      {/* Well outline — light lines on dense ink */}
       <group position={[0, HALF_H / 2 - HOLE_DEPTH / 2, 0]}>
         <CylinderBlueprintOutline
           radius={HOLE_R}

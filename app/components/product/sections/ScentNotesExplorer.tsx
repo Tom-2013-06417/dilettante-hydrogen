@@ -10,6 +10,10 @@ import {ClientOnly, PageContainer} from '~/components/shared';
 import {CubeBlueprintAnnotations} from './CubeBlueprintAnnotations';
 import {EMPTY_CUBE_ANCHORS, type CubeAnchorsMap} from './cubeAnchors';
 import {PackagingCubeLoader} from './PackagingCubeLoader';
+import {
+  loadProductHalfCanvases,
+  type ProductHalfCanvases,
+} from './productHalfCrops';
 import {DEG_150, PIN, SECTION_VH} from './scentAnatomyTimeline';
 
 function clamp01(n: number) {
@@ -38,15 +42,36 @@ function assignRef<T>(ref: Ref<T> | undefined, value: T) {
 
 export function ScentNotesExplorer({
   scentProfile,
+  productImageUrl,
   sectionRef,
 }: {
   scentProfile: ScentProfile;
+  /** Shopify product / variant image for the base-half photo faces. */
+  productImageUrl?: string | null;
   sectionRef?: Ref<HTMLElement | null>;
 }) {
   const reducedMotion = useReducedMotion();
   const localRef = useRef<HTMLElement | null>(null);
   const anchorsRef = useRef(EMPTY_CUBE_ANCHORS);
   const [stageElement, setStageElement] = useState<HTMLElement | null>(null);
+  const [halfCanvases, setHalfCanvases] =
+    useState<ProductHalfCanvases | null>(null);
+
+  useEffect(() => {
+    const url = productImageUrl || scentProfile.detailImage;
+    if (!url) return;
+    let cancelled = false;
+    void loadProductHalfCanvases(url)
+      .then((canvases) => {
+        if (!cancelled) setHalfCanvases(canvases);
+      })
+      .catch(() => {
+        if (!cancelled) setHalfCanvases(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [productImageUrl, scentProfile.detailImage]);
 
   const setSectionRef = useCallback(
     (node: HTMLElement | null) => {
@@ -61,8 +86,9 @@ export function ScentNotesExplorer({
   );
   const [explodeAmount, setExplodeAmount] = useState(0);
   const [annotationDraw, setAnnotationDraw] = useState(0);
-  const [showSolid, setShowSolid] = useState(true);
-  const [showLayers, setShowLayers] = useState(false);
+  // Halftone top + photo base are visible from first paint; explode only separates them.
+  const [showSolid, setShowSolid] = useState(false);
+  const [showLayers, setShowLayers] = useState(true);
 
   const {scrollYProgress} = useScroll({
     target: localRef,
@@ -85,9 +111,9 @@ export function ScentNotesExplorer({
 
       setScrollRotationY(scrollRotateY.get());
 
-      const layersOn = p >= PIN + 0.025;
-      setShowLayers(layersOn);
-      setShowSolid(!layersOn);
+      // Textured halves from the start — no solid cream cube phase
+      setShowLayers(true);
+      setShowSolid(false);
 
       let explode = 0;
       if (p < PIN + 0.04) explode = 0;
@@ -155,7 +181,7 @@ export function ScentNotesExplorer({
                     }
                   >
                     <PackagingCubeLoader
-                      textureUrl={scentProfile.detailImage}
+                      halfCanvases={halfCanvases}
                       tiers={scentProfile.tiers}
                       explodeAmount={explodeAmount}
                       showSolid={showSolid}

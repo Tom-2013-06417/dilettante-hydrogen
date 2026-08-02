@@ -29,7 +29,11 @@ export default async function handleRequest(
       'https://use.typekit.net',
       'https://p.typekit.net',
     ],
-    connectSrc: ['https://use.typekit.net', 'https://p.typekit.net'],
+    connectSrc: [
+      'https://use.typekit.net',
+      'https://p.typekit.net',
+      'https://cdn.shopify.com',
+    ],
   });
 
   const body = await renderToReadableStream(

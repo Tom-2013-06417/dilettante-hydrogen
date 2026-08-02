@@ -51,6 +51,9 @@ export function ProductPage({
 
         <ScentNotesExplorer
           scentProfile={scentProfile}
+          productImageUrl={
+            selectedVariant?.image?.url ?? product.featuredImage?.url
+          }
           sectionRef={scentSectionRef}
         />
       </div>

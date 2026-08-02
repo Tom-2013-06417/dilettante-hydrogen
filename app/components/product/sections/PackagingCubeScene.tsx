@@ -1,7 +1,7 @@
 /* eslint-disable react/no-unknown-property -- R3F Three.js props */
 import {Edges} from '@react-three/drei';
 import {useFrame, useThree} from '@react-three/fiber';
-import {useMemo, useRef, type MutableRefObject} from 'react';
+import {useEffect, useMemo, useRef, type MutableRefObject} from 'react';
 import * as THREE from 'three';
 import type {ScentTier, ScentTierId} from '~/lib/scentProfile';
 import {
@@ -11,6 +11,10 @@ import {
 } from './cubeAnchors';
 import {CylinderBlueprintOutline} from './CylinderBlueprintOutline';
 import {bottleDimsForCube, PerfumeBottle} from './PerfumeBottle';
+import {
+  canvasesToHalfTextures,
+  type ProductHalfCanvases,
+} from './productHalfCrops';
 
 const SIZE = 1.2;
 const HALF_H = SIZE / 2;
@@ -39,21 +43,26 @@ const HALF_GAP = BOTTLE_H / 2 + EXPLODE_CLEARANCE;
 const TOP_EXPLODE_Y = HALF_GAP;
 const BASE_EXPLODE_Y = -HALF_GAP;
 
-/** Flat unlit fill (matches page) + inkwell edge lines — no lighting */
+/** Flat unlit fill (matches page) — assembled cube before split */
 const FILL = '#fff6e6'; // vellum-100
+/** Packaging green — inkwell-700 */
+const INKWELL = '#152015';
+/** Cube / packaging edge outlines */
 const EDGE = '#152015'; // inkwell-700
+/** Halftone dots: inkwell at half strength over vellum */
+const HALFTONE_DOT_RGBA = 'rgba(21, 32, 21, 0.5)';
+
+/** Uniform comic-book screen — one size, one spacing, everywhere. */
+const HALFTONE_DOT_RADIUS = 4.35;
+/** Center-to-center spacing (125% of prior 9.5). */
+const HALFTONE_SPACING = 11.875;
 
 /**
- * Procedural halftone canvas — same hex colors as OutlineBox.
+ * Monotonous halftone: equal inkwell dots on a regular lattice over vellum.
+ * No size / density / position jitter — a pure even print screen.
  */
-function createHalftoneTexture({
-  cell = 8,
-  dotRadius = 1.35,
-}: {
-  cell?: number;
-  dotRadius?: number;
-}) {
-  const size = 256;
+function createHalftoneTexture() {
+  const size = 512;
   const canvas = document.createElement('canvas');
   canvas.width = size;
   canvas.height = size;
@@ -64,12 +73,29 @@ function createHalftoneTexture({
 
   ctx.fillStyle = FILL;
   ctx.fillRect(0, 0, size, size);
-  ctx.fillStyle = EDGE;
-  for (let y = cell / 2; y < size; y += cell) {
-    for (let x = cell / 2; x < size; x += cell) {
-      ctx.beginPath();
-      ctx.arc(x, y, dotRadius, 0, Math.PI * 2);
-      ctx.fill();
+  ctx.fillStyle = HALFTONE_DOT_RGBA;
+
+  const cols = Math.max(1, Math.round(size / HALFTONE_SPACING));
+  const rows = Math.max(1, Math.round(size / HALFTONE_SPACING));
+  const stepX = size / cols;
+  const stepY = size / rows;
+  const r = HALFTONE_DOT_RADIUS;
+
+  for (let j = 0; j < rows; j++) {
+    for (let i = 0; i < cols; i++) {
+      const x = (i + 0.5) * stepX;
+      const y = (j + 0.5) * stepY;
+      // Wrap copies so RepeatWrapping doesn’t flash a seam
+      for (let oy = -1; oy <= 1; oy++) {
+        for (let ox = -1; ox <= 1; ox++) {
+          const px = x + ox * size;
+          const py = y + oy * size;
+          if (px < -r || py < -r || px > size + r || py > size + r) continue;
+          ctx.beginPath();
+          ctx.arc(px, py, r, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
     }
   }
 
@@ -78,7 +104,7 @@ function createHalftoneTexture({
   texture.wrapS = THREE.RepeatWrapping;
   texture.wrapT = THREE.RepeatWrapping;
   texture.anisotropy = 8;
-  texture.repeat.set(4, 4);
+  texture.repeat.set(1, 1);
   texture.needsUpdate = true;
   return texture;
 }
@@ -122,9 +148,62 @@ function boxGeometryWithAspectUVs(
   return geometry;
 }
 
+/**
+ * Collar UVs: caps keep ExtrudeGeometry’s denser shape-space scale
+ * (raw XZ as UV). Vertical well wall unwraps by arc-length + height so
+ * dots stay round — planar mapping on a cylinder collapses into streaks.
+ */
+function applyCollarHalftoneUVs(geometry: THREE.BufferGeometry) {
+  geometry.computeVertexNormals();
+  const pos = geometry.getAttribute('position');
+  const normal = geometry.getAttribute('normal');
+  if (
+    !(pos instanceof THREE.BufferAttribute) ||
+    !(normal instanceof THREE.BufferAttribute)
+  ) {
+    return geometry;
+  }
+
+  let uv = geometry.getAttribute('uv');
+  if (!(uv instanceof THREE.BufferAttribute) || uv.count !== pos.count) {
+    uv = new THREE.BufferAttribute(new Float32Array(pos.count * 2), 2);
+    geometry.setAttribute('uv', uv);
+  }
+
+  for (let i = 0; i < pos.count; i++) {
+    const x = pos.getX(i);
+    const y = pos.getY(i);
+    const z = pos.getZ(i);
+    const ny = normal.getY(i);
+
+    if (Math.abs(ny) > 0.55) {
+      // Denser lid scale (pre–planar-match ExtrudeGeometry top UVs)
+      uv.setXY(i, x, z);
+      continue;
+    }
+
+    const radius = Math.hypot(x, z);
+    if (Math.abs(radius - HOLE_R) < HOLE_R * 0.2) {
+      // 1 UV ≡ 1 world unit — same denser scale as the caps
+      uv.setXY(i, Math.atan2(z, x) * radius, y);
+    } else {
+      const nx = normal.getX(i);
+      const nz = normal.getZ(i);
+      if (Math.abs(nx) >= Math.abs(nz)) {
+        uv.setXY(i, z, y);
+      } else {
+        uv.setXY(i, x, y);
+      }
+    }
+  }
+
+  uv.needsUpdate = true;
+  return geometry;
+}
+
 type PackagingCubeSceneProps = {
-  /** Kept for API compatibility; outline style ignores photo maps. */
-  textureUrl: string;
+  /** Pre-baked product image half-crops (loaded outside R3F). */
+  halfCanvases: ProductHalfCanvases | null;
   tiers: [ScentTier, ScentTier, ScentTier];
   /** 0 = stacked halves / solid cube, 1 = fully exploded */
   explodeAmount: number;
@@ -145,6 +224,90 @@ type AnchorRefs = MutableRefObject<
   Partial<Record<ScentTierId, THREE.Object3D | null>>
 >;
 
+function InkwellSidePlanes({half}: {half: number}) {
+  return (
+    <>
+      <mesh position={[0, 0, half + 0.002]}>
+        <planeGeometry args={[SIZE, HALF_H]} />
+        <meshBasicMaterial color={INKWELL} toneMapped={false} />
+      </mesh>
+      <mesh position={[0, 0, -half - 0.002]} rotation={[0, Math.PI, 0]}>
+        <planeGeometry args={[SIZE, HALF_H]} />
+        <meshBasicMaterial color={INKWELL} toneMapped={false} />
+      </mesh>
+      <mesh position={[half + 0.002, 0, 0]} rotation={[0, Math.PI / 2, 0]}>
+        <planeGeometry args={[SIZE, HALF_H]} />
+        <meshBasicMaterial color={INKWELL} toneMapped={false} />
+      </mesh>
+      <mesh position={[-half - 0.002, 0, 0]} rotation={[0, -Math.PI / 2, 0]}>
+        <planeGeometry args={[SIZE, HALF_H]} />
+        <meshBasicMaterial color={INKWELL} toneMapped={false} />
+      </mesh>
+    </>
+  );
+}
+
+function PhotoSidePlanes({
+  halfCanvases,
+  half,
+}: {
+  halfCanvases: ProductHalfCanvases;
+  half: number;
+}) {
+  const crops = useMemo(
+    () => canvasesToHalfTextures(halfCanvases),
+    [halfCanvases],
+  );
+
+  useEffect(() => {
+    return () => {
+      crops.topCrop.dispose();
+      crops.bottomCrop.dispose();
+    };
+  }, [crops]);
+
+  return (
+    <>
+      <mesh position={[0, 0, half + 0.002]}>
+        <planeGeometry args={[SIZE, HALF_H]} />
+        <meshBasicMaterial
+          map={crops.topCrop}
+          toneMapped={false}
+          polygonOffset
+          polygonOffsetFactor={-1}
+        />
+      </mesh>
+      <mesh position={[0, 0, -half - 0.002]} rotation={[0, Math.PI, 0]}>
+        <planeGeometry args={[SIZE, HALF_H]} />
+        <meshBasicMaterial
+          map={crops.topCrop}
+          toneMapped={false}
+          polygonOffset
+          polygonOffsetFactor={-1}
+        />
+      </mesh>
+      <mesh position={[half + 0.002, 0, 0]} rotation={[0, Math.PI / 2, 0]}>
+        <planeGeometry args={[SIZE, HALF_H]} />
+        <meshBasicMaterial
+          map={crops.bottomCrop}
+          toneMapped={false}
+          polygonOffset
+          polygonOffsetFactor={-1}
+        />
+      </mesh>
+      <mesh position={[-half - 0.002, 0, 0]} rotation={[0, -Math.PI / 2, 0]}>
+        <planeGeometry args={[SIZE, HALF_H]} />
+        <meshBasicMaterial
+          map={crops.bottomCrop}
+          toneMapped={false}
+          polygonOffset
+          polygonOffsetFactor={-1}
+        />
+      </mesh>
+    </>
+  );
+}
+
 /** Unlit box: page-matched fill + dark edge lines only (no lights). */
 function OutlineBox({
   args,
@@ -162,7 +325,9 @@ function OutlineBox({
   );
 }
 
-/** Top half: vellum fill + dense inkwell halftone dots + edge outlines. */
+/**
+ * Top half: uniform vellum + inkwell-dot screen + light edge outlines.
+ */
 function HalftoneOutlineBox({
   args,
   visible = true,
@@ -175,25 +340,41 @@ function HalftoneOutlineBox({
     () => boxGeometryWithAspectUVs(width, height, depth),
     [depth, height, width],
   );
-  const texture = useMemo(
-    () => createHalftoneTexture({cell: 20, dotRadius: 5}),
-    [],
-  );
+  const map = useHalftoneMap();
+
+  useEffect(() => {
+    return () => {
+      geometry.dispose();
+    };
+  }, [geometry]);
 
   return (
     <mesh visible={visible} geometry={geometry}>
-      <meshBasicMaterial map={texture} toneMapped={false} />
+      <meshBasicMaterial map={map} toneMapped={false} />
       <Edges threshold={1} color={EDGE} linewidth={1} />
     </mesh>
   );
 }
 
+function useHalftoneMap() {
+  const map = useMemo(() => createHalftoneTexture(), []);
+  useEffect(() => {
+    return () => {
+      map.dispose();
+    };
+  }, [map]);
+  return map;
+}
+
 /**
- * Base-half body: continuous outer hull (no mid-face seam), plus an
- * internal cylindrical blind well whose floor is a circle that stops
- * inside the cube — it never extends out to the outer faces.
+ * Base-half body: halftone inkwell top (hole + recess) + product-photo side walls.
+ * Top image crop → ±Z faces; bottom crop → ±X faces.
  */
-function BaseHalfBody() {
+function BaseHalfBody({
+  halfCanvases,
+}: {
+  halfCanvases: ProductHalfCanvases | null;
+}) {
   const collarGeo = useMemo(() => {
     const half = SIZE / 2;
     const shape = new THREE.Shape();
@@ -215,15 +396,27 @@ function BaseHalfBody() {
     // Extrude along +Z → rotate so depth runs downward (−Y) from the top face
     geo.rotateX(Math.PI / 2);
     geo.translate(0, HALF_H / 2, 0);
+    applyCollarHalftoneUVs(geo);
     return geo;
   }, []);
 
-  const lowerH = HALF_H - HOLE_DEPTH;
+  const halftoneMap = useHalftoneMap();
+
   const holeFloorY = HALF_H / 2 - HOLE_DEPTH;
+  const half = SIZE / 2;
+  /**
+   * Keep the solid lower body’s top below the well floor so we never
+   * z-fight a flat inkwell against the halftone disc on scroll.
+   */
+  const floorClearance = 0.006;
+  const lowerTopY = holeFloorY - floorClearance;
+  const lowerBottomY = -HALF_H / 2;
+  const lowerBoxH = Math.max(0.01, lowerTopY - lowerBottomY);
+  const lowerCenterY = (lowerTopY + lowerBottomY) / 2;
 
   return (
     <group>
-      {/* Outer silhouette only — full half, so no mid-face seam lines */}
+      {/* Outer silhouette — edges only */}
       <mesh>
         <boxGeometry args={[SIZE, HALF_H, SIZE]} />
         <meshBasicMaterial
@@ -236,28 +429,35 @@ function BaseHalfBody() {
         <Edges threshold={1} color={EDGE} linewidth={1} />
       </mesh>
 
-      {/* Solid under the well — fill only, no edges */}
-      <mesh position={[0, -HALF_H / 2 + lowerH / 2, 0]}>
-        <boxGeometry args={[SIZE, lowerH, SIZE]} />
-        <meshBasicMaterial color={FILL} toneMapped={false} />
+      {/* Lower body under the well — same even screen as the floor */}
+      <mesh position={[0, lowerCenterY, 0]}>
+        <boxGeometry args={[SIZE * 0.998, lowerBoxH, SIZE * 0.998]} />
+        <meshBasicMaterial map={halftoneMap} toneMapped={false} />
       </mesh>
 
-      {/* Collar around the well — fill only, no edges */}
+      {/* Collar — denser Extrude-style lid UVs; cylinder unwrapped for dots */}
       <mesh geometry={collarGeo}>
         <meshBasicMaterial
-          color={FILL}
+          map={halftoneMap}
           toneMapped={false}
           side={THREE.DoubleSide}
         />
       </mesh>
 
-      {/* Circular recess floor — internal only, does not reach outer faces */}
+      {/* Circular recess floor — default circle UVs (denser screen) */}
       <mesh position={[0, holeFloorY, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <circleGeometry args={[HOLE_R, 32]} />
-        <meshBasicMaterial color={FILL} toneMapped={false} />
+        <circleGeometry args={[HOLE_R, 48]} />
+        <meshBasicMaterial map={halftoneMap} toneMapped={false} />
       </mesh>
 
-      {/* Well outline: full opening + floor circles + side silhouettes */}
+      {/* Side walls: top crop on ±Z, bottom crop on ±X */}
+      {halfCanvases ? (
+        <PhotoSidePlanes halfCanvases={halfCanvases} half={half} />
+      ) : (
+        <InkwellSidePlanes half={half} />
+      )}
+
+      {/* Well outline — light lines on dense ink */}
       <group position={[0, HALF_H / 2 - HOLE_DEPTH / 2, 0]}>
         <CylinderBlueprintOutline
           radius={HOLE_R}
@@ -277,6 +477,7 @@ function CubeHalf({
   explodeY,
   explodeAmount,
   anchorRefs,
+  halfCanvases,
   withHole = false,
 }: {
   tierId: ScentTierId;
@@ -284,6 +485,7 @@ function CubeHalf({
   explodeY: number;
   explodeAmount: number;
   anchorRefs: AnchorRefs;
+  halfCanvases: ProductHalfCanvases | null;
   withHole?: boolean;
 }) {
   const groupRef = useRef<THREE.Group>(null);
@@ -307,7 +509,7 @@ function CubeHalf({
   return (
     <group ref={groupRef} position={[0, stackY, 0]}>
       {withHole ? (
-        <BaseHalfBody />
+        <BaseHalfBody halfCanvases={halfCanvases} />
       ) : (
         <HalftoneOutlineBox args={[SIZE, HALF_H, SIZE]} />
       )}
@@ -327,6 +529,7 @@ function CubeHalf({
 }
 
 export function PackagingCubeScene({
+  halfCanvases,
   tiers,
   explodeAmount,
   showSolid,
@@ -408,6 +611,7 @@ export function PackagingCubeScene({
             explodeY={TOP_EXPLODE_Y}
             explodeAmount={explodeAmount}
             anchorRefs={anchorRefs}
+            halfCanvases={halfCanvases}
           />
           <CubeHalf
             tierId="base"
@@ -415,6 +619,7 @@ export function PackagingCubeScene({
             explodeY={BASE_EXPLODE_Y}
             explodeAmount={explodeAmount}
             anchorRefs={anchorRefs}
+            halfCanvases={halfCanvases}
             withHole
           />
           {/* After both halves so bottle fill/outlines aren’t painted over mid-explode */}

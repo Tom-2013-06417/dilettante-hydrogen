@@ -1,12 +1,13 @@
 import {Canvas, useThree} from '@react-three/fiber';
-import {Suspense, useLayoutEffect} from 'react';
+import {useLayoutEffect} from 'react';
 import * as THREE from 'three';
 import type {ScentTier} from '~/lib/scentProfile';
 import type {CubeAnchorsMap} from './cubeAnchors';
 import {PackagingCubeScene} from './PackagingCubeScene';
+import type {ProductHalfCanvases} from './productHalfCrops';
 
 export type PackagingCubeCanvasProps = {
-  textureUrl: string;
+  halfCanvases: ProductHalfCanvases | null;
   tiers: [ScentTier, ScentTier, ScentTier];
   explodeAmount: number;
   showSolid: boolean;
@@ -48,7 +49,7 @@ function FramingCamera({
 }
 
 export default function PackagingCubeCanvas({
-  textureUrl,
+  halfCanvases,
   tiers,
   explodeAmount,
   showSolid,
@@ -74,19 +75,17 @@ export default function PackagingCubeCanvas({
         background: 'transparent',
       }}
     >
-      <Suspense fallback={null}>
-        <FramingCamera distance={3.85} horizontalFovDeg={40} />
-        <PackagingCubeScene
-          textureUrl={textureUrl}
-          tiers={tiers}
-          explodeAmount={explodeAmount}
-          showSolid={showSolid}
-          showLayers={showLayers}
-          scrollRotationY={scrollRotationY}
-          stageElement={stageElement}
-          onAnchorsChange={onAnchorsChange}
-        />
-      </Suspense>
+      <FramingCamera distance={3.85} horizontalFovDeg={40} />
+      <PackagingCubeScene
+        halfCanvases={halfCanvases}
+        tiers={tiers}
+        explodeAmount={explodeAmount}
+        showSolid={showSolid}
+        showLayers={showLayers}
+        scrollRotationY={scrollRotationY}
+        stageElement={stageElement}
+        onAnchorsChange={onAnchorsChange}
+      />
     </Canvas>
   );
 }

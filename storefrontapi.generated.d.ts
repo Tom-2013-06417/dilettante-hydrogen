@@ -943,6 +943,22 @@ export type ProductFragment = Pick<
       }>;
     }
   >;
+  vhsImages?: StorefrontAPI.Maybe<
+    Pick<StorefrontAPI.Metafield, 'type'> & {
+      references?: StorefrontAPI.Maybe<{
+        nodes: Array<
+          Pick<StorefrontAPI.MediaImage, 'id'> & {
+            image?: StorefrontAPI.Maybe<
+              Pick<
+                StorefrontAPI.Image,
+                'url' | 'altText' | 'width' | 'height'
+              >
+            >;
+          }
+        >;
+      }>;
+    }
+  >;
 };
 
 export type ProductQueryVariables = StorefrontAPI.Exact<{
@@ -1107,6 +1123,22 @@ export type ProductQuery = {
               Pick<StorefrontAPI.Metaobject, 'handle' | 'type'> & {
                 fields: Array<
                   Pick<StorefrontAPI.MetaobjectField, 'key' | 'value'>
+                >;
+              }
+            >;
+          }>;
+        }
+      >;
+      vhsImages?: StorefrontAPI.Maybe<
+        Pick<StorefrontAPI.Metafield, 'type'> & {
+          references?: StorefrontAPI.Maybe<{
+            nodes: Array<
+              Pick<StorefrontAPI.MediaImage, 'id'> & {
+                image?: StorefrontAPI.Maybe<
+                  Pick<
+                    StorefrontAPI.Image,
+                    'url' | 'altText' | 'width' | 'height'
+                  >
                 >;
               }
             >;

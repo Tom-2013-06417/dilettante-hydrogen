@@ -273,6 +273,22 @@ const PRODUCT_FRAGMENT = `#graphql
         }
       }
     }
+    vhsImages: metafield(namespace: "custom", key: "vhs_images") {
+      type
+      references(first: 12) {
+        nodes {
+          ... on MediaImage {
+            id
+            image {
+              url
+              altText
+              width
+              height
+            }
+          }
+        }
+      }
+    }
   }
   ${TAXONOMY_METAOBJECT_FRAGMENT}
   ${PRODUCT_VARIANT_FRAGMENT}

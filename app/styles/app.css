@@ -576,11 +576,19 @@ aside.aside-cart .cart-main {
   padding-bottom: 0;
 }
 
-/* Scroll the lines, not the whole drawer, so the summary stays put. */
+/* Scroll the lines, not the whole drawer, so the summary stays put.
+   Hide the gutter — classic scrollbars sit in the padded list and crowd the
+   delete/quantity controls; scrolling still works via trackpad/wheel/touch. */
 aside.aside-cart .cart-line-list {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+aside.aside-cart .cart-line-list::-webkit-scrollbar {
+  display: none;
 }
 
 aside.aside-cart .cart-summary-aside {

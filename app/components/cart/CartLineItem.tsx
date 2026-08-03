@@ -10,6 +10,7 @@ import {
 import type {MoneyV2} from '@shopify/hydrogen/storefront-api-types';
 import {useEffect, useRef, useState} from 'react';
 import {useVariantUrl} from '~/lib/variants';
+import {CART_LINE_IMAGE_SIZE} from '~/lib/cartLineImage';
 import {Link} from 'react-router';
 import {useAside} from '~/components/layout';
 import type {
@@ -135,10 +136,14 @@ export function CartLineItem({
             <Image
               alt={title}
               aspectRatio="1/1"
+              crop="center"
               data={image}
-              height={96}
-              loading="lazy"
-              width={96}
+              // Eager: the drawer opens into view; lazy would delay the request.
+              // Size matches cartLineImage.ts so the product-page preload hits.
+              fetchPriority="high"
+              height={CART_LINE_IMAGE_SIZE}
+              loading="eager"
+              width={CART_LINE_IMAGE_SIZE}
             />
           </div>
         )}

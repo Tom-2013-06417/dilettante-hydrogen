@@ -18,6 +18,11 @@ import {
 import {ProductPrice} from '~/components/product/ProductPrice';
 import {ScentFormatLine} from '~/components/shared/ScentFormatLine';
 import type {ScentProfile} from '~/lib/scentProfile';
+import {
+  cartLineImageSrcSet,
+  shopifyCdnUrl,
+  CART_LINE_IMAGE_SIZE,
+} from '~/lib/cartLineImage';
 import {ProductBottleBand} from './ProductBottleBand';
 import {ProductTitle} from './ProductTitle';
 
@@ -64,6 +69,21 @@ export function ProductHero({
 
   return (
     <div className="relative z-1 flex min-h-0 w-full flex-1 flex-col text-inkwell-700">
+        {/* Warm the cart-thumbnail CDN URLs while the hero (a different size)
+            loads, so Purchase → drawer can reuse cache instead of waiting. */}
+        {image?.url ? (
+          <link
+            rel="preload"
+            as="image"
+            href={shopifyCdnUrl(image.url, {
+              width: CART_LINE_IMAGE_SIZE,
+              height: CART_LINE_IMAGE_SIZE,
+              crop: 'center',
+            })}
+            imageSrcSet={cartLineImageSrcSet(image.url)}
+          />
+        ) : null}
+
         {/* Title leads; rest of the page fades in shortly after */}
         <div className="relative shrink-0">
           <IntroFade>

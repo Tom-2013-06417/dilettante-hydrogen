@@ -8,7 +8,7 @@ import {
   type OptimisticCartLine,
 } from '@shopify/hydrogen';
 import type {MoneyV2} from '@shopify/hydrogen/storefront-api-types';
-import {useEffect, useRef, useState} from 'react';
+import {useEffect, useState} from 'react';
 import {useVariantUrl} from '~/lib/variants';
 import {CART_LINE_IMAGE_SIZE} from '~/lib/cartLineImage';
 import {Link} from 'react-router';
@@ -50,40 +50,6 @@ function useRetreat(visible: boolean, ms: number) {
 }
 
 /**
- * Measures the line's text block so the thumbnail can be a square of exactly
- * that height.
- *
- * This cannot be done in CSS. Flex sizes the main axis (width) before the cross
- * axis (height) and never revisits it, so a width derived from the text's height
- * is unavailable: an `<img>` ends up sizing the square from its own intrinsic
- * width and stretching the row, and an `aspect-ratio` wrapper has no width to
- * resolve. Grid has the same ordering. Hence the observer.
- *
- * The text block must be `align-self: flex-start` (see `.cart-line-inner`) — if
- * it stretched to the row it would report the row's height, which the square
- * sets, and any starting size would look self-consistent.
- */
-function useTextBlockSquare() {
-  const textRef = useRef<HTMLDivElement>(null);
-  const [side, setSide] = useState<number | null>(null);
-
-  useEffect(() => {
-    const element = textRef.current;
-    if (!element || typeof ResizeObserver === 'undefined') return;
-
-    const observer = new ResizeObserver(() => {
-      // Rounded up: a fractional height would leave a hairline of background
-      // below the image.
-      setSide(Math.ceil(element.getBoundingClientRect().height));
-    });
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, []);
-
-  return {textRef, side};
-}
-
-/**
  * A single line item in the cart. It displays the product image, title, price.
  * It also provides controls to update the quantity or remove the line item.
  * If the line is a parent line that has child components (like warranties or gift wrapping), they are
@@ -110,7 +76,6 @@ export function CartLineItem({
   // server value for both the stepper and the subtotal below.
   const quantity = getDraftQuantity(id) ?? line.quantity;
   const unitPrice = line?.cost?.amountPerQuantity ?? merchandise.price;
-  const {textRef, side} = useTextBlockSquare();
   // At quantity 1 the per-piece price would only restate the subtotal.
   const {rendered: showUnitPrice, retreating} = useRetreat(
     quantity > 1 && !!unitPrice,
@@ -126,13 +91,8 @@ export function CartLineItem({
       />
 
       <div className="cart-line-inner">
-        {/* Side comes from the measured text height; the CSS default covers the
-            first paint. The <Image> dimensions only pick the asset resolution. */}
         {image && (
-          <div
-            className="cart-line-media"
-            style={side ? {height: side, width: side} : undefined}
-          >
+          <div className="cart-line-media">
             <Image
               alt={title}
               aspectRatio="1/1"
@@ -148,7 +108,7 @@ export function CartLineItem({
           </div>
         )}
 
-        <div className="min-w-0 flex-1" ref={textRef}>
+        <div className="min-w-0 flex-1">
           {scentNumber ? (
             <span className="block font-['config-mono-vf'] text-[12px] font-medium leading-none tracking-[0.02em] [font-variant-numeric:slashed-zero]">
               No. {scentNumber}

@@ -2,8 +2,8 @@
   --aside-width: 400px;
   --cart-aside-summary-height-with-discount: 300px;
   --cart-aside-summary-height: 250px;
-  /* See .cart-line-media — the text block's single-line height. */
-  --cart-line-media-size: 69px;
+  /* Fixed cart thumbnail; keep in sync with CART_LINE_IMAGE_SIZE. */
+  --cart-line-media-size: 105px;
   /* Wide enough for "- 18 +"; the thumbnail is no longer a usable width for it. */
   --cart-line-stepper-width: 100px;
   --grid-item-width: 355px;
@@ -440,17 +440,11 @@ main {
 }
 
 .cart-line-inner {
-  /* Not stretch: useTextBlockSquare measures the text block, so its box has to
-     stay content-sized or it would just report back the height it caused. */
   align-items: flex-start;
   display: flex;
 }
 
-/* A square whose side is the height of the text block beside it. The side is set
-   inline by useTextBlockSquare; the values here are the first-paint default, and
-   what a client without ResizeObserver keeps. --cart-line-media-size is the
-   text block's single-line height, so the common case does not move on hydration:
-   12px No. + 4 + 36px title + 4 + 13px size line. */
+/* Fixed square for every line — wrapping titles must not resize the thumb. */
 .cart-line-media {
   aspect-ratio: 1 / 1;
   flex: none;
@@ -494,7 +488,7 @@ main {
   overflow: hidden;
   /* Room for descenders inside the clip box — the line is set at leading-none, so
      hiding overflow would otherwise shave the tails off. Cancelled by the margin
-     so the measured text height, and the square that follows it, do not change. */
+     so the line's layout height does not change. */
   margin-bottom: -0.3em;
   padding-bottom: 0.3em;
 }

@@ -1,8 +1,9 @@
 /**
- * Cart line thumbnails are ~69px CSS; we request 72 so 1x/2x/3x densities stay
- * tiny. Must stay in sync with CartLineItem's <Image width/height>.
+ * Fixed cart thumbnail side. Compact enough to leave text room, tall enough
+ * to sit beside a two-line title. Keep in sync with --cart-line-media-size
+ * and CartLineItem <Image>.
  */
-export const CART_LINE_IMAGE_SIZE = 72;
+export const CART_LINE_IMAGE_SIZE = 88;
 
 /** Same query-param shape Hydrogen's Image shopifyLoader produces. */
 export function shopifyCdnUrl(

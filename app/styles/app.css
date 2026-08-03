@@ -116,6 +116,11 @@ a {
 * --------------------------------------------------
 */
 @media (max-width: 45em) {
+  :root {
+    /* Full-bleed drawer on phones; desktop keeps the 400px cap. */
+    --aside-width: 100%;
+  }
+
   html:has(.overlay.expanded) {
     overflow: hidden;
   }
@@ -128,7 +133,9 @@ aside {
   /* Mobile browser chrome overlaps the bottom of a 100vh box, which would hide
      anything anchored to the drawer's bottom edge. */
   height: 100dvh;
-  width: min(var(--aside-width), 100vw);
+  /* Width, off-screen parking, and the open translate all share --aside-width
+     so a mobile 100% drawer never leaves a peek of the page beside it. */
+  width: var(--aside-width);
   position: fixed;
   right: calc(-1 * var(--aside-width));
   top: 0;
@@ -224,16 +231,19 @@ aside li {
 }
 
 .overlay {
-  background: rgba(0, 0, 0, 0.2);
+  /* Fade the scrim via background, not opacity — opacity on this node would
+     also fade the sliding aside (which is a child). */
+  background: rgba(0, 0, 0, 0);
   bottom: 0;
   left: 0;
-  opacity: 0;
   pointer-events: none;
   position: fixed;
   right: 0;
   top: 0;
-  transition: opacity 400ms ease-in-out;
-  transition: opacity 400ms;
+  /* Stay visible through the aside's slide-out, then hide. */
+  transition:
+    background-color 200ms ease-in-out,
+    visibility 0s linear 200ms;
   visibility: hidden;
   z-index: 100;
 }
@@ -261,11 +271,15 @@ aside li {
 }
 
 .overlay.expanded {
-  opacity: 1;
+  background: rgba(0, 0, 0, 0.2);
   pointer-events: auto;
+  transition:
+    background-color 200ms ease-in-out,
+    visibility 0s linear 0s;
   visibility: visible;
 }
-/* reveal aside */
+
+/* reveal aside — slide only; no opacity so enter/exit stay a pure slide */
 .overlay.expanded aside {
   transform: translateX(calc(var(--aside-width) * -1));
 }

@@ -21,6 +21,23 @@ import type {ScentProfile} from '~/lib/scentProfile';
 import {ProductBottleBand} from './ProductBottleBand';
 import {ProductTitle} from './ProductTitle';
 
+/** Merge product-page scent number onto the variant so optimistic cart lines
+ *  match the shape the cart query eventually returns. */
+function withCartLineScentNumber<T extends {product?: object | null}>(
+  variant: T,
+  scentNumber: string,
+): T {
+  const value = scentNumber.trim();
+  if (!value) return variant;
+  return {
+    ...variant,
+    product: {
+      ...variant.product,
+      scentNumber: {value},
+    },
+  };
+}
+
 type ProductHeroProps = {
   title: string;
   /** Optional parenthetical under the title (Forever only today). */
@@ -140,7 +157,14 @@ export function ProductHero({
                         {
                           merchandiseId: selectedVariant.id,
                           quantity: 1,
-                          selectedVariant,
+                          // Optimistic cart uses selectedVariant as the line's
+                          // merchandise. Stitch scentNumber from the already-
+                          // loaded product page so "No." is present on first
+                          // paint and the thumbnail does not resize later.
+                          selectedVariant: withCartLineScentNumber(
+                            selectedVariant,
+                            scentProfile.number,
+                          ),
                         },
                       ]
                     : []

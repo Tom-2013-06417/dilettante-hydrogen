@@ -149,6 +149,10 @@ const PRODUCT_VARIANT_FRAGMENT = `#graphql
     product {
       title
       handle
+      # Needed on optimistic cart lines so "No." is present before the cart query returns.
+      scentNumber: metafield(namespace: "custom", key: "scent_number") {
+        value
+      }
     }
     selectedOptions {
       name

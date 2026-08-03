@@ -477,6 +477,19 @@ main {
   }
 }
 
+/* Separate name from the entrance — browsers often skip restarting when only
+   `reverse` flips on the same animation-name, so qty→1 would wait then snap. */
+@keyframes cart-line-unit-price-out {
+  from {
+    margin-left: 0;
+    opacity: 1;
+  }
+  to {
+    margin-left: -12ch;
+    opacity: 0;
+  }
+}
+
 .cart-line-size {
   overflow: hidden;
   /* Room for descenders inside the clip box — the line is set at leading-none, so
@@ -492,11 +505,10 @@ main {
   animation: cart-line-unit-price-in 240ms ease-out;
 }
 
-/* Retreating runs the same keyframes backwards, so the price slides back off to
-   the left and the size label follows it. `forwards` holds the hidden end state
-   for the moment between the animation finishing and React dropping the span. */
+/* Slide back off to the left; `forwards` holds the hidden end state until React
+   drops the span after UNIT_PRICE_ANIMATION_MS. */
 .cart-line-unit-price.is-retreating {
-  animation: cart-line-unit-price-in 240ms ease-in reverse forwards;
+  animation: cart-line-unit-price-out 240ms ease-in forwards;
 }
 
 @media (prefers-reduced-motion: reduce) {

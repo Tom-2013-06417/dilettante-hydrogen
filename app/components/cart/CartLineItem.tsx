@@ -108,7 +108,7 @@ export function CartLineItem({
           </div>
         )}
 
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 pr-8">
           {scentNumber ? (
             <span className="block font-['config-mono-vf'] text-[12px] font-medium leading-none tracking-[0.02em] [font-variant-numeric:slashed-zero]">
               No. {scentNumber}

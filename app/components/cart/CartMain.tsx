@@ -1,5 +1,4 @@
 import {useOptimisticCart} from '@shopify/hydrogen';
-import {Link} from 'react-router';
 import type {CartApiQueryFragment} from 'storefrontapi.generated';
 import {useAside} from '~/components/layout';
 import {CartLineItem, type CartLine} from './CartLineItem';
@@ -100,14 +99,11 @@ function CartEmpty({
   return (
     <div hidden={hidden}>
       <br />
-      <p>
-        Looks like you haven&rsquo;t added anything yet, let&rsquo;s get you
-        started!
-      </p>
+      <p>Your cart is empty — nothing waiting here yet.</p>
       <br />
-      <Link to="/collections" onClick={close} prefetch="viewport">
+      <button className="reset" type="button" onClick={close}>
         Continue shopping →
-      </Link>
+      </button>
     </div>
   );
 }

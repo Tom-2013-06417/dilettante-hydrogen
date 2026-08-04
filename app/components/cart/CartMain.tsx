@@ -1,6 +1,8 @@
+import {Fragment} from 'react';
 import {useOptimisticCart} from '@shopify/hydrogen';
 import type {CartApiQueryFragment} from 'storefrontapi.generated';
 import {useAside} from '~/components/layout';
+import {BlueprintRule} from '~/components/product/BlueprintRule';
 import {CartLineItem, type CartLine} from './CartLineItem';
 import {CartLineUpdatesProvider} from './CartLineUpdates';
 import {CartSummary} from './CartSummary';
@@ -49,6 +51,12 @@ export function CartMain({layout, cart: originalCart}: CartMainProps) {
   const cartHasItems = cart?.totalQuantity ? cart.totalQuantity > 0 : false;
   const lines = cart?.lines?.nodes ?? [];
   const childrenMap = getLineItemChildrenMap(lines);
+  const rootLines = lines.filter(
+    (line) =>
+      !(
+        'parentRelationship' in line && line.parentRelationship?.parent
+      ),
+  );
 
   return (
     <section
@@ -63,23 +71,23 @@ export function CartMain({layout, cart: originalCart}: CartMainProps) {
           </p>
           <div className="cart-line-list">
             <ul aria-labelledby="cart-lines">
-              {lines.map((line) => {
-                // we do not render non-parent lines at the root of the cart
-                if (
-                  'parentRelationship' in line &&
-                  line.parentRelationship?.parent
-                ) {
-                  return null;
-                }
-                return (
+              {rootLines.map((line, index) => (
+                <Fragment key={line.id}>
+                  {index > 0 ? (
+                    <li aria-hidden="true" className="list-none py-1">
+                      <BlueprintRule
+                        orientation="h"
+                        className="w-full text-vellum-100/50"
+                      />
+                    </li>
+                  ) : null}
                   <CartLineItem
-                    key={line.id}
                     line={line}
                     layout={layout}
                     childrenMap={childrenMap}
                   />
-                );
-              })}
+                </Fragment>
+              ))}
             </ul>
           </div>
           {cartHasItems && <CartSummary cart={cart} layout={layout} />}

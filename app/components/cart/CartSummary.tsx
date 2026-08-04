@@ -54,7 +54,7 @@ function CartCheckoutActions({checkoutUrl}: {checkoutUrl?: string}) {
     <a
       aria-busy={isCartBusy || undefined}
       aria-disabled={isCartBusy || undefined}
-      className={`checkout-button mb-3 flex items-center justify-center gap-2 rounded-[var(--radius-button)] bg-vellum-100 px-6 py-4 text-center font-heading text-base font-bold uppercase tracking-[0.2em] text-inkwell-700! no-underline transition-colors ${
+      className={`checkout-button mb-3 flex items-center justify-center gap-2 rounded-[var(--radius-button)] bg-vellum-100 px-6 py-2 text-center font-heading text-base font-bold uppercase tracking-[0.2em] text-inkwell-700! no-underline transition-colors ${
         isCartBusy
           ? 'pointer-events-none opacity-60'
           : 'hover:bg-inkwell-700 hover:text-vellum-100!'

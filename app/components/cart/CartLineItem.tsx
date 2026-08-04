@@ -116,6 +116,7 @@ export function CartLineItem({
           ) : null}
 
           <Link
+            className="block min-w-0"
             prefetch="intent"
             to={lineItemUrl}
             onClick={() => {
@@ -126,7 +127,7 @@ export function CartLineItem({
           >
             {/* Important modifiers: reset.css is unlayered, so its `p` rules
                 (line-height: 1.25, margin: 0) outrank layered utilities. */}
-            <p className="mt-1! font-['wayfinder-cf'] text-[36px] font-thin leading-none! tracking-[-5%]">
+            <p className="mt-1! truncate font-['wayfinder-cf'] text-[36px] font-thin leading-none! tracking-[-5%]">
               {product.title}
             </p>
           </Link>

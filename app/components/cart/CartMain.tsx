@@ -1,6 +1,7 @@
 import {Fragment} from 'react';
 import {useOptimisticCart} from '@shopify/hydrogen';
 import type {CartApiQueryFragment} from 'storefrontapi.generated';
+import {EmptyBasket} from '~/assets/illustrations/EmptyBasket';
 import {useAside} from '~/components/layout';
 import {BlueprintRule} from '~/components/product/BlueprintRule';
 import {CartLineItem, type CartLine} from './CartLineItem';
@@ -43,7 +44,6 @@ export function CartMain({layout, cart: originalCart}: CartMainProps) {
   // so the user immediately sees feedback when they modify the cart.
   const cart = useOptimisticCart(originalCart);
 
-  const linesCount = Boolean(cart?.lines?.nodes?.length || 0);
   const withDiscount =
     cart &&
     Boolean(cart?.discountCodes?.filter((code) => code.applicable)?.length);
@@ -53,9 +53,7 @@ export function CartMain({layout, cart: originalCart}: CartMainProps) {
   const childrenMap = getLineItemChildrenMap(lines);
   const rootLines = lines.filter(
     (line) =>
-      !(
-        'parentRelationship' in line && line.parentRelationship?.parent
-      ),
+      !('parentRelationship' in line && line.parentRelationship?.parent),
   );
 
   return (
@@ -63,53 +61,62 @@ export function CartMain({layout, cart: originalCart}: CartMainProps) {
       className={className}
       aria-label={layout === 'page' ? 'Cart page' : 'Cart drawer'}
     >
-      <CartEmpty hidden={linesCount} layout={layout} />
-      <CartLineUpdatesProvider layout={layout} lines={lines}>
-        <div className="cart-details">
-          <p id="cart-lines" className="sr-only">
-            Line items
-          </p>
-          <div className="cart-line-list">
-            <ul aria-labelledby="cart-lines">
-              {rootLines.map((line, index) => (
-                <Fragment key={line.id}>
-                  {index > 0 ? (
-                    <li aria-hidden="true" className="list-none py-1">
-                      <BlueprintRule
-                        orientation="h"
-                        className="w-full text-vellum-100/50"
-                      />
-                    </li>
-                  ) : null}
-                  <CartLineItem
-                    line={line}
-                    layout={layout}
-                    childrenMap={childrenMap}
-                  />
-                </Fragment>
-              ))}
-            </ul>
+      {!cartHasItems ? (
+        <CartEmpty layout={layout} />
+      ) : (
+        <CartLineUpdatesProvider layout={layout} lines={lines}>
+          <div className="cart-details">
+            <p id="cart-lines" className="sr-only">
+              Line items
+            </p>
+            <div className="cart-line-list">
+              <ul aria-labelledby="cart-lines">
+                {rootLines.map((line, index) => (
+                  <Fragment key={line.id}>
+                    {index > 0 ? (
+                      <li aria-hidden="true" className="list-none py-1">
+                        <BlueprintRule
+                          orientation="h"
+                          className="w-full text-vellum-100/50"
+                        />
+                      </li>
+                    ) : null}
+                    <CartLineItem
+                      line={line}
+                      layout={layout}
+                      childrenMap={childrenMap}
+                    />
+                  </Fragment>
+                ))}
+              </ul>
+            </div>
+            <CartSummary cart={cart} layout={layout} />
           </div>
-          {cartHasItems && <CartSummary cart={cart} layout={layout} />}
-        </div>
-      </CartLineUpdatesProvider>
+        </CartLineUpdatesProvider>
+      )}
     </section>
   );
 }
 
-function CartEmpty({
-  hidden = false,
-}: {
-  hidden: boolean;
-  layout?: CartMainProps['layout'];
-}) {
+function CartEmpty({layout}: {layout?: CartMainProps['layout']}) {
   const {close} = useAside();
+  const isAside = layout === 'aside';
+
   return (
-    <div hidden={hidden}>
-      <br />
-      <p>Your cart is empty — nothing waiting here yet.</p>
-      <br />
-      <button className="reset" type="button" onClick={close}>
+    <div
+      className={
+        isAside
+          ? 'flex flex-1 flex-col justify-center gap-5'
+          : 'flex flex-col justify-center gap-5 py-16'
+      }
+    >
+      <EmptyBasket className="mx-auto h-10 w-10 text-vellum-100" />
+      <p className="px-8 text-center sm:px-10">Your cart is empty.</p>
+      <button
+        className="mb-10 reset mx-auto cursor-pointer text-center underline-offset-4 transition-opacity hover:opacity-80 hover:underline"
+        type="button"
+        onClick={close}
+      >
         Continue shopping →
       </button>
     </div>

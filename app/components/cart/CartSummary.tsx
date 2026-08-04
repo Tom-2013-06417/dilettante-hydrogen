@@ -15,14 +15,28 @@ export function CartSummary({cart, layout}: CartSummaryProps) {
   const className =
     layout === 'page' ? 'cart-summary-page' : 'cart-summary-aside';
   const summaryId = useId();
+  const estimatedTotal = cart?.cost?.totalAmount;
 
-  // Totals, discounts and gift cards are cleared until the design is finalized.
-  // CartDiscounts / CartGiftCard below are kept for when they are reinstated.
   return (
     <div aria-labelledby={summaryId} className={className}>
       <h4 id={summaryId} className="sr-only">
         Totals
       </h4>
+      {estimatedTotal ? (
+        <div className="mb-3 flex items-baseline justify-between gap-3">
+          <span className="font-['config-mono-vf'] text-[12px] uppercase tracking-[0.08em]">
+            Estimated total
+          </span>
+          <Money
+            as="span"
+            className="font-['config-mono-vf'] text-[18px] tracking-[0.04em]"
+            data={estimatedTotal}
+          />
+        </div>
+      ) : null}
+      <p className="font-['config-mono-vf'] text-[11px] leading-snug text-vellum-100/60">
+        Taxes, discounts, and shipping fees are calculated at checkout.
+      </p>
       <CartCheckoutActions checkoutUrl={cart?.checkoutUrl} />
     </div>
   );
@@ -40,7 +54,7 @@ function CartCheckoutActions({checkoutUrl}: {checkoutUrl?: string}) {
     <a
       aria-busy={isCartBusy || undefined}
       aria-disabled={isCartBusy || undefined}
-      className={`checkout-button mb-12 mt-4 flex items-center justify-center gap-2 rounded-[var(--radius-button)] bg-vellum-100 px-6 py-4 text-center font-heading text-base font-bold uppercase tracking-[0.2em] text-inkwell-700! no-underline transition-colors ${
+      className={`checkout-button mt-4 flex items-center justify-center gap-2 rounded-[var(--radius-button)] bg-vellum-100 px-6 py-4 text-center font-heading text-base font-bold uppercase tracking-[0.2em] text-inkwell-700! no-underline transition-colors ${
         isCartBusy
           ? 'pointer-events-none opacity-60'
           : 'hover:bg-inkwell-700 hover:text-vellum-100!'

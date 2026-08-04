@@ -8,7 +8,7 @@ import {
   type OptimisticCartLine,
 } from '@shopify/hydrogen';
 import type {MoneyV2} from '@shopify/hydrogen/storefront-api-types';
-import {useCallback, useEffect, useLayoutEffect, useRef, useState} from 'react';
+import {useEffect, useState} from 'react';
 import {useVariantUrl} from '~/lib/variants';
 import {CART_LINE_IMAGE_SIZE} from '~/lib/cartLineImage';
 import {Link} from 'react-router';
@@ -25,9 +25,6 @@ export type CartLine = OptimisticCartLine<CartApiQueryFragment>;
  * Must match the animation duration in `.cart-line-unit-price` (app.css).
  */
 const UNIT_PRICE_ANIMATION_MS = 240;
-
-const CART_TITLE_MAX_PX = 36;
-const CART_TITLE_MIN_PX = 22;
 
 /**
  * Keeps a element rendered for `ms` after it stops being wanted, so it can
@@ -50,77 +47,6 @@ function useRetreat(visible: boolean, ms: number) {
   }, [ms, visible]);
 
   return {rendered, retreating: rendered && !visible};
-}
-
-/**
- * Starts at 36px and shrinks (down to a floor) so the title stays on one line
- * inside the cart text column. Re-fits when the title or column width changes.
- */
-function CartLineTitle({children}: {children: string}) {
-  const ref = useRef<HTMLParagraphElement>(null);
-
-  const fit = useCallback(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    el.style.whiteSpace = 'nowrap';
-    el.style.overflow = 'hidden';
-    el.style.textOverflow = 'clip';
-
-    let low = CART_TITLE_MIN_PX;
-    let high = CART_TITLE_MAX_PX;
-    let best = CART_TITLE_MIN_PX;
-
-    while (low <= high) {
-      const mid = (low + high) >> 1;
-      el.style.fontSize = `${mid}px`;
-      if (el.scrollWidth <= el.clientWidth + 0.5) {
-        best = mid;
-        low = mid + 1;
-      } else {
-        high = mid - 1;
-      }
-    }
-
-    el.style.fontSize = `${best}px`;
-    // Still overflowing at the floor — ellipsis rather than wrapping.
-    el.style.textOverflow =
-      el.scrollWidth > el.clientWidth + 0.5 ? 'ellipsis' : 'clip';
-  }, []);
-
-  useLayoutEffect(() => {
-    let cancelled = false;
-    const run = () => {
-      if (!cancelled) fit();
-    };
-    run();
-    void document.fonts?.ready.then(run);
-    return () => {
-      cancelled = true;
-    };
-  }, [children, fit]);
-
-  useLayoutEffect(() => {
-    const el = ref.current;
-    if (!el || typeof ResizeObserver === 'undefined') return;
-
-    const observer = new ResizeObserver(() => fit());
-    observer.observe(el);
-    if (el.parentElement) observer.observe(el.parentElement);
-    return () => observer.disconnect();
-  }, [fit]);
-
-  return (
-    // Important modifiers: reset.css is unlayered, so its `p` rules
-    // (line-height: 1.25, margin: 0) outrank layered utilities.
-    <p
-      ref={ref}
-      className="mt-1! overflow-hidden font-['wayfinder-cf'] font-thin leading-none! tracking-[-5%] whitespace-nowrap"
-      style={{fontSize: CART_TITLE_MAX_PX}}
-    >
-      {children}
-    </p>
-  );
 }
 
 /**
@@ -190,7 +116,6 @@ export function CartLineItem({
           ) : null}
 
           <Link
-            className="block min-w-0"
             prefetch="intent"
             to={lineItemUrl}
             onClick={() => {
@@ -199,7 +124,11 @@ export function CartLineItem({
               }
             }}
           >
-            <CartLineTitle>{product.title}</CartLineTitle>
+            {/* Important modifiers: reset.css is unlayered, so its `p` rules
+                (line-height: 1.25, margin: 0) outrank layered utilities. */}
+            <p className="mt-1! font-['wayfinder-cf'] text-[36px] font-thin leading-none! tracking-[-5%]">
+              {product.title}
+            </p>
           </Link>
 
           {/* The per-piece price only earns its space once there is more than

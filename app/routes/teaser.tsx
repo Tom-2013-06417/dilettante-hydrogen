@@ -1,11 +1,7 @@
 import {data, redirect} from 'react-router';
 import type {Route} from './+types/teaser';
 import {subscribeTeaserEmail} from '~/lib/newsletterSubscribe';
-import {
-  isSiteGated,
-  unlockSite,
-  verifyPreviewPassword,
-} from '~/lib/siteGate';
+import {isSiteGated, unlockSite, verifyPreviewPassword} from '~/lib/siteGate';
 
 /**
  * Resource route for teaser mailing-list signup and preview unlock.
@@ -36,10 +32,7 @@ export async function action({request, context}: Route.ActionArgs) {
 
     const result = await subscribeTeaserEmail(context.env, email);
     if (!result.ok) {
-      return data(
-        {ok: false, error: result.error},
-        {status: result.status},
-      );
+      return data({ok: false, error: result.error}, {status: result.status});
     }
 
     return data({ok: true, message: result.message});

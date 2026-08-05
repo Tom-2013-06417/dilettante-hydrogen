@@ -229,7 +229,7 @@ export function TeaserPage({slides: productSlides}: TeaserPageProps) {
         Logo→date: clamp(1rem, 3.5svh, 1.5rem) — stays compact.
         Date→CTA: clamp opens up on tall screens so the date sits nearer the wordmark.
       */}
-      <div className="flex w-full shrink-0 flex-col items-center px-[15svw] sm:max-w-[22rem] sm:px-0 lg:max-w-[24rem]">
+      <div className="flex w-full shrink-0 flex-col items-center px-[15svw] sm:max-w-88 sm:px-0 lg:max-w-[24rem]">
         <div
           className="w-full shrink-0"
           style={{
@@ -253,7 +253,7 @@ export function TeaserPage({slides: productSlides}: TeaserPageProps) {
           aria-hidden
         />
 
-        <div className="w-full max-w-[14rem] shrink-0 pb-[clamp(1svh,5svh,8svh)] sm:max-w-[15rem]">
+        <div className="w-full max-w-56 shrink-0 pb-[clamp(1svh,5svh,8svh)] sm:max-w-60">
           {subscribed ? (
             <div
               className={`${CTA_SHELL} relative justify-center pr-9 text-center`}

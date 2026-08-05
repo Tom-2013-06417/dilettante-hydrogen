@@ -12,7 +12,11 @@ export function shopifyCdnUrl(
     width,
     height,
     crop,
-  }: {width: number; height?: number; crop?: 'center' | 'top' | 'bottom' | 'left' | 'right'},
+  }: {
+    width: number;
+    height?: number;
+    crop?: 'center' | 'top' | 'bottom' | 'left' | 'right';
+  },
 ) {
   // Storefront API image URLs are always absolute CDN links.
   const url = new URL(src);

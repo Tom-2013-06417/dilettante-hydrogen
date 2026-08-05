@@ -334,8 +334,7 @@ function OutlineBox({
 
 /** Top half with screen-space hatch + hand-inked edges. */
 function HalftoneOutlineBox({
-  args,
-  visible = true,
+  args, = true,
 }: {
   args: [number, number, number];
   visible?: boolean;

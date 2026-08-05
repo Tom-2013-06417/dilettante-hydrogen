@@ -54,8 +54,9 @@ export function ScentNotesExplorer({
   const localRef = useRef<HTMLElement | null>(null);
   const anchorsRef = useRef(EMPTY_CUBE_ANCHORS);
   const [stageElement, setStageElement] = useState<HTMLElement | null>(null);
-  const [halfCanvases, setHalfCanvases] =
-    useState<ProductHalfCanvases | null>(null);
+  const [halfCanvases, setHalfCanvases] = useState<ProductHalfCanvases | null>(
+    null,
+  );
 
   useEffect(() => {
     const url = productImageUrl || scentProfile.detailImage;
@@ -151,7 +152,7 @@ export function ScentNotesExplorer({
     >
       {/*
         Paper fill lives on this sticky shell (not only body). Transparent
-        WebGL inside sticky + overflow:hidden often composites against the
+        WebGL inside + overflow:hidden often composites against the
         local stacking context — without a local paint, the canvas reads as
         flat solid cream instead of the page grain.
       */}
@@ -159,10 +160,7 @@ export function ScentNotesExplorer({
         <div className="flex h-full flex-col">
           <PageContainer className="flex h-full flex-col">
             <div className="relative mx-auto h-full w-full max-w-4xl">
-              <div
-                ref={setStageElement}
-                className="absolute inset-0"
-              >
+              <div ref={setStageElement} className="absolute inset-0">
                 <CubeBlueprintAnnotations
                   tiers={scentProfile.tiers}
                   drawProgress={annotationDraw}

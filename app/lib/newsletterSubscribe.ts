@@ -10,8 +10,7 @@
 const ADMIN_API_VERSION = '2025-01';
 
 type SubscribeResult =
-  | {ok: true; message: string}
-  | {ok: false; error: string; status: number};
+  {ok: true; message: string} | {ok: false; error: string; status: number};
 
 type AdminGraphqlResponse<T> = {
   data?: T;
@@ -219,7 +218,10 @@ export async function subscribeTeaserEmail(
   try {
     token = await getAdminAccessToken(env, shopDomain);
   } catch (error) {
-    if (error instanceof Error && error.message === 'MISSING_ADMIN_CREDENTIALS') {
+    if (
+      error instanceof Error &&
+      error.message === 'MISSING_ADMIN_CREDENTIALS'
+    ) {
       console.error(
         'teaser subscribe: missing SHOPIFY_APP_CLIENT_ID / SHOPIFY_APP_CLIENT_SECRET',
       );

@@ -51,7 +51,10 @@ type TeaserProductsQuery = {
 
 type TeaserStorefront = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  query: (query: typeof TEASER_PRODUCTS_QUERY, options?: any) => Promise<TeaserProductsQuery>;
+  query: (
+    query: typeof TEASER_PRODUCTS_QUERY,
+    options?: any,
+  ) => Promise<TeaserProductsQuery>;
   CacheLong: () => unknown;
 };
 

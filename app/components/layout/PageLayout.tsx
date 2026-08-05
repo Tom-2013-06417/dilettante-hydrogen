@@ -30,8 +30,9 @@ export function PageLayout({
   const isHome = location.pathname === '/';
   const isProduct = location.pathname.startsWith('/products/');
   // Detail only — leave /collections and /collections/all on the default chrome.
-  const isCollectionDetail =
-    /^\/collections\/(?!all(?:\/|$))[^/]+\/?$/.test(location.pathname);
+  const isCollectionDetail = /^\/collections\/(?!all(?:\/|$))[^/]+\/?$/.test(
+    location.pathname,
+  );
   const isImmersive = isHome || isProduct || isCollectionDetail;
 
   return (

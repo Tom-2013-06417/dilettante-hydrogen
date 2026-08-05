@@ -337,9 +337,7 @@ export function RevolvedBlueprintOutline({
   const rimPositionsRef = useRef(
     new Float32Array(floatsPerRim('front') * Math.max(endRims.length, 1)),
   );
-  const sidePositionsRef = useRef(
-    new Float32Array(segmentCount * 2 * 2 * 3),
-  );
+  const sidePositionsRef = useRef(new Float32Array(segmentCount * 2 * 2 * 3));
 
   const rimPlaceholder = useMemo(
     () => placeholderRimPoints(Math.max(endRims.length, 1), 'front'),

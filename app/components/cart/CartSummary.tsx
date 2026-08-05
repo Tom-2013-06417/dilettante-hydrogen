@@ -35,7 +35,7 @@ export function CartSummary({cart, layout}: CartSummaryProps) {
         </div>
       ) : null}
       <CartCheckoutActions checkoutUrl={cart?.checkoutUrl} />
-      <p className="font-['config-mono-vf'] text-[11px] leading-snug text-vellum-100/60">
+      <p className="text-center font-['config-mono-vf'] text-[11px] leading-snug text-vellum-100/60">
         Taxes, discounts, and shipping fees are calculated at checkout.
       </p>
     </div>

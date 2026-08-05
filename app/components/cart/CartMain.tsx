@@ -110,10 +110,10 @@ function CartEmpty({layout}: {layout?: CartMainProps['layout']}) {
           : 'flex flex-col justify-center gap-5 py-16'
       }
     >
-      <EmptyBasket className="mx-auto h-10 w-10 text-vellum-100" />
+      <EmptyBasket className="mx-auto h-16 w-16 text-vellum-100" />
       <p className="px-8 text-center sm:px-10">Your cart is empty.</p>
       <button
-        className="mb-10 reset mx-auto cursor-pointer text-center underline-offset-4 transition-opacity hover:opacity-80 hover:underline"
+        className="reset mx-auto mb-25 cursor-pointer text-center underline! underline-offset-4 transition-opacity hover:opacity-80"
         type="button"
         onClick={close}
       >

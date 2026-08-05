@@ -1,6 +1,13 @@
 import {Image} from '@shopify/hydrogen';
 import {motion, useReducedMotion} from 'motion/react';
-import {useCallback, useEffect, useRef, useState} from 'react';
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type MutableRefObject,
+  type RefObject,
+} from 'react';
 import {fetchPriorityAttr} from '~/lib/fetchPriority';
 import {
   shopifyImageUrl,
@@ -78,6 +85,7 @@ const PROJECTOR_FRAME_MASK = {
 
 type VhsSectionProps = {
   slides: VhsSlide[];
+  sectionRef?: RefObject<HTMLElement | null>;
 };
 
 type LayerMode = 'idle' | 'exit' | 'enter';
@@ -194,9 +202,17 @@ type Phase = 'idle' | 'exiting' | 'entering';
  * Product VHS section. Continues from scent-anatomy’s inkwell exit fade —
  * solid inkwell-900 stage, then a projector-gate slideshow.
  */
-export function VhsSection({slides}: VhsSectionProps) {
+export function VhsSection({slides, sectionRef}: VhsSectionProps) {
   const stageRef = useRef<HTMLDivElement>(null);
-  const sectionRef = useRef<HTMLDivElement>(null);
+  const localSectionRef = useRef<HTMLElement | null>(null);
+  const setSectionRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      localSectionRef.current = node;
+      if (!sectionRef) return;
+      (sectionRef as MutableRefObject<HTMLElement | null>).current = node;
+    },
+    [sectionRef],
+  );
   const busyRef = useRef(false);
   const reducedMotion = useReducedMotion();
   /** Latch: mount bloom/plates only when near — avoids decode jank during scent anatomy. */
@@ -212,7 +228,7 @@ export function VhsSection({slides}: VhsSectionProps) {
 
   // Arm media only once the VHS block is approaching — not on first paint.
   useEffect(() => {
-    const el = sectionRef.current;
+    const el = localSectionRef.current;
     if (!el || mediaArmed) return;
 
     const arm = () => setMediaArmed(true);
@@ -390,9 +406,10 @@ export function VhsSection({slides}: VhsSectionProps) {
 
   return (
     <div
-      ref={sectionRef}
+      ref={setSectionRef}
+      id="scenes"
       className="vhs-section relative w-full bg-inkwell-900 text-vellum-100"
-      aria-label="VHS"
+      aria-label="Scenes"
     >
       <div className="relative w-full overflow-hidden bg-inkwell-900">
         {/* Bloom + plates stay unmounted until near — heavy blur/decode fights sticky WebGL. */}

@@ -5,7 +5,7 @@ import {
   useScroll,
   useTransform,
 } from 'motion/react';
-import {useCallback, useEffect, useRef, useState, type Ref} from 'react';
+import {useCallback, useEffect, useRef, useState, type Ref, type RefObject} from 'react';
 import type {ScentProfile} from '~/lib/scentProfile';
 import {ClientOnly, PageContainer} from '~/components/shared';
 import {CubeBlueprintAnnotations} from './CubeBlueprintAnnotations';
@@ -24,6 +24,7 @@ import {
   SCRUB_END,
   TOTAL_VH,
 } from './scentAnatomyTimeline';
+import {ScenesCue} from './ScentAnatomyPin';
 
 function clamp01(n: number) {
   return Math.min(1, Math.max(0, n));
@@ -64,11 +65,14 @@ export function ScentNotesExplorer({
   scentProfile,
   productImageUrl,
   sectionRef,
+  scenesSectionRef,
 }: {
   scentProfile: ScentProfile;
   /** Shopify product / variant image for the base-half photo faces. */
   productImageUrl?: string | null;
   sectionRef?: Ref<HTMLElement | null>;
+  /** Target for the SCENES down-arrow (VHS block). */
+  scenesSectionRef?: RefObject<HTMLElement | null>;
 }) {
   const reducedMotion = useReducedMotion();
   const localRef = useRef<HTMLElement | null>(null);
@@ -209,7 +213,10 @@ export function ScentNotesExplorer({
         >
           <PageContainer className="flex h-full flex-col">
             <div className="relative mx-auto h-full w-full max-w-4xl">
-              <div ref={setStageElement} className="absolute inset-0">
+              <div
+                ref={setStageElement}
+                className="pointer-events-none absolute inset-0"
+              >
                 <CubeBlueprintAnnotations
                   tiers={scentProfile.tiers}
                   drawProgress={annotationDraw}
@@ -241,10 +248,16 @@ export function ScentNotesExplorer({
                 </div>
               </div>
 
-              <span className="pointer-events-none absolute inset-x-0 bottom-0 z-2 mx-auto max-w-[36ch] px-4 pb-6 text-center text-[13px] italic leading-[1.6] tracking-[0.02em] text-inkwell-700/50 sm:pb-8">
-                Top, heart, and base — the three registers that unfold as the
-                scent settles on skin.
-              </span>
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex flex-col items-center px-4 pb-6 sm:pb-8">
+                {scenesSectionRef ? (
+                  <div className="pointer-events-auto">
+                    <ScenesCue
+                      scentSectionRef={localRef}
+                      scenesSectionRef={scenesSectionRef}
+                    />
+                  </div>
+                ) : null}
+              </div>
             </div>
           </PageContainer>
         </motion.div>

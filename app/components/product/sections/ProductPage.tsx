@@ -28,6 +28,7 @@ export function ProductPage({
   const title = isForever ? FOREVER_DISPLAY_TITLE : product.title;
   const titleSubtitle = isForever ? FOREVER_TITLE_SUBTITLE : undefined;
   const scentSectionRef = useRef<HTMLElement>(null);
+  const scenesSectionRef = useRef<HTMLElement>(null);
 
   return (
     <article className="product-page relative w-full">
@@ -60,10 +61,11 @@ export function ProductPage({
           scentProfile={scentProfile}
           productImageUrl={selectedVariant?.image?.url}
           sectionRef={scentSectionRef}
+          scenesSectionRef={scenesSectionRef}
         />
       </div>
 
-      <VhsSection slides={vhsSlides} />
+      <VhsSection slides={vhsSlides} sectionRef={scenesSectionRef} />
     </article>
   );
 }

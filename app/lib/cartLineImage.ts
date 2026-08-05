@@ -23,17 +23,3 @@ export function shopifyCdnUrl(
   if (crop) url.searchParams.set('crop', crop);
   return url.href;
 }
-
-/** Density srcSet matching Hydrogen FixedWidthImage for CART_LINE_IMAGE_SIZE. */
-export function cartLineImageSrcSet(src: string) {
-  return [1, 2, 3]
-    .map((density) => {
-      const side = CART_LINE_IMAGE_SIZE * density;
-      return `${shopifyCdnUrl(src, {
-        width: side,
-        height: side,
-        crop: 'center',
-      })} ${density}x`;
-    })
-    .join(', ');
-}

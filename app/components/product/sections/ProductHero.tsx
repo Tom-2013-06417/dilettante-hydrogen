@@ -19,7 +19,6 @@ import {ProductPrice} from '~/components/product/ProductPrice';
 import {ScentFormatLine} from '~/components/shared/ScentFormatLine';
 import type {ScentProfile} from '~/lib/scentProfile';
 import {
-  cartLineImageSrcSet,
   shopifyCdnUrl,
   CART_LINE_IMAGE_SIZE,
 } from '~/lib/cartLineImage';
@@ -69,18 +68,18 @@ export function ProductHero({
 
   return (
     <div className="relative z-1 flex min-h-0 w-full flex-1 flex-col text-inkwell-700">
-        {/* Warm the cart-thumbnail CDN URLs while the hero (a different size)
-            loads, so Purchase → drawer can reuse cache instead of waiting. */}
+        {/* Warm the retina cart thumbnail for Purchase → drawer. Use prefetch
+            (not preload): imagesrcset is preload-only, and an unused preload
+            triggers Chrome's "preloaded but not used" warning. */}
         {image?.url ? (
           <link
-            rel="preload"
+            rel="prefetch"
             as="image"
             href={shopifyCdnUrl(image.url, {
-              width: CART_LINE_IMAGE_SIZE,
-              height: CART_LINE_IMAGE_SIZE,
+              width: CART_LINE_IMAGE_SIZE * 2,
+              height: CART_LINE_IMAGE_SIZE * 2,
               crop: 'center',
             })}
-            imageSrcSet={cartLineImageSrcSet(image.url)}
           />
         ) : null}
 

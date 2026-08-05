@@ -7,35 +7,18 @@ import {
   getAdjacentAndFirstAvailableVariants,
   useSelectedOptionInUrlParam,
 } from '@shopify/hydrogen';
-import {
-  HERO_BAND_IMAGE_SIZES,
-  heroImagePreloadSrcSet,
-} from '~/components/product/ProductHeroPhoto';
 import {ProductPage} from '~/components/product/sections';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {pageTitle} from '~/lib/constants';
 
 export const meta: Route.MetaFunction = ({data}) => {
-  const imageUrl = data?.product?.selectedOrFirstAvailableVariant?.image?.url;
-  const descriptors: Route.MetaDescriptors = [
+  return [
     {title: pageTitle(data?.product.title)},
     {
       rel: 'canonical',
       href: `/products/${data?.product.handle}`,
     },
   ];
-
-  if (imageUrl) {
-    descriptors.push({
-      tagName: 'link',
-      rel: 'preload',
-      as: 'image',
-      imageSrcSet: heroImagePreloadSrcSet(imageUrl),
-      imageSizes: HERO_BAND_IMAGE_SIZES,
-    });
-  }
-
-  return descriptors;
 };
 
 export async function loader(args: Route.LoaderArgs) {

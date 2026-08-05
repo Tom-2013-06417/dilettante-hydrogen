@@ -1,6 +1,7 @@
 import {Image} from '@shopify/hydrogen';
 import {motion, useReducedMotion} from 'motion/react';
 import {useCallback, useEffect, useRef, useState} from 'react';
+import {fetchPriorityAttr} from '~/lib/fetchPriority';
 import {
   shopifyImageUrl,
   VHS_BLOOM_WIDTH,
@@ -118,7 +119,7 @@ function VhsStageBloom({slide, mode}: {slide: VhsSlide; mode: LayerMode}) {
         }}
         decoding="async"
         loading="eager"
-        fetchPriority="low"
+        {...fetchPriorityAttr('low')}
       />
     </motion.div>
   );
@@ -179,7 +180,7 @@ function VhsSlideLayer({
             sizes="(min-width: 1024px) 42rem, (min-width: 640px) 55vw, 70vw"
             srcSetOptions={PLATE_SRCSET}
             loading="eager"
-            fetchPriority={active ? 'high' : 'low'}
+            {...fetchPriorityAttr(active ? 'high' : 'low')}
           />
         </motion.div>
       </div>

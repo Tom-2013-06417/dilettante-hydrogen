@@ -2,6 +2,7 @@ import {Image} from '@shopify/hydrogen';
 import {useLayoutEffect, useRef, useState} from 'react';
 import type {ProductVariantFragment} from 'storefrontapi.generated';
 import {ProductHeroImageVeil} from '~/components/product/ProductHeroImageVeil';
+import {fetchPriorityAttr} from '~/lib/fetchPriority';
 
 /** Layout width hint for the top hero band (title overlay). */
 export const HERO_BAND_IMAGE_SIZES =
@@ -21,17 +22,6 @@ export const HERO_IMAGE_SRCSET = {
   placeholderWidth: 200,
 };
 
-const HERO_PRELOAD_WIDTHS = [400, 600, 800, 1000, 1200] as const;
-
-/** Build a Shopify CDN srcset for `<link rel="preload" as="image">`. */
-export function heroImagePreloadSrcSet(url: string): string {
-  return HERO_PRELOAD_WIDTHS.map((width) => {
-    const parsed = new URL(url);
-    parsed.searchParams.set('width', String(width));
-    return `${parsed.toString()} ${width}w`;
-  }).join(', ');
-}
-
 type ProductHeroPhotoProps = {
   image: NonNullable<ProductVariantFragment['image']>;
   alt: string;
@@ -44,6 +34,11 @@ type ProductHeroPhotoProps = {
 /**
  * Above-the-fold product photo: eager load, capped srcset, veil only after
  * decode so empty cache doesn’t flash vignette on blank space.
+ *
+ * No `<link rel="preload">` — the image is in SSR HTML, so the preload
+ * scanner already finds it. A separate responsive preload often picks a
+ * different srcset candidate than the `<img>` and trips Chrome’s unused-
+ * preload warning.
  */
 export function ProductHeroPhoto({
   image,
@@ -70,7 +65,7 @@ export function ProductHeroPhoto({
         data={image}
         sizes={sizes}
         loading="eager"
-        fetchPriority={fetchPriority}
+        {...fetchPriorityAttr(fetchPriority)}
         decoding="async"
         srcSetOptions={HERO_IMAGE_SRCSET}
         onLoad={() => setReady(true)}

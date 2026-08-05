@@ -333,16 +333,11 @@ function OutlineBox({
 }
 
 /** Top half with screen-space hatch + hand-inked edges. */
-function HalftoneOutlineBox({
-  args, = true,
-}: {
-  args: [number, number, number];
-  visible?: boolean;
-}) {
+function HalftoneOutlineBox({args}: {args: [number, number, number]}) {
   const material = useHatchMaterial();
 
   return (
-    <group visible={visible}>
+    <group>
       <mesh material={material}>
         <boxGeometry args={args} />
       </mesh>

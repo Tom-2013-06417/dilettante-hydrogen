@@ -4,15 +4,14 @@ import {
   PRODUCT_FADE_DELAY,
   PRODUCT_FADE_DURATION,
 } from '~/components/home/sections/animations';
-import {CUE_LEAVE_EARLY_VH, PIN} from './scentAnatomyTimeline';
+import {easeExit, leaveMark, PIN, SCRUB_END} from './scentAnatomyTimeline';
 
 /**
  * Starts at the bottom of the first fold. On scroll it rises and sticks at
  * ~10% from the top. Parent spans through the cube section.
  *
- * Leave progress uses `end end` → `end start` — the same window as the
- * sticky cube panel scrolling away — so the label tracks the section exit.
- * CUE_LEAVE_EARLY_VH shifts that start (0 = sync).
+ * Leave matches the cube’s transform exit (SCRUB_END runway) — ease-in-out
+ * lift in sync with the sticky shell, not native sticky release.
  */
 export function ScentAnatomyCue({
   scentSectionRef,
@@ -23,14 +22,14 @@ export function ScentAnatomyCue({
 
   const {scrollYProgress} = useScroll({
     target: scentSectionRef,
-    offset: ['start end', 'end start'],
+    // Same scrub window as the cube (explode / pin), not the exit runway
+    offset: ['start end', `${SCRUB_END} start`],
   });
 
-  // 1 = section bottom @ viewport bottom (sticky release). >1 = earlier.
-  const leaveStart = 1 + CUE_LEAVE_EARLY_VH / 100;
+  const mark = leaveMark();
   const {scrollYProgress: leaveProgress} = useScroll({
     target: scentSectionRef,
-    offset: [`end ${leaveStart}`, 'end start'],
+    offset: [`${mark} end`, `${mark} start`],
   });
 
   const arrowOpacity = useTransform(scrollYProgress, [PIN - 0.02, PIN], [1, 0]);
@@ -38,7 +37,10 @@ export function ScentAnatomyCue({
     v < 0.08 ? 'none' : 'auto',
   );
 
-  const leaveY = useTransform(leaveProgress, [0, 1], ['0vh', '-100vh']);
+  const leaveY = useTransform(leaveProgress, (p) => {
+    if (reducedMotion) return '0vh';
+    return `${-easeExit(p) * 100}vh`;
+  });
 
   return (
     <motion.div

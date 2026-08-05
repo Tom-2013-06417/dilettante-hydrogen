@@ -1,4 +1,5 @@
 import {
+  motion,
   useMotionValueEvent,
   useReducedMotion,
   useScroll,
@@ -14,7 +15,15 @@ import {
   loadProductHalfCanvases,
   type ProductHalfCanvases,
 } from './productHalfCrops';
-import {DEG_150, PIN, SECTION_VH} from './scentAnatomyTimeline';
+import {
+  DEG_150,
+  easeExit,
+  EXIT_FADE_START,
+  leaveMark,
+  PIN,
+  SCRUB_END,
+  TOTAL_VH,
+} from './scentAnatomyTimeline';
 
 function clamp01(n: number) {
   return Math.min(1, Math.max(0, n));
@@ -101,12 +110,31 @@ export function ScentNotesExplorer({
   const explodeAmountRef = useRef(reducedMotion ? 1 : 0);
   const annotationDrawRef = useRef(0);
 
+  // Scrub only — exit runway is excluded so PIN / explode timing stay stable
   const {scrollYProgress} = useScroll({
     target: localRef,
-    offset: ['start end', 'end start'],
+    offset: ['start end', `${SCRUB_END} start`],
   });
 
-  // Cube keeps rotating through the whole stage, including the hold + scroll-away
+  const mark = leaveMark();
+  const {scrollYProgress: leaveProgress} = useScroll({
+    target: localRef,
+    offset: [`${mark} end`, `${mark} start`],
+  });
+
+  // Transform-only exit (sticky stays pinned) — ease-in lift + fade to inkwell
+  const leaveY = useTransform(leaveProgress, (p) => {
+    if (reducedMotion) return '0vh';
+    return `${-easeExit(p) * 100}vh`;
+  });
+  // Keep vellum through most of the cube exit; fade to inkwell only at the end
+  const vellumOpacity = useTransform(leaveProgress, (p) => {
+    if (reducedMotion) return p > 0.5 ? 0 : 1;
+    if (p <= EXIT_FADE_START) return 1;
+    const t = (p - EXIT_FADE_START) / (1 - EXIT_FADE_START);
+    return 1 - easeExit(t);
+  });
+
   const scrollRotateY = useTransform(scrollYProgress, [0, 1], [0, DEG_150]);
 
   const applyProgress = useCallback(
@@ -121,7 +149,6 @@ export function ScentNotesExplorer({
         return;
       }
 
-      // Refs only for the canvas — avoids R3F re-renders that reset half positions
       scrollRotationYRef.current = scrollRotateY.get();
 
       const explodeT = mapRange(
@@ -157,17 +184,29 @@ export function ScentNotesExplorer({
     <div
       ref={setSectionRef}
       id="scent-anatomy"
-      className="relative z-10 w-full font-['trust-3a'] text-inkwell-700"
-      style={{height: `${SECTION_VH}vh`}}
+      className="relative z-10 w-full bg-inkwell-900 font-['trust-3a'] text-inkwell-700"
+      style={{height: `${TOTAL_VH}vh`}}
     >
       {/*
-        Paper fill lives on this sticky shell (not only body). Transparent
-        WebGL inside + overflow:hidden often composites against the
-        local stacking context — without a local paint, the canvas reads as
-        flat solid cream instead of the page grain.
+        Sticky shell stays pinned through EXIT_VH. Content lifts via transform
+        while vellum fades to inkwell — then VHS continues on the same black.
+
+        Use dvh (not only svh) so the fade layers cover the full visual
+        viewport; a short svh shell left a body-vellum strip at the bottom.
+        Section fill is inkwell so any runway below the shell matches VHS.
       */}
-      <div className="sticky top-0 z-10 h-svh overflow-hidden bg-vellum-paper">
-        <div className="flex h-full flex-col">
+      <div className="sticky top-0 z-10 h-dvh min-h-svh overflow-hidden">
+        <div className="absolute inset-0 bg-inkwell-900" aria-hidden />
+        <motion.div
+          className="absolute inset-0 bg-vellum-paper"
+          style={{opacity: vellumOpacity}}
+          aria-hidden
+        />
+
+        <motion.div
+          className="relative z-10 flex h-full flex-col"
+          style={reducedMotion ? undefined : {y: leaveY}}
+        >
           <PageContainer className="flex h-full flex-col">
             <div className="relative mx-auto h-full w-full max-w-4xl">
               <div ref={setStageElement} className="absolute inset-0">
@@ -208,7 +247,7 @@ export function ScentNotesExplorer({
               </span>
             </div>
           </PageContainer>
-        </div>
+        </motion.div>
       </div>
     </div>
   );

@@ -191,8 +191,8 @@ function VhsSlideLayer({
 type Phase = 'idle' | 'exiting' | 'entering';
 
 /**
- * Product VHS section. Below scent anatomy, a static soft crossfade from page
- * vellum into solid inkwell-900 — then a projector-gate slideshow.
+ * Product VHS section. Continues from scent-anatomy’s inkwell exit fade —
+ * solid inkwell-900 stage, then a projector-gate slideshow.
  */
 export function VhsSection({slides}: VhsSectionProps) {
   const stageRef = useRef<HTMLDivElement>(null);
@@ -391,26 +391,9 @@ export function VhsSection({slides}: VhsSectionProps) {
   return (
     <div
       ref={sectionRef}
-      className="vhs-section relative w-full text-vellum-100"
+      className="vhs-section relative w-full bg-inkwell-900 text-vellum-100"
       aria-label="VHS"
     >
-      <div
-        className="pointer-events-none relative h-svh w-full"
-        style={{
-          backgroundImage: `linear-gradient(
-            to bottom,
-            transparent 0%,
-            rgb(8 13 8 / 0.08) 18%,
-            rgb(8 13 8 / 0.22) 34%,
-            rgb(8 13 8 / 0.45) 52%,
-            rgb(8 13 8 / 0.72) 70%,
-            rgb(8 13 8 / 0.92) 86%,
-            rgb(8 13 8) 100%
-          )`,
-        }}
-        aria-hidden
-      />
-
       <div className="relative w-full overflow-hidden bg-inkwell-900">
         {/* Bloom + plates stay unmounted until near — heavy blur/decode fights sticky WebGL. */}
         {mediaArmed && bloomSlide && !reducedMotion ? (

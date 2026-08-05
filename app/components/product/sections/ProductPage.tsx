@@ -36,7 +36,7 @@ export function ProductPage({
         label pins at ~10% from the top through the notes, then leaves
         when the cube section scrolls away.
 
-        Keep overflow-x-clip OFF this wrapper. The VHS intro moved it here
+        Keep overflow-x-clip OFF this wrapper. The VHS stage moved it here
         from the article so bloom could bleed, but sticky inside
         overflow-x:clip jitters while pinned (WebKit 247130). Clip on the
         sections that need it instead; VHS already clips its own stage.

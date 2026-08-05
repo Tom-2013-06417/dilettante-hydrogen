@@ -6,7 +6,7 @@
  *  PIN+…               explode halves + bottle → notes, then hold while rotating
  *  STICKY_RELEASE–1    cube sticky panel scrolls up / leaves
  */
-export const SECTION_VH = 360;
+export const SECTION_VH = 175;
 export const ENTER_VH = 100;
 export const PIN = ENTER_VH / (ENTER_VH + SECTION_VH); // ~0.22
 /** Section bottom hits viewport bottom — sticky cube starts moving up */

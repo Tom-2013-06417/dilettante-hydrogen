@@ -5,7 +5,14 @@ import {
   useScroll,
   useTransform,
 } from 'motion/react';
-import {useCallback, useEffect, useRef, useState, type Ref, type RefObject} from 'react';
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type Ref,
+  type RefObject,
+} from 'react';
 import type {ScentProfile} from '~/lib/scentProfile';
 import {ClientOnly, PageContainer} from '~/components/shared';
 import {CubeBlueprintAnnotations} from './CubeBlueprintAnnotations';

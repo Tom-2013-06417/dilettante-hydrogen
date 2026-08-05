@@ -20,7 +20,7 @@ import {easeExit, leaveMark, PIN, SCRUB_END} from './scentAnatomyTimeline';
  * ~10% from the top. Parent spans through the cube section.
  *
  * Leave matches the cube’s transform exit (SCRUB_END runway) — ease-in-out
- * lift in sync with the sticky shell, not native sticky release.
+ * lift in sync with the sticky shell, not native release.
  */
 export function ScentAnatomyCue({
   scentSectionRef,

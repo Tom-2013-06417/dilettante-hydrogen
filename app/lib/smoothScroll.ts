@@ -11,14 +11,10 @@ let activeRaf = 0;
  */
 export function smoothScrollTo(
   target: HTMLElement,
-  {
-    duration = 1800,
-    offset = 0,
-  }: {duration?: number; offset?: number} = {},
+  {duration = 1800, offset = 0}: {duration?: number; offset?: number} = {},
 ) {
   const startY = window.scrollY;
-  const endY =
-    target.getBoundingClientRect().top + window.scrollY + offset;
+  const endY = target.getBoundingClientRect().top + window.scrollY + offset;
   const distance = endY - startY;
   if (Math.abs(distance) < 1) return;
 

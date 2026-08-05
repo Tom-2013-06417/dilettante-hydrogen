@@ -4,15 +4,15 @@ import {
   PRODUCT_FADE_DELAY,
   PRODUCT_FADE_DURATION,
 } from '~/components/home/sections/animations';
-import {PIN, STICKY_RELEASE} from './scentAnatomyTimeline';
+import {CUE_LEAVE_EARLY_VH, PIN} from './scentAnatomyTimeline';
 
 /**
  * Starts at the bottom of the first fold. On scroll it rises and sticks at
  * ~10% from the top. Parent spans through the cube section.
  *
- * A short sticky label would otherwise lag behind the full-viewport cube on
- * exit — so we lift it in sync from STICKY_RELEASE (when the cube starts
- * moving up) instead of waiting for the section bottom to clear.
+ * Leave progress uses `end end` → `end start` — the same window as the
+ * sticky cube panel scrolling away — so the label tracks the section exit.
+ * CUE_LEAVE_EARLY_VH shifts that start (0 = sync).
  */
 export function ScentAnatomyCue({
   scentSectionRef,
@@ -26,21 +26,19 @@ export function ScentAnatomyCue({
     offset: ['start end', 'end start'],
   });
 
+  // 1 = section bottom @ viewport bottom (sticky release). >1 = earlier.
+  const leaveStart = 1 + CUE_LEAVE_EARLY_VH / 100;
+  const {scrollYProgress: leaveProgress} = useScroll({
+    target: scentSectionRef,
+    offset: [`end ${leaveStart}`, 'end start'],
+  });
+
   const arrowOpacity = useTransform(scrollYProgress, [PIN - 0.02, PIN], [1, 0]);
-  const arrowHeight = useTransform(
-    arrowOpacity,
-    (v) => `${Math.round(v * 28)}px`,
-  );
   const arrowPointerEvents = useTransform(arrowOpacity, (v) =>
     v < 0.08 ? 'none' : 'auto',
   );
 
-  // Match the sticky cube panel’s exit travel (~1 viewport)
-  const leaveY = useTransform(
-    scrollYProgress,
-    [STICKY_RELEASE, 1],
-    ['0vh', '-100vh'],
-  );
+  const leaveY = useTransform(leaveProgress, [0, 1], ['0vh', '-100vh']);
 
   return (
     <motion.div
@@ -59,14 +57,13 @@ export function ScentAnatomyCue({
       </span>
       <motion.button
         type="button"
-        className="cursor-pointer overflow-hidden border-0 bg-transparent p-0 text-inherit transition-opacity hover:opacity-80"
+        className="h-7 w-7 shrink-0 cursor-pointer border-0 bg-transparent p-0 text-inherit transition-opacity hover:opacity-80"
         aria-label="Scroll to scent anatomy"
         style={
           reducedMotion
             ? undefined
             : {
                 opacity: arrowOpacity,
-                height: arrowHeight,
                 pointerEvents: arrowPointerEvents,
               }
         }

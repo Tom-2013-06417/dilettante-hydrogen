@@ -1,5 +1,5 @@
 import {Canvas, useThree} from '@react-three/fiber';
-import {useLayoutEffect} from 'react';
+import {useLayoutEffect, type MutableRefObject} from 'react';
 import * as THREE from 'three';
 import type {ScentTier} from '~/lib/scentProfile';
 import type {CubeAnchorsMap} from './cubeAnchors';
@@ -9,10 +9,12 @@ import type {ProductHalfCanvases} from './productHalfCrops';
 export type PackagingCubeCanvasProps = {
   halfCanvases: ProductHalfCanvases | null;
   tiers: [ScentTier, ScentTier, ScentTier];
-  explodeAmount: number;
+  /** Scroll-scrubbed 0–1; read from the ref inside useFrame (avoids render resets). */
+  explodeAmountRef: MutableRefObject<number>;
   showSolid: boolean;
   showLayers: boolean;
-  scrollRotationY: number;
+  /** Scroll-scrubbed Y rotation (rad); read from the ref inside useFrame. */
+  scrollRotationYRef: MutableRefObject<number>;
   stageElement: HTMLElement | null;
   onAnchorsChange: (anchors: CubeAnchorsMap) => void;
 };
@@ -51,10 +53,10 @@ function FramingCamera({
 export default function PackagingCubeCanvas({
   halfCanvases,
   tiers,
-  explodeAmount,
+  explodeAmountRef,
   showSolid,
   showLayers,
-  scrollRotationY,
+  scrollRotationYRef,
   stageElement,
   onAnchorsChange,
 }: PackagingCubeCanvasProps) {
@@ -79,10 +81,10 @@ export default function PackagingCubeCanvas({
       <PackagingCubeScene
         halfCanvases={halfCanvases}
         tiers={tiers}
-        explodeAmount={explodeAmount}
+        explodeAmountRef={explodeAmountRef}
         showSolid={showSolid}
         showLayers={showLayers}
-        scrollRotationY={scrollRotationY}
+        scrollRotationYRef={scrollRotationYRef}
         stageElement={stageElement}
         onAnchorsChange={onAnchorsChange}
       />

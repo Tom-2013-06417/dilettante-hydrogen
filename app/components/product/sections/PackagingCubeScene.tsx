@@ -210,13 +210,14 @@ type PackagingCubeSceneProps = {
   /** Pre-baked product image half-crops (loaded outside R3F). */
   halfCanvases: ProductHalfCanvases | null;
   tiers: [ScentTier, ScentTier, ScentTier];
-  /** 0 = stacked halves / solid cube, 1 = fully exploded */
-  explodeAmount: number;
+  /** 0 = stacked halves / solid cube, 1 = fully exploded (read in useFrame) */
+  explodeAmountRef: MutableRefObject<number>;
   /** Solid packaging cube (assembled) */
   showSolid: boolean;
   /** Halves + bottle (replaces solid when splitting) */
   showLayers: boolean;
-  scrollRotationY: number;
+  /** Y rotation in radians (read in useFrame) */
+  scrollRotationYRef: MutableRefObject<number>;
   /**
    * Element that owns the SVG/label overlay. Anchor coords are reported
    * relative to this element's bounding box.
@@ -447,7 +448,7 @@ function CubeHalf({
   tierId,
   stackY,
   explodeY,
-  explodeAmount,
+  explodeAmountRef,
   anchorRefs,
   halfCanvases,
   withHole = false,
@@ -455,26 +456,22 @@ function CubeHalf({
   tierId: ScentTierId;
   stackY: number;
   explodeY: number;
-  explodeAmount: number;
+  explodeAmountRef: MutableRefObject<number>;
   anchorRefs: AnchorRefs;
   halfCanvases: ProductHalfCanvases | null;
   withHole?: boolean;
 }) {
   const groupRef = useRef<THREE.Group>(null);
   const side = tierLabelSide(tierId);
-  const amountRef = useRef(explodeAmount);
-  amountRef.current = explodeAmount;
 
+  // Scrub Y directly from scroll — no lerp. Declarative position is omitted
+  // so parent re-renders (annotations, etc.) can't snap halves back to stackY.
   useFrame(() => {
     if (!groupRef.current) return;
-    const t = amountRef.current;
-    const targetY = stackY + explodeY * t;
-    groupRef.current.position.x = 0;
-    groupRef.current.position.z = 0;
-    groupRef.current.position.y = THREE.MathUtils.lerp(
-      groupRef.current.position.y,
-      targetY,
-      0.22,
+    groupRef.current.position.set(
+      0,
+      stackY + explodeY * explodeAmountRef.current,
+      0,
     );
   }, -1);
 
@@ -503,10 +500,10 @@ function CubeHalf({
 export function PackagingCubeScene({
   halfCanvases,
   tiers,
-  explodeAmount,
+  explodeAmountRef,
   showSolid,
   showLayers,
-  scrollRotationY,
+  scrollRotationYRef,
   stageElement,
   onAnchorsChange,
 }: PackagingCubeSceneProps) {
@@ -520,25 +517,11 @@ export function PackagingCubeScene({
   useFrame(() => {
     if (!rootRef.current) return;
 
-    const targetY = scrollRotationY;
-    const targetX = 0.22 + scrollRotationY * 0.15;
+    const targetY = scrollRotationYRef.current;
+    const targetX = 0.22 + targetY * 0.15;
 
-    // Track scroll tightly — soft lerp was causing a catch-up pop on enter
-    rootRef.current.rotation.y = THREE.MathUtils.lerp(
-      rootRef.current.rotation.y,
-      targetY,
-      0.35,
-    );
-    rootRef.current.rotation.x = THREE.MathUtils.lerp(
-      rootRef.current.rotation.x,
-      targetX,
-      0.35,
-    );
-    rootRef.current.rotation.z = THREE.MathUtils.lerp(
-      rootRef.current.rotation.z,
-      0,
-      0.35,
-    );
+    // 1:1 with scroll — lerp lagged and popped when explode re-renders caught up
+    rootRef.current.rotation.set(targetX, targetY, 0);
   }, -2);
 
   useFrame(() => {
@@ -581,7 +564,7 @@ export function PackagingCubeScene({
             tierId="top"
             stackY={TOP_STACK_Y}
             explodeY={TOP_EXPLODE_Y}
-            explodeAmount={explodeAmount}
+            explodeAmountRef={explodeAmountRef}
             anchorRefs={anchorRefs}
             halfCanvases={halfCanvases}
           />
@@ -589,7 +572,7 @@ export function PackagingCubeScene({
             tierId="base"
             stackY={BASE_STACK_Y}
             explodeY={BASE_EXPLODE_Y}
-            explodeAmount={explodeAmount}
+            explodeAmountRef={explodeAmountRef}
             anchorRefs={anchorRefs}
             halfCanvases={halfCanvases}
             withHole

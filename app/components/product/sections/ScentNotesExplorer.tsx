@@ -31,6 +31,11 @@ function mapRange(
   return outMin + ((value - inMin) / (inMax - inMin)) * (outMax - outMin);
 }
 
+function smoothstep01(t: number) {
+  const x = clamp01(t);
+  return x * x * (3 - 2 * x);
+}
+
 function assignRef<T>(ref: Ref<T> | undefined, value: T) {
   if (!ref) return;
   if (typeof ref === 'function') {
@@ -39,6 +44,12 @@ function assignRef<T>(ref: Ref<T> | undefined, value: T) {
   }
   (ref as {current: T}).current = value;
 }
+
+/** Progress window for half separation (after PIN), eased with smoothstep. */
+const EXPLODE_START = 0.03;
+const EXPLODE_END = 0.16;
+const DRAW_START = 0.08;
+const DRAW_END = 0.2;
 
 export function ScentNotesExplorer({
   scentProfile,
@@ -82,14 +93,13 @@ export function ScentNotesExplorer({
     [sectionRef],
   );
 
-  const [scrollRotationY, setScrollRotationY] = useState(
-    reducedMotion ? DEG_150 * 0.35 : 0,
-  );
-  const [explodeAmount, setExplodeAmount] = useState(0);
   const [annotationDraw, setAnnotationDraw] = useState(0);
   // Halftone top + photo base are visible from first paint; explode only separates them.
-  const [showSolid, setShowSolid] = useState(false);
-  const [showLayers, setShowLayers] = useState(true);
+  const showSolid = false;
+  const showLayers = true;
+  const scrollRotationYRef = useRef(reducedMotion ? DEG_150 * 0.35 : 0);
+  const explodeAmountRef = useRef(reducedMotion ? 1 : 0);
+  const annotationDrawRef = useRef(0);
 
   const {scrollYProgress} = useScroll({
     target: localRef,
@@ -102,33 +112,33 @@ export function ScentNotesExplorer({
   const applyProgress = useCallback(
     (p: number) => {
       if (reducedMotion) {
-        setScrollRotationY(DEG_150 * 0.4);
-        setShowSolid(false);
-        setShowLayers(true);
-        setExplodeAmount(1);
-        setAnnotationDraw(1);
+        scrollRotationYRef.current = DEG_150 * 0.4;
+        explodeAmountRef.current = 1;
+        if (annotationDrawRef.current !== 1) {
+          annotationDrawRef.current = 1;
+          setAnnotationDraw(1);
+        }
         return;
       }
 
-      setScrollRotationY(scrollRotateY.get());
+      // Refs only for the canvas — avoids R3F re-renders that reset half positions
+      scrollRotationYRef.current = scrollRotateY.get();
 
-      // Textured halves from the start — no solid cream cube phase
-      setShowLayers(true);
-      setShowSolid(false);
+      const explodeT = mapRange(
+        p,
+        PIN + EXPLODE_START,
+        PIN + EXPLODE_END,
+        0,
+        1,
+      );
+      explodeAmountRef.current = smoothstep01(explodeT);
 
-      let explode = 0;
-      if (p < PIN + 0.04) explode = 0;
-      else if (p < PIN + 0.1)
-        explode = clamp01(mapRange(p, PIN + 0.04, PIN + 0.1, 0, 1));
-      else explode = 1;
-      setExplodeAmount(explode);
-
-      let draw = 0;
-      if (p < PIN + 0.08) draw = 0;
-      else if (p < PIN + 0.13)
-        draw = clamp01(mapRange(p, PIN + 0.08, PIN + 0.13, 0, 1));
-      else draw = 1;
-      setAnnotationDraw(draw);
+      const drawT = mapRange(p, PIN + DRAW_START, PIN + DRAW_END, 0, 1);
+      const draw = smoothstep01(drawT);
+      if (draw !== annotationDrawRef.current) {
+        annotationDrawRef.current = draw;
+        setAnnotationDraw(draw);
+      }
     },
     [reducedMotion, scrollRotateY],
   );
@@ -181,10 +191,10 @@ export function ScentNotesExplorer({
                     <PackagingCubeLoader
                       halfCanvases={halfCanvases}
                       tiers={scentProfile.tiers}
-                      explodeAmount={explodeAmount}
+                      explodeAmountRef={explodeAmountRef}
                       showSolid={showSolid}
                       showLayers={showLayers}
-                      scrollRotationY={scrollRotationY}
+                      scrollRotationYRef={scrollRotationYRef}
                       stageElement={stageElement}
                       onAnchorsChange={onAnchorsChange}
                     />

@@ -16,7 +16,7 @@ import {
 /** Space between the label's marker dot and where the line starts */
 const GAP = 0;
 /** Length of the horizontal run leaving the label before the elbow */
-const H_RUN = 20;
+const H_RUN = 35;
 /** Match `.blueprint-rule-*`: 4px dash, 5px gap */
 const DASH_PATTERN = '4 5';
 

@@ -1,13 +1,33 @@
 import {AnimatePresence, motion, useReducedMotion} from 'motion/react';
-import {useLayoutEffect, useRef, useState, type ReactNode} from 'react';
+import {
+  useLayoutEffect,
+  useRef,
+  useState,
+  type MutableRefObject,
+  type ReactNode,
+  type RefObject,
+} from 'react';
 import {useLocation, useNavigationType} from 'react-router';
 import {ClientOnly} from '~/components/shared';
 import {storefrontStackDepth} from '~/lib/constants';
 
-const EASE = [0.32, 0.72, 0, 1] as const;
-const DURATION = 0.38;
-/** Slightly longer so pop feels matched to push (collection is already visible underneath). */
-const EXIT_DURATION = 0.5;
+/** History (non-stack) transitions. */
+const HISTORY_EASE = [0.32, 0.72, 0, 1] as const;
+const HISTORY_DURATION = 0.38;
+
+/**
+ * Stack cover — matched to the cart aside (`200ms ease-in-out` in app.css),
+ * with a slightly longer duration so a full-page slide doesn’t feel clipped.
+ * Enter/exit must both tween a real delta — if exit is `x: 0 → 0`, Motion
+ * finishes in 0ms and unmounts the previous page mid-slide.
+ */
+const STACK_DURATION = 0.28;
+
+const stackTween = {
+  type: 'tween' as const,
+  duration: STACK_DURATION,
+  ease: 'easeInOut' as const,
+};
 
 /** Default (non-immersive) history push/pop. */
 const historyVariants = {
@@ -32,28 +52,24 @@ const historyVariants = {
 };
 
 /**
- * Collection ↔ product: cover transition only.
- * Push — product slides in over a still collection (no dual-moving images).
- * Pop — product slides out on top; collection stays underneath (must keep
- * lower z-index or it covers the exit and the animation “disappears”).
+ * Collection ↔ product cover.
+ * Push — product slides in; collection recesses (frozen DOM underneath).
+ * Pop — product slides out; collection eases back from recess.
  */
 const stackVariants = {
   enter: (direction: number) =>
     direction > 0
-      ? {x: '100%', zIndex: 2}
-      : {x: 0, zIndex: 1},
+      ? {x: '100%', zIndex: 2, transition: stackTween}
+      : {x: '-18%', zIndex: 1, transition: stackTween},
   center: (direction: number) => ({
     x: 0,
     zIndex: direction > 0 ? 2 : 1,
+    transition: stackTween,
   }),
   exit: (direction: number) =>
     direction > 0
-      ? {x: 0, zIndex: 1}
-      : {
-          x: '100%',
-          zIndex: 2,
-          transition: {duration: EXIT_DURATION, ease: EASE},
-        },
+      ? {x: '-18%', zIndex: 1, transition: stackTween}
+      : {x: '100%', zIndex: 2, transition: stackTween},
 };
 
 const reducedMotionVariants = {
@@ -66,11 +82,12 @@ export type PageTransitionNav = 'history' | 'stack';
 
 type PageTransitionProps = {
   children: ReactNode;
-  /**
-   * `history` — browser push/pop (default, non-immersive pages).
-   * `stack` — collection ↔ product hierarchy (logo-back pops even on PUSH).
-   */
   nav?: PageTransitionNav;
+};
+
+type FrozenExit = {
+  key: string;
+  html: string;
 };
 
 function PageTransitionStatic({
@@ -111,6 +128,94 @@ function resolveDirection(
   return navigationType === 'POP' ? -1 : 1;
 }
 
+/**
+ * Stack layers cannot keep a live `<Outlet />` on the exiting page — Outlet
+ * (and route hooks) always follow the current URL, so the underneath layer
+ * morphs into the oncoming page. Capture the previous DOM as HTML while the
+ * old paint is still in the ref, then animate that inert snapshot out.
+ */
+function StackPresence({
+  children,
+  direction,
+  playEnter,
+  transition,
+  variants,
+  contentRef,
+  onSettled,
+}: {
+  children: ReactNode;
+  direction: number;
+  playEnter: boolean;
+  transition: object;
+  variants: typeof stackVariants | typeof reducedMotionVariants;
+  contentRef: MutableRefObject<HTMLDivElement | null>;
+  onSettled: () => void;
+}) {
+  const {pathname} = useLocation();
+  const liveRef = useRef<HTMLDivElement>(null);
+  const pathRef = useRef(pathname);
+  const exitRef = useRef<FrozenExit | null>(null);
+  const [exitTick, setExitTick] = useState(0);
+
+  // Render-phase capture: refs still point at the previous commit's DOM.
+  if (pathRef.current !== pathname) {
+    const html = liveRef.current?.innerHTML ?? '';
+    exitRef.current = html ? {key: pathRef.current, html} : null;
+    pathRef.current = pathname;
+  }
+
+  const exitLayer = exitRef.current;
+  // Touch exitTick so clearing the exit layer re-renders.
+  void exitTick;
+
+  const setLiveNode = (node: HTMLDivElement | null) => {
+    liveRef.current = node;
+    contentRef.current = node;
+  };
+
+  const clearExit = () => {
+    if (!exitRef.current) return;
+    exitRef.current = null;
+    setExitTick((tick) => tick + 1);
+    onSettled();
+  };
+
+  return (
+    <>
+      {exitLayer ? (
+        <motion.div
+          key={`exit-${exitLayer.key}`}
+          custom={direction}
+          variants={variants}
+          initial="center"
+          animate="exit"
+          transition={transition}
+          className="page-transition-content page-transition-content--stack"
+          aria-hidden
+          onAnimationComplete={clearExit}
+        >
+          <div
+            className="page-transition-frozen"
+            // Inert snapshot of the previous route — not a live Outlet.
+            dangerouslySetInnerHTML={{__html: exitLayer.html}}
+          />
+        </motion.div>
+      ) : null}
+      <motion.div
+        key={pathname}
+        custom={direction}
+        variants={variants}
+        initial={playEnter ? 'enter' : false}
+        animate="center"
+        transition={transition}
+        className="page-transition-content page-transition-content--stack"
+      >
+        <div ref={setLiveNode}>{children}</div>
+      </motion.div>
+    </>
+  );
+}
+
 function PageTransitionAnimated({
   children,
   nav,
@@ -123,6 +228,7 @@ function PageTransitionAnimated({
   const reducedMotion = useReducedMotion();
   const contentRef = useRef<HTMLDivElement>(null);
   const [height, setHeight] = useState<number | undefined>();
+  const animatingRef = useRef(false);
   const pathMetaRef = useRef({
     pathname: location.pathname,
     direction: 1,
@@ -151,69 +257,115 @@ function PageTransitionAnimated({
       : historyVariants;
   const transition = reducedMotion
     ? {duration: 0.12}
-    : {duration: DURATION, ease: EASE};
-  // Cold load / refresh: no page slide (lets product intros run on-screen).
-  // After an in-session stack navigation: slide enter for push/pop.
-  const initial =
-    immersive && pathMetaRef.current.hasNavigated
-      ? ('enter' as const)
-      : false;
-  // Stack: key on pathname so cart open/close history (same URL, new location.key)
-  // cannot remount the product page and replay the entrance animation.
+    : immersive
+      ? stackTween
+      : {duration: HISTORY_DURATION, ease: HISTORY_EASE};
+  const playEnter = immersive && pathMetaRef.current.hasNavigated;
   const presenceKey = immersive ? location.pathname : location.key;
+
+  const settleHeight = () => {
+    animatingRef.current = false;
+    const h = contentRef.current?.offsetHeight;
+    if (h != null) setHeight(h);
+  };
 
   useLayoutEffect(() => {
     const element = contentRef.current;
     if (!element) return;
 
     const updateHeight = () => {
+      if (animatingRef.current) return;
       const next = element.offsetHeight;
-      // Don't shrink while the previous screen may still be exiting — that
-      // clips the product→collection slide and makes the pop look like a cut.
-      setHeight((prev) =>
-        prev == null || next >= prev ? next : prev,
-      );
+      setHeight((prev) => (prev == null || next >= prev ? next : prev));
     };
     updateHeight();
 
     const observer = new ResizeObserver(updateHeight);
     observer.observe(element);
     return () => observer.disconnect();
-  }, [presenceKey, children]);
+  }, [presenceKey, immersive]);
+
+  useLayoutEffect(() => {
+    if (!immersive || !pathMetaRef.current.hasNavigated || reducedMotion) {
+      return;
+    }
+    animatingRef.current = true;
+  }, [location.pathname, immersive, reducedMotion]);
 
   return (
     <div
       className={`page-transition${immersive ? ' page-transition--stack' : ''}`}
       style={{height: height ?? 'auto'}}
     >
-      <AnimatePresence
-        initial={false}
-        custom={direction}
-        onExitComplete={() => {
-          const h = contentRef.current?.offsetHeight;
-          if (h != null) setHeight(h);
-        }}
-      >
-        {/*
-          Keep `ref` off the AnimatePresence child — Motion's PopChild reads
-          `props.ref` and trips React 18.3's "ref is not a prop" warning.
-        */}
-        <motion.div
-          key={presenceKey}
-          custom={direction}
-          variants={variants}
-          initial={initial}
-          animate="center"
-          exit="exit"
+      {immersive ? (
+        reducedMotion ? (
+          <div className="page-transition-content page-transition-content--stack">
+            <div ref={contentRef}>{children}</div>
+          </div>
+        ) : (
+          <StackPresence
+            direction={direction}
+            playEnter={playEnter}
+            transition={transition}
+            variants={variants}
+            contentRef={contentRef}
+            onSettled={settleHeight}
+          >
+            {children}
+          </StackPresence>
+        )
+      ) : (
+        <HistoryPresence
+          presenceKey={presenceKey}
+          direction={direction}
           transition={transition}
-          className={`page-transition-content${
-            immersive ? ' page-transition-content--stack' : ''
-          }`}
+          variants={variants}
+          contentRef={contentRef}
+          onSettled={settleHeight}
         >
-          <div ref={contentRef}>{children}</div>
-        </motion.div>
-      </AnimatePresence>
+          {children}
+        </HistoryPresence>
+      )}
     </div>
+  );
+}
+
+function HistoryPresence({
+  children,
+  presenceKey,
+  direction,
+  transition,
+  variants,
+  contentRef,
+  onSettled,
+}: {
+  children: ReactNode;
+  presenceKey: string;
+  direction: number;
+  transition: object;
+  variants: typeof historyVariants | typeof reducedMotionVariants;
+  contentRef: RefObject<HTMLDivElement | null>;
+  onSettled: () => void;
+}) {
+  return (
+    <AnimatePresence
+      initial={false}
+      custom={direction}
+      onExitComplete={onSettled}
+    >
+      <motion.div
+        key={presenceKey}
+        custom={direction}
+        variants={variants}
+        initial={false}
+        animate="center"
+        exit="exit"
+        transition={transition}
+        className="page-transition-content"
+      >
+        <div ref={contentRef}>{children}</div>
+      </motion.div>
+    </AnimatePresence>
   );
 }
 
@@ -221,9 +373,6 @@ export function PageTransition({
   children,
   nav = 'history',
 }: PageTransitionProps) {
-  // Stack routes (collection/product) must not go through ClientOnly — that
-  // remounts the page after hydration and kills product intro animations on
-  // direct landings. SPA stack pushes still skip intros via location state.
   if (nav === 'stack') {
     return (
       <PageTransitionAnimated nav={nav}>{children}</PageTransitionAnimated>

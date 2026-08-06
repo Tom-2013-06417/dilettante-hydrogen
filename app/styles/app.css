@@ -346,6 +346,8 @@ main {
 .page-transition--stack {
   flex: 1 1 auto;
   min-height: 0;
+  /* Clip siblings while one panel translates — less overpaint on iOS. */
+  overflow: hidden;
   width: 100%;
 }
 
@@ -358,20 +360,27 @@ main {
   will-change: transform;
 }
 
-/* Opaque paper so the incoming screen fully covers the one underneath. */
+/*
+  Sliding shell uses a flat fill only. Tiled paper under transform is a common
+  iOS jank source; page content / body still paints the grain.
+*/
 .page-transition-content--stack {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
   background-color: rgb(var(--vellum-paper-base));
-  background-image:
-    linear-gradient(
-      rgb(var(--vellum-paper-base) / var(--vellum-paper-wash)),
-      rgb(var(--vellum-paper-base) / var(--vellum-paper-wash))
-    ),
-    var(--vellum-paper-texture);
-  background-size:
-    auto,
-    var(--vellum-paper-size) var(--vellum-paper-size);
-  background-repeat: repeat;
+  background-image: none;
+  contain: paint;
   min-height: 100%;
+  /* Promote a single compositor layer for the slide. */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+/* Inert DOM snapshot of the previous route (Outlet would follow the new URL). */
+.page-transition-frozen {
+  min-height: 100%;
+  pointer-events: none;
+  user-select: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

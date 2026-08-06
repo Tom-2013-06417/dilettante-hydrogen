@@ -1,5 +1,6 @@
 import {useRef} from 'react';
 import type {ProductFragment} from 'storefrontapi.generated';
+import {useStackCoverRevealed} from '~/components/layout/PageTransition';
 import {getScentProfile} from '~/lib/scentProfile';
 import {parseVhsSlides} from '~/lib/vhsMetafields';
 import {ProductHero} from './ProductHero';
@@ -29,6 +30,8 @@ export function ProductPage({
   const titleSubtitle = isForever ? FOREVER_TITLE_SUBTITLE : undefined;
   const scentSectionRef = useRef<HTMLElement>(null);
   const scenesSectionRef = useRef<HTMLElement>(null);
+  // During collection→product cover, skip below-fold / WebGL until slide ends.
+  const coverRevealed = useStackCoverRevealed();
 
   return (
     <article className="product-page relative w-full">
@@ -55,17 +58,23 @@ export function ProductPage({
           />
         </div>
 
-        <ScentAnatomyCue scentSectionRef={scentSectionRef} />
+        {coverRevealed ? (
+          <>
+            <ScentAnatomyCue scentSectionRef={scentSectionRef} />
 
-        <ScentNotesExplorer
-          scentProfile={scentProfile}
-          productImageUrl={selectedVariant?.image?.url}
-          sectionRef={scentSectionRef}
-          scenesSectionRef={scenesSectionRef}
-        />
+            <ScentNotesExplorer
+              scentProfile={scentProfile}
+              productImageUrl={selectedVariant?.image?.url}
+              sectionRef={scentSectionRef}
+              scenesSectionRef={scenesSectionRef}
+            />
+          </>
+        ) : null}
       </div>
 
-      <VhsSection slides={vhsSlides} sectionRef={scenesSectionRef} />
+      {coverRevealed ? (
+        <VhsSection slides={vhsSlides} sectionRef={scenesSectionRef} />
+      ) : null}
     </article>
   );
 }

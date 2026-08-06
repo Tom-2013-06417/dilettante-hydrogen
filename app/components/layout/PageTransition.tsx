@@ -1,5 +1,7 @@
 import {AnimatePresence, motion, useReducedMotion} from 'motion/react';
 import {
+  createContext,
+  useContext,
   useLayoutEffect,
   useRef,
   useState,
@@ -16,18 +18,10 @@ const HISTORY_EASE = [0.32, 0.72, 0, 1] as const;
 const HISTORY_DURATION = 0.38;
 
 /**
- * Stack cover — matched to the cart aside (`200ms ease-in-out` in app.css),
- * with a slightly longer duration so a full-page slide doesn’t feel clipped.
- * Enter/exit must both tween a real delta — if exit is `x: 0 → 0`, Motion
- * finishes in 0ms and unmounts the previous page mid-slide.
+ * Stack cover — same timing as the cart aside (`200ms ease-in-out` in app.css).
+ * Driven with CSS `transition` (not Motion) so the compositor owns the slide.
  */
-const STACK_DURATION = 0.28;
-
-const stackTween = {
-  type: 'tween' as const,
-  duration: STACK_DURATION,
-  ease: 'easeInOut' as const,
-};
+const STACK_MS = 200;
 
 /** Default (non-immersive) history push/pop. */
 const historyVariants = {
@@ -51,27 +45,6 @@ const historyVariants = {
   }),
 };
 
-/**
- * Collection ↔ product cover.
- * Push — product slides in; collection recesses (frozen DOM underneath).
- * Pop — product slides out; collection eases back from recess.
- */
-const stackVariants = {
-  enter: (direction: number) =>
-    direction > 0
-      ? {x: '100%', zIndex: 2, transition: stackTween}
-      : {x: '-18%', zIndex: 1, transition: stackTween},
-  center: (direction: number) => ({
-    x: 0,
-    zIndex: direction > 0 ? 2 : 1,
-    transition: stackTween,
-  }),
-  exit: (direction: number) =>
-    direction > 0
-      ? {x: '-18%', zIndex: 1, transition: stackTween}
-      : {x: '100%', zIndex: 2, transition: stackTween},
-};
-
 const reducedMotionVariants = {
   enter: {opacity: 0},
   center: {opacity: 1},
@@ -87,8 +60,20 @@ type PageTransitionProps = {
 
 type FrozenExit = {
   key: string;
-  html: string;
+  /** Live DOM clone — cheaper + keeps decoded images vs innerHTML. */
+  node: Node;
+  direction: number;
 };
+
+/**
+ * False while a stack *push* cover is sliding in. Product page uses this to
+ * skip mounting below-the-fold / WebGL work until the slide finishes.
+ */
+const StackCoverRevealedContext = createContext(true);
+
+export function useStackCoverRevealed(): boolean {
+  return useContext(StackCoverRevealedContext);
+}
 
 function PageTransitionStatic({
   children,
@@ -129,25 +114,21 @@ function resolveDirection(
 }
 
 /**
- * Stack layers cannot keep a live `<Outlet />` on the exiting page — Outlet
- * (and route hooks) always follow the current URL, so the underneath layer
- * morphs into the oncoming page. Capture the previous DOM as HTML while the
- * old paint is still in the ref, then animate that inert snapshot out.
+ * Cart-like stack cover:
+ * - One layer moves (CSS transform); the other stays still.
+ * - Outgoing paint is a cloneNode snapshot (Outlet would follow the new URL).
+ * - Push defers “revealed” until transitionend so the product can delay work.
  */
 function StackPresence({
   children,
   direction,
   playEnter,
-  transition,
-  variants,
   contentRef,
   onSettled,
 }: {
   children: ReactNode;
   direction: number;
   playEnter: boolean;
-  transition: object;
-  variants: typeof stackVariants | typeof reducedMotionVariants;
   contentRef: MutableRefObject<HTMLDivElement | null>;
   onSettled: () => void;
 }) {
@@ -155,64 +136,143 @@ function StackPresence({
   const liveRef = useRef<HTMLDivElement>(null);
   const pathRef = useRef(pathname);
   const exitRef = useRef<FrozenExit | null>(null);
+  const slideRef = useRef<HTMLDivElement>(null);
   const [exitTick, setExitTick] = useState(0);
 
   // Render-phase capture: refs still point at the previous commit's DOM.
   if (pathRef.current !== pathname) {
-    const html = liveRef.current?.innerHTML ?? '';
-    exitRef.current = html ? {key: pathRef.current, html} : null;
+    const source = liveRef.current;
+    const clone = source?.cloneNode(true) ?? null;
+    exitRef.current =
+      clone != null
+        ? {key: pathRef.current, node: clone, direction}
+        : null;
     pathRef.current = pathname;
   }
 
   const exitLayer = exitRef.current;
-  // Touch exitTick so clearing the exit layer re-renders.
   void exitTick;
+
+  // Push + frozen underlayer present → keep product below-fold unmounted.
+  const coverRevealed = !(
+    exitLayer != null &&
+    exitLayer.direction > 0 &&
+    playEnter
+  );
 
   const setLiveNode = (node: HTMLDivElement | null) => {
     liveRef.current = node;
     contentRef.current = node;
   };
 
+  const attachFrozen = (el: HTMLDivElement | null) => {
+    if (!el || !exitLayer) return;
+    if (exitLayer.node.parentNode !== el) {
+      el.replaceChildren();
+      el.appendChild(exitLayer.node);
+    }
+  };
+
   const clearExit = () => {
-    if (!exitRef.current) return;
+    if (!exitRef.current) {
+      onSettled();
+      return;
+    }
     exitRef.current = null;
     setExitTick((tick) => tick + 1);
     onSettled();
   };
 
+  // Kick the CSS transition after paint (same double-rAF pattern as class toggles).
+  useLayoutEffect(() => {
+    if (!exitLayer || !playEnter) return;
+
+    const sliding = slideRef.current;
+    if (!sliding) return;
+
+    const isPush = exitLayer.direction > 0;
+
+    if (isPush) {
+      sliding.classList.remove('page-transition-layer--in');
+    } else {
+      sliding.classList.add('page-transition-layer--in');
+    }
+
+    let frame2 = 0;
+    const frame1 = requestAnimationFrame(() => {
+      frame2 = requestAnimationFrame(() => {
+        if (isPush) {
+          sliding.classList.add('page-transition-layer--in');
+        } else {
+          sliding.classList.remove('page-transition-layer--in');
+        }
+      });
+    });
+
+    let settled = false;
+    const finish = () => {
+      if (settled) return;
+      settled = true;
+      clearExit();
+    };
+
+    const onEnd = (event: TransitionEvent) => {
+      if (event.target !== sliding || event.propertyName !== 'transform') {
+        return;
+      }
+      finish();
+    };
+    sliding.addEventListener('transitionend', onEnd);
+    const fallback = window.setTimeout(finish, STACK_MS + 80);
+
+    return () => {
+      cancelAnimationFrame(frame1);
+      cancelAnimationFrame(frame2);
+      sliding.removeEventListener('transitionend', onEnd);
+      window.clearTimeout(fallback);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only re-run on route layer change
+  }, [pathname, exitLayer?.key, playEnter]);
+
+  // Push: frozen under (still) + live cover (slides in).
+  // Pop: live under (still) + frozen cover (slides out).
+  const isPush = (exitLayer?.direction ?? direction) > 0;
+
   return (
-    <>
-      {exitLayer ? (
-        <motion.div
-          key={`exit-${exitLayer.key}`}
-          custom={direction}
-          variants={variants}
-          initial="center"
-          animate="exit"
-          transition={transition}
-          className="page-transition-content page-transition-content--stack"
+    <StackCoverRevealedContext.Provider value={coverRevealed}>
+      {exitLayer && isPush ? (
+        <div
+          key={`under-${exitLayer.key}`}
+          className="page-transition-content page-transition-content--stack page-transition-layer--under"
           aria-hidden
-          onAnimationComplete={clearExit}
         >
-          <div
-            className="page-transition-frozen"
-            // Inert snapshot of the previous route — not a live Outlet.
-            dangerouslySetInnerHTML={{__html: exitLayer.html}}
-          />
-        </motion.div>
+          <div className="page-transition-frozen" ref={attachFrozen} />
+        </div>
       ) : null}
-      <motion.div
+
+      {exitLayer && !isPush ? (
+        <div
+          key={`cover-${exitLayer.key}`}
+          ref={slideRef}
+          className="page-transition-content page-transition-content--stack page-transition-layer--cover page-transition-layer--in"
+          aria-hidden
+        >
+          <div className="page-transition-frozen" ref={attachFrozen} />
+        </div>
+      ) : null}
+
+      <div
         key={pathname}
-        custom={direction}
-        variants={variants}
-        initial={playEnter ? 'enter' : false}
-        animate="center"
-        transition={transition}
-        className="page-transition-content page-transition-content--stack"
+        ref={isPush && exitLayer ? slideRef : undefined}
+        className={`page-transition-content page-transition-content--stack${
+          isPush && exitLayer && playEnter
+            ? ' page-transition-layer--cover'
+            : ' page-transition-layer--under'
+        }`}
       >
         <div ref={setLiveNode}>{children}</div>
-      </motion.div>
-    </>
+      </div>
+    </StackCoverRevealedContext.Provider>
   );
 }
 
@@ -250,16 +310,6 @@ function PageTransitionAnimated({
 
   const direction = pathMetaRef.current.direction;
   const immersive = nav === 'stack';
-  const variants = reducedMotion
-    ? reducedMotionVariants
-    : immersive
-      ? stackVariants
-      : historyVariants;
-  const transition = reducedMotion
-    ? {duration: 0.12}
-    : immersive
-      ? stackTween
-      : {duration: HISTORY_DURATION, ease: HISTORY_EASE};
   const playEnter = immersive && pathMetaRef.current.hasNavigated;
   const presenceKey = immersive ? location.pathname : location.key;
 
@@ -306,8 +356,6 @@ function PageTransitionAnimated({
           <StackPresence
             direction={direction}
             playEnter={playEnter}
-            transition={transition}
-            variants={variants}
             contentRef={contentRef}
             onSettled={settleHeight}
           >
@@ -318,10 +366,9 @@ function PageTransitionAnimated({
         <HistoryPresence
           presenceKey={presenceKey}
           direction={direction}
-          transition={transition}
-          variants={variants}
           contentRef={contentRef}
           onSettled={settleHeight}
+          reducedMotion={!!reducedMotion}
         >
           {children}
         </HistoryPresence>
@@ -334,19 +381,22 @@ function HistoryPresence({
   children,
   presenceKey,
   direction,
-  transition,
-  variants,
   contentRef,
   onSettled,
+  reducedMotion,
 }: {
   children: ReactNode;
   presenceKey: string;
   direction: number;
-  transition: object;
-  variants: typeof historyVariants | typeof reducedMotionVariants;
   contentRef: RefObject<HTMLDivElement | null>;
   onSettled: () => void;
+  reducedMotion: boolean;
 }) {
+  const variants = reducedMotion ? reducedMotionVariants : historyVariants;
+  const transition = reducedMotion
+    ? {duration: 0.12}
+    : {duration: HISTORY_DURATION, ease: HISTORY_EASE};
+
   return (
     <AnimatePresence
       initial={false}

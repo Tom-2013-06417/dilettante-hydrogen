@@ -371,9 +371,27 @@ main {
   background-image: none;
   contain: paint;
   min-height: 100%;
-  /* Promote a single compositor layer for the slide. */
-  -webkit-transform: translateZ(0);
+}
+
+/*
+  Cart-like stack: only the cover layer transitions transform.
+  Underlayer stays put (no transition) — one moving compositor layer.
+*/
+.page-transition-layer--under {
+  z-index: 1;
   transform: translateZ(0);
+  transition: none;
+}
+
+.page-transition-layer--cover {
+  z-index: 2;
+  transform: translate3d(100%, 0, 0);
+  transition: transform 200ms ease-in-out;
+  will-change: transform;
+}
+
+.page-transition-layer--cover.page-transition-layer--in {
+  transform: translate3d(0, 0, 0);
 }
 
 /* Inert DOM snapshot of the previous route (Outlet would follow the new URL). */

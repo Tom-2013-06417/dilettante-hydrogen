@@ -84,16 +84,16 @@ function TierLabel({
   return (
     <li
       ref={labelRef}
-      className={`pointer-events-none flex max-w-44 flex-col ${
+      className={`pointer-events-none flex max-w-44 flex-col lg:max-w-52 ${
         onLeft ? 'items-start text-left' : 'items-end text-right'
       }`}
       style={{opacity, transform: `translateX(${insetX + enterX}px)`}}
     >
-      <span className="relative text-[11px] font-medium uppercase tracking-[0.12em] text-inkwell-700">
+      <span className="relative text-[11px] font-medium uppercase tracking-[0.12em] text-inkwell-700 lg:text-[13px]">
         {tier.label}
         <span
           ref={markerRef}
-          className={`absolute top-1/2 size-1.5 -translate-y-1/2 rounded-full bg-inkwell-700/55 ${
+          className={`absolute top-1/2 size-1.5 -translate-y-1/2 rounded-full bg-inkwell-700/55 lg:size-2 ${
             onLeft ? 'left-full ml-2' : 'right-full mr-2'
           }`}
           aria-hidden
@@ -101,7 +101,7 @@ function TierLabel({
       </span>
       {tier.notes.length ? (
         <span
-          className={`mt-1 flex flex-col gap-0 text-[11px] lowercase leading-tight tracking-[0.06em] text-inkwell-700/65 ${
+          className={`mt-1 flex flex-col gap-0 text-[11px] lowercase leading-tight tracking-[0.06em] text-inkwell-700/65 lg:mt-1.5 lg:text-[13px] ${
             onLeft ? 'items-start' : 'items-end'
           }`}
         >

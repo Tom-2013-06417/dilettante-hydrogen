@@ -56,11 +56,11 @@ export function ProductBottleBand({
           orientation="v"
           className="absolute inset-y-0 left-0 z-1 text-inkwell-700/35"
         />
-        <span className="text-left font-['trust-3a'] text-[14px] font-medium leading-none tracking-[0.02em] text-inkwell-700 sm:text-[15px]">
+        <span className="text-left font-['trust-3a'] text-[14px] font-medium leading-none tracking-[0.02em] text-inkwell-700 sm:text-[15px] lg:text-[18px]">
           {scentProfile.tagline}
         </span>
         {scentProfile.olfactoryFamily?.length ? (
-          <span className="text-left font-['trust-3a'] text-[11px] lowercase leading-none tracking-[0.08em] text-inkwell-700/65 sm:text-[10px]">
+          <span className="text-left font-['trust-3a'] text-[11px] lowercase leading-none tracking-[0.08em] text-inkwell-700/65 sm:text-[10px] lg:text-[13px]">
             {scentProfile.olfactoryFamily.join(' · ')}
           </span>
         ) : null}
@@ -78,11 +78,11 @@ export function ProductBottleBand({
         />
 
         <div className="flex shrink-0 flex-col gap-3 px-8 py-4">
-          <span className="max-w-[36ch] font-['trust-3a'] text-[13px] italic leading-[1.4] tracking-[0.02em] text-inkwell-700/70">
+          <span className="max-w-[36ch] font-['trust-3a'] text-[13px] italic leading-[1.4] tracking-[0.02em] text-inkwell-700/70 lg:text-[16px]">
             {scentProfile.shortDescription}
           </span>
           {scentProfile.heroNotes.length ? (
-            <span className="max-w-[36ch] font-['trust-3a'] text-[11px] lowercase leading-[1.4] tracking-[0.08em] text-inkwell-700/65 sm:text-[10px]">
+            <span className="max-w-[36ch] font-['trust-3a'] text-[11px] lowercase leading-[1.4] tracking-[0.08em] text-inkwell-700/65 sm:text-[10px] lg:text-[13px]">
               {scentProfile.heroNotes.join(' · ')}
             </span>
           ) : null}

@@ -136,7 +136,11 @@ export function Aside({
               {heading}
             </h3>
           </div>
-          <button className="close reset" onClick={close} aria-label="Close">
+          <button
+            className="close reset cursor-pointer"
+            onClick={close}
+            aria-label="Close"
+          >
             <XMarkIcon className="h-5 w-5" aria-hidden="true" />
           </button>
         </header>

@@ -28,9 +28,9 @@ export function ProductTitle({
 
   return (
     <div className={`relative overflow-visible ${className}`}>
-      <div className="mb-1 inline-flex items-center gap-1 text-[12px] font-bold tracking-[0.02em]">
+      <div className="mb-1 inline-flex items-center gap-1 text-[12px] font-bold tracking-[0.02em] lg:text-[14px]">
         No.
-        <span className="flex h-4.25 w-8 items-center justify-center rounded-[50%] bg-inkwell-700 font-['config-mono-vf'] text-[12px] font-medium leading-none text-vellum-100 [font-variant-numeric:slashed-zero]">
+        <span className="flex h-4.25 w-8 items-center justify-center rounded-[50%] bg-inkwell-700 font-['config-mono-vf'] text-[12px] font-medium leading-none text-vellum-100 [font-variant-numeric:slashed-zero] lg:h-5 lg:w-9 lg:text-[14px]">
           {number}
         </span>
       </div>
@@ -94,7 +94,7 @@ export function ProductTitle({
             className="blueprint-rule-h absolute inset-x-0 bottom-0 z-10 text-inkwell-700/35"
           />
           <span
-            className={`${titleTypeClassName} translate-y-0.5 whitespace-nowrap text-[60px] leading-[0.72]`}
+            className={`${titleTypeClassName} translate-y-0.5 whitespace-nowrap text-[60px] leading-[0.72] lg:text-[72px]`}
             style={noiseStyle}
           >
             {title}
@@ -102,7 +102,7 @@ export function ProductTitle({
         </div>
         {subtitle ? (
           <span
-            className={`${titleTypeClassName} mt-3 whitespace-nowrap text-[24px] leading-[0.85]`}
+            className={`${titleTypeClassName} mt-3 whitespace-nowrap text-[24px] leading-[0.85] lg:mt-4 lg:text-[29px]`}
             style={noiseStyle}
           >
             {subtitle}

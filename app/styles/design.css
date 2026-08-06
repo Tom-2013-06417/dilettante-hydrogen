@@ -304,6 +304,60 @@ body:has(.teaser-page) {
   border-radius: 0;
 }
 
+/* Collection cards: lift + deepen drop shadow together. */
+.collection-product-card {
+  box-shadow: 0 2px 3px rgba(21, 32, 21, 0.35);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .collection-product-card {
+    transition:
+      transform 110ms ease-out,
+      box-shadow 110ms ease-out;
+  }
+
+  .collection-product-card:hover,
+  .collection-product-card:focus-visible {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(21, 32, 21, 0.3);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .collection-product-card {
+    transition: none;
+  }
+
+  .collection-product-card:hover,
+  .collection-product-card:focus-visible {
+    transform: none;
+    box-shadow: 0 2px 3px rgba(21, 32, 21, 0.35);
+  }
+}
+
+/* Navbar cart bag: slight enlarge on hover / keyboard focus. */
+@media (hover: hover) and (pointer: fine) {
+  .header-cart-bag {
+    transition: transform 200ms ease-out;
+  }
+
+  .header-cart-bag:hover,
+  .header-cart-bag:focus-visible {
+    transform: scale(1.12);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .header-cart-bag {
+    transition: none;
+  }
+
+  .header-cart-bag:hover,
+  .header-cart-bag:focus-visible {
+    transform: none;
+  }
+}
+
 :root {
   /* Phone-width column on desktop — immersive pages stay vertically composed. */
   --design-content-max: 680px;

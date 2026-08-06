@@ -101,7 +101,7 @@ function CartBagButton({count}: {count: number}) {
   return (
     <button
       type="button"
-      className="reset relative flex h-6 w-6 cursor-pointer items-center justify-center text-inkwell-700 before:absolute before:-inset-2 before:content-['']"
+      className="header-cart-bag reset relative flex h-6 w-6 cursor-pointer items-center justify-center text-inkwell-700 before:absolute before:-inset-2 before:content-['']"
       aria-label={label}
       onClick={(event) => {
         event.preventDefault();

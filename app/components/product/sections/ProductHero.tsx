@@ -161,7 +161,7 @@ export function ProductHero({
               <ProductPrice price={price} compareAtPrice={compareAtPrice} />
             </div>
             <ScentFormatLine
-              className="whitespace-nowrap font-['trust-3a'] text-[11px] leading-none tracking-[0.02em] text-inkwell-700/70"
+              className="whitespace-nowrap font-['trust-3a'] text-[11px] leading-none tracking-[0.02em] text-inkwell-700/70 lg:text-[13px]"
               concentration={scentProfile.concentration}
               variantTitle={selectedVariant?.title}
             />

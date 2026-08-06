@@ -49,6 +49,14 @@ type CartLineFeedbackValue = {
   syncQuantities: (
     lines: Array<{merchandiseId?: string; quantity: number}>,
   ) => void;
+  /**
+   * Absolute quantities the shopper has asked for via +/- before LinesUpdate
+   * lands. HeaderBar folds these into the bag badge so the count moves with
+   * the stepper during the debounce window (useOptimisticCart alone only
+   * updates once the fetcher submits).
+   */
+  draftQuantities: Record<string, number>;
+  setDraftQuantities: (drafts: Record<string, number>) => void;
 };
 
 const CartLineFeedbackContext = createContext<CartLineFeedbackValue | null>(
@@ -147,6 +155,19 @@ function lineErrorsFromClampedAdd(
  * revalidation cannot wipe them when CartMain remounts. Also owns the shared
  * LinesAdd fetcher listener used by the product Purchase CTA.
  */
+function draftsEqual(
+  a: Record<string, number>,
+  b: Record<string, number>,
+): boolean {
+  const aKeys = Object.keys(a);
+  const bKeys = Object.keys(b);
+  if (aKeys.length !== bKeys.length) return false;
+  for (const key of aKeys) {
+    if (a[key] !== b[key]) return false;
+  }
+  return true;
+}
+
 export function CartLineFeedbackProvider({
   children,
 }: {
@@ -155,6 +176,9 @@ export function CartLineFeedbackProvider({
   const [lineErrors, setLineErrorsState] = useState<Record<string, string>>(
     {},
   );
+  const [draftQuantities, setDraftQuantitiesState] = useState<
+    Record<string, number>
+  >({});
   const addFetcher = useFetcher({key: CART_LINES_ADD_FETCHER_KEY});
   const seenDataRef = useRef(new WeakSet<object>());
   const qtyBeforeRef = useRef<Map<string, number>>(new Map());
@@ -181,6 +205,12 @@ export function CartLineFeedbackProvider({
       delete next[lineId];
       return next;
     });
+  }, []);
+
+  const setDraftQuantities = useCallback((drafts: Record<string, number>) => {
+    setDraftQuantitiesState((prev) =>
+      draftsEqual(prev, drafts) ? prev : drafts,
+    );
   }, []);
 
   const syncQuantities = useCallback(
@@ -245,8 +275,17 @@ export function CartLineFeedbackProvider({
       setLineErrors,
       clearLineError,
       syncQuantities,
+      draftQuantities,
+      setDraftQuantities,
     }),
-    [clearLineError, lineErrors, setLineErrors, syncQuantities],
+    [
+      clearLineError,
+      draftQuantities,
+      lineErrors,
+      setDraftQuantities,
+      setLineErrors,
+      syncQuantities,
+    ],
   );
 
   return (

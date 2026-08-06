@@ -126,8 +126,13 @@ export function CartLineUpdatesProvider({
     merchandise?: {id?: string} | null;
   }>;
 }) {
-  const {getLineError, setLineErrors, clearLineError, syncQuantities} =
-    useCartLineFeedback();
+  const {
+    getLineError,
+    setLineErrors,
+    clearLineError,
+    syncQuantities,
+    setDraftQuantities,
+  } = useCartLineFeedback();
 
   // Key by layout so concurrent cart UIs (if any) don't cancel each other's submits.
   const fetcher = useFetcher({key: `cart-lines-update-${layout}`});
@@ -338,6 +343,20 @@ export function CartLineUpdatesProvider({
   }, [flush, linesKey, mutating]);
 
   const hasDrafts = Object.keys(drafts).length > 0;
+
+  // Publish drafts above `<Await>` so the navbar bag badge can move with +/-
+  // during the debounce window, before LinesUpdate hits useOptimisticCart.
+  useEffect(() => {
+    const next: Record<string, number> = {};
+    for (const [id, draft] of Object.entries(drafts)) {
+      next[id] = draft.quantity;
+    }
+    setDraftQuantities(next);
+  }, [drafts, setDraftQuantities]);
+
+  useEffect(() => {
+    return () => setDraftQuantities({});
+  }, [setDraftQuantities]);
 
   const value = useMemo<CartLineUpdatesValue>(
     () => ({

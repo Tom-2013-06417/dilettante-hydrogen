@@ -1,4 +1,5 @@
 import {CartForm} from '@shopify/hydrogen';
+import type {CartUserError, CartWarning} from '@shopify/hydrogen/storefront-api-types';
 import {
   createContext,
   useCallback,
@@ -35,6 +36,13 @@ type Draft = {
 /** lineId -> the quantity the shopper wants, not yet confirmed by the server. */
 type Drafts = Record<string, Draft>;
 
+/** Shape returned by the `/cart` action for LinesUpdate (and other mutations). */
+type CartActionData = {
+  errors?: Array<{message: string} | string> | null;
+  userErrors?: CartUserError[] | null;
+  warnings?: CartWarning[] | null;
+};
+
 type CartLineUpdatesValue = {
   /** Record a desired quantity and (re)arm the single debounced submit. */
   setQuantity: (line: CartLine, quantity: number) => void;
@@ -42,9 +50,52 @@ type CartLineUpdatesValue = {
   cancelQuantity: (lineId: string) => void;
   /** The draft quantity, or undefined when the line follows server state. */
   getDraftQuantity: (lineId: string) => number | undefined;
+  /** Server message for a line after a failed or adjusted quantity update. */
+  getLineError: (lineId: string) => string | undefined;
   /** A debounce is pending, or some cart mutation is in flight. */
   isCartBusy: boolean;
 };
+
+/**
+ * Map the LinesUpdate response onto the line ids that were just submitted.
+ * Stock issues arrive as warnings with a CartLine `target`; validation failures
+ * as userErrors whose `field` indexes into the submitted `lines` array.
+ */
+function lineErrorsFromResponse(
+  submittedIds: string[],
+  data: CartActionData,
+): Record<string, string> {
+  const out: Record<string, string> = {};
+  const submitted = new Set(submittedIds);
+
+  for (const warning of data.warnings ?? []) {
+    if (submitted.has(warning.target)) {
+      out[warning.target] = warning.message;
+    }
+  }
+
+  for (const userError of data.userErrors ?? []) {
+    const linesAt = userError.field?.indexOf('lines') ?? -1;
+    const index =
+      linesAt >= 0 ? Number(userError.field?.[linesAt + 1]) : Number.NaN;
+    const lineId = Number.isInteger(index) ? submittedIds[index] : undefined;
+    if (lineId) {
+      out[lineId] = userError.message;
+    } else if (submittedIds.length === 1) {
+      out[submittedIds[0]] = userError.message;
+    }
+  }
+
+  const graphQlMessage = (data.errors ?? [])
+    .map((error) => (typeof error === 'string' ? error : error.message))
+    .filter(Boolean)
+    .join('; ');
+  if (graphQlMessage && submittedIds.length === 1 && !out[submittedIds[0]]) {
+    out[submittedIds[0]] = graphQlMessage;
+  }
+
+  return out;
+}
 
 const CartLineUpdatesContext = createContext<CartLineUpdatesValue | null>(null);
 
@@ -69,12 +120,16 @@ export function CartLineUpdatesProvider({
   // key must differ per layout or one instance's submit cancels the other's.
   const fetcher = useFetcher({key: `cart-lines-update-${layout}`});
   const [drafts, setDrafts] = useState<Drafts>({});
+  /** lineId -> last quantity-update message from the server (warning/error). */
+  const [lineErrors, setLineErrors] = useState<Record<string, string>>({});
 
   // Mirrors `drafts` so the timer callback reads the newest values without
   // having to re-arm itself on every render.
   const draftsRef = useRef<Drafts>({});
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inFlightRef = useRef<Drafts>({});
+  /** Submission order of the in-flight update — userError `field` indexes this. */
+  const inFlightOrderRef = useRef<string[]>([]);
   const submitRef = useRef(fetcher.submit);
   submitRef.current = fetcher.submit;
 
@@ -117,6 +172,7 @@ export function CartLineUpdatesProvider({
     if (!ready.length) return;
 
     inFlightRef.current = Object.fromEntries(ready);
+    inFlightOrderRef.current = ready.map(([id]) => id);
 
     const body = new FormData();
     body.set(
@@ -139,6 +195,14 @@ export function CartLineUpdatesProvider({
         [line.id]: {quantity, merchandiseId: line.merchandise?.id},
       });
 
+      // A fresh edit supersedes whatever the last response said about this line.
+      setLineErrors((prev) => {
+        if (!(line.id in prev)) return prev;
+        const next = {...prev};
+        delete next[line.id];
+        return next;
+      });
+
       if (timerRef.current) clearTimeout(timerRef.current);
       timerRef.current = setTimeout(flush, DEBOUNCE_MS);
     },
@@ -147,16 +211,23 @@ export function CartLineUpdatesProvider({
 
   const cancelQuantity = useCallback(
     (lineId: string) => {
-      if (!(lineId in draftsRef.current)) return;
+      if (lineId in draftsRef.current) {
+        const next = {...draftsRef.current};
+        delete next[lineId];
+        commitDrafts(next);
 
-      const next = {...draftsRef.current};
-      delete next[lineId];
-      commitDrafts(next);
-
-      if (!Object.keys(next).length && timerRef.current) {
-        clearTimeout(timerRef.current);
-        timerRef.current = null;
+        if (!Object.keys(next).length && timerRef.current) {
+          clearTimeout(timerRef.current);
+          timerRef.current = null;
+        }
       }
+
+      setLineErrors((prev) => {
+        if (!(lineId in prev)) return prev;
+        const next = {...prev};
+        delete next[lineId];
+        return next;
+      });
     },
     [commitDrafts],
   );
@@ -177,6 +248,8 @@ export function CartLineUpdatesProvider({
     const submitted = inFlightRef.current;
     if (!Object.keys(submitted).length) return;
     inFlightRef.current = {};
+    const submittedIds = inFlightOrderRef.current;
+    inFlightOrderRef.current = [];
 
     const next = {...draftsRef.current};
     for (const [id, draft] of Object.entries(submitted)) {
@@ -184,6 +257,19 @@ export function CartLineUpdatesProvider({
       if (next[id]?.quantity === draft.quantity) delete next[id];
     }
     commitDrafts(next);
+
+    const fromResponse = lineErrorsFromResponse(
+      submittedIds,
+      fetcher.data as CartActionData,
+    );
+    setLineErrors((prev) => {
+      const nextErrors = {...prev};
+      for (const id of submittedIds) {
+        if (fromResponse[id]) nextErrors[id] = fromResponse[id];
+        else delete nextErrors[id];
+      }
+      return nextErrors;
+    });
   }, [commitDrafts, fetcher.state, fetcher.data]);
 
   // Keep draft keys pointing at lines that exist, so nothing is submitted
@@ -246,9 +332,10 @@ export function CartLineUpdatesProvider({
       setQuantity,
       cancelQuantity,
       getDraftQuantity: (lineId: string) => drafts[lineId]?.quantity,
+      getLineError: (lineId: string) => lineErrors[lineId],
       isCartBusy: mutating || hasDrafts,
     }),
-    [cancelQuantity, drafts, hasDrafts, mutating, setQuantity],
+    [cancelQuantity, drafts, hasDrafts, lineErrors, mutating, setQuantity],
   );
 
   return (

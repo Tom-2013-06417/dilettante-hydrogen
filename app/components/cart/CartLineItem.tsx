@@ -1,4 +1,5 @@
 import {MinusIcon, PlusIcon, TrashIcon} from '@heroicons/react/24/outline';
+import {ExclamationTriangleIcon} from '@heroicons/react/16/solid';
 import type {CartLayout, LineItemChildrenMap} from './CartMain';
 import {useCartLineUpdates} from './CartLineUpdates';
 import {
@@ -8,6 +9,7 @@ import {
   type OptimisticCartLine,
 } from '@shopify/hydrogen';
 import type {MoneyV2} from '@shopify/hydrogen/storefront-api-types';
+import {AnimatePresence, motion} from 'motion/react';
 import {useEffect, useState} from 'react';
 import {useVariantUrl} from '~/lib/variants';
 import {CART_LINE_IMAGE_SIZE} from '~/lib/cartLineImage';
@@ -26,6 +28,14 @@ export type CartLine = OptimisticCartLine<CartApiQueryFragment>;
  * Must match the animation duration in `.cart-line-unit-price` (app.css).
  */
 const UNIT_PRICE_ANIMATION_MS = 240;
+
+/** Matches the teaser email error motion. */
+const QTY_ERROR_MOTION = {
+  initial: {opacity: 0, y: -6},
+  animate: {opacity: 1, y: 0},
+  exit: {opacity: 0, y: -6},
+  transition: {duration: 0.15, ease: 'easeOut' as const},
+};
 
 /**
  * Keeps a element rendered for `ms` after it stops being wanted, so it can
@@ -72,10 +82,11 @@ export function CartLineItem({
   const lineItemChildren = childrenMap[id];
   const childrenLabelId = `cart-line-children-${id}`;
   const scentNumber = product.scentNumber?.value?.trim();
-  const {getDraftQuantity} = useCartLineUpdates();
+  const {getDraftQuantity, getLineError} = useCartLineUpdates();
   // A queued quantity has not reached the server yet, so it wins over the
   // server value for both the stepper and the subtotal below.
   const quantity = getDraftQuantity(id) ?? line.quantity;
+  const quantityError = getLineError(id);
   const unitPrice = line?.cost?.amountPerQuantity ?? merchandise.price;
   // At quantity 1 the per-piece price would only restate the subtotal.
   const {rendered: showUnitPrice, retreating} = useRetreat(
@@ -151,8 +162,9 @@ export function CartLineItem({
         </div>
       </div>
 
-      {/* Prices stack on the left, stepper on the right. */}
-      <div className="mt-3 flex items-end justify-between gap-3">
+      {/* Prices stack on the left, stepper on the right. Quantity errors sit on
+          their own row below so they stay a single right-aligned line. */}
+      <div className="mt-3 mb-3 flex items-end justify-between gap-3">
         {unitPrice ? (
           <div className="min-w-0 font-['config-mono-vf'] tracking-[0.04em]">
             <span className="block text-[10px] uppercase tracking-[0.08em] text-vellum-100/60">
@@ -167,6 +179,22 @@ export function CartLineItem({
         ) : null}
         <CartLineQuantity line={line} quantity={quantity} />
       </div>
+      <AnimatePresence>
+        {quantityError ? (
+          <motion.p
+            key="cart-line-qty-error"
+            {...QTY_ERROR_MOTION}
+            className="m-0 flex items-center justify-end gap-1.5 font-['trust-3a'] text-[11px] tracking-[0.02em] text-vellum-100/80"
+            role="alert"
+          >
+            <ExclamationTriangleIcon
+              aria-hidden="true"
+              className="size-4 shrink-0"
+            />
+            <span className="min-w-0 truncate">{quantityError}</span>
+          </motion.p>
+        ) : null}
+      </AnimatePresence>
 
       {lineItemChildren ? (
         <div>

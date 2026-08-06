@@ -36,14 +36,20 @@ Restart the dev server after pulling environment variables.
 
 ## Pre-launch gate
 
-While `PUBLIC_SITE_LAUNCHED` is unset/false, every URL shows only the teaser page. Other routes redirect to `/`.
+This is app-level only (Shopify storefront password protection stays off so the teaser can be public). While `PUBLIC_SITE_LAUNCHED` is unset/false, every URL shows only the teaser page. Other routes redirect to `/`.
 
-| Env var                 | Purpose                                      |
-| ----------------------- | -------------------------------------------- |
-| `PUBLIC_SITE_LAUNCHED`  | Set to `true` to open the full storefront    |
-| `SITE_PREVIEW_PASSWORD` | Optional password for “Enter using password” |
+| Env var                | Purpose                                   |
+| ---------------------- | ----------------------------------------- |
+| `PUBLIC_SITE_LAUNCHED` | Set to `true` to open the full storefront |
+| `SITE_PREVIEW_TOKEN`   | Shared secret for personal preview access |
 
-Local defaults are in `.env` / `.env.example`. On Oxygen/Railway, set the same vars in the host’s environment.
+While gated, unlock the full site for yourself by setting the cookie in DevTools:
+
+```js
+document.cookie = "site_preview=YOUR_TOKEN; path=/; max-age=2592000"
+```
+
+Local defaults are in `.env` / `.env.example`. On Oxygen, set `PUBLIC_SITE_LAUNCHED=false` and `SITE_PREVIEW_TOKEN` in the environment.
 
 ## Scripts
 

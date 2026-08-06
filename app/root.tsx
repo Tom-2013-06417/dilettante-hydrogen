@@ -173,7 +173,7 @@ export function links() {
 
 export async function loader(args: Route.LoaderArgs) {
   const {storefront, env, session} = args.context;
-  const gated = isSiteGated(env, session);
+  const gated = isSiteGated(env, session, args.request);
 
   if (gated) {
     const teaserSlides = await loadTeaserSlides(storefront);

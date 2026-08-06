@@ -13,7 +13,13 @@ declare global {
      * When unset or false, visitors only see the teaser until they unlock.
      */
     PUBLIC_SITE_LAUNCHED?: string;
-    /** Password that unlocks the full site while PUBLIC_SITE_LAUNCHED is false. */
+    /**
+     * Shared secret that unlocks the full site while PUBLIC_SITE_LAUNCHED is false.
+     * Match via cookie `site_preview=<token>`.
+     * Not Shopify storefront password protection.
+     */
+    SITE_PREVIEW_TOKEN?: string;
+    /** @deprecated Prefer SITE_PREVIEW_TOKEN */
     SITE_PREVIEW_PASSWORD?: string;
     /**
      * Dev Dashboard app credentials (client_credentials → Admin API token).

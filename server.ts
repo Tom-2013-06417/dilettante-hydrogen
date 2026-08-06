@@ -33,7 +33,7 @@ export default {
       );
 
       const url = new URL(request.url);
-      const gated = isSiteGated(env, hydrogenContext.session);
+      const gated = isSiteGated(env, hydrogenContext.session, request);
 
       // While gated, only the teaser UI + /teaser action (and framework assets)
       // are reachable. Redirect real storefront paths so their loaders never run.

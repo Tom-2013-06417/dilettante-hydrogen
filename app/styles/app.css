@@ -346,9 +346,12 @@ main {
 .page-transition--stack {
   flex: 1 1 auto;
   min-height: 0;
-  /* Clip siblings while one panel translates — less overpaint on iOS. */
-  overflow: hidden;
   width: 100%;
+  /* overflow only while sliding — overflow:hidden breaks sticky (scent→inkwell fade). */
+}
+
+.page-transition--stack.page-transition--stack-animating {
+  overflow: hidden;
 }
 
 .page-transition-content {
@@ -369,8 +372,18 @@ main {
   backface-visibility: hidden;
   background-color: rgb(var(--vellum-paper-base));
   background-image: none;
-  contain: paint;
   min-height: 100%;
+}
+
+/*
+  After the cover finishes: normal flow, no transform / contain.
+  transform or overflow on ancestors breaks position:sticky (cube exit fade).
+*/
+.page-transition-content--stack-settled {
+  contain: none;
+  position: relative;
+  transform: none;
+  will-change: auto;
 }
 
 /*
@@ -379,12 +392,14 @@ main {
 */
 .page-transition-layer--under {
   z-index: 1;
+  contain: paint;
   transform: translateZ(0);
   transition: none;
 }
 
 .page-transition-layer--cover {
   z-index: 2;
+  contain: paint;
   transform: translate3d(100%, 0, 0);
   transition: transform 200ms ease-in-out;
   will-change: transform;

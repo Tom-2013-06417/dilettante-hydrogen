@@ -125,12 +125,14 @@ function StackPresence({
   playEnter,
   contentRef,
   onSettled,
+  onAnimatingChange,
 }: {
   children: ReactNode;
   direction: number;
   playEnter: boolean;
   contentRef: MutableRefObject<HTMLDivElement | null>;
   onSettled: () => void;
+  onAnimatingChange?: (animating: boolean) => void;
 }) {
   const {pathname} = useLocation();
   const liveRef = useRef<HTMLDivElement>(null);
@@ -153,12 +155,18 @@ function StackPresence({
   const exitLayer = exitRef.current;
   void exitTick;
 
+  const isAnimating = exitLayer != null && playEnter;
+
   // Push + frozen underlayer present → keep product below-fold unmounted.
   const coverRevealed = !(
     exitLayer != null &&
     exitLayer.direction > 0 &&
     playEnter
   );
+
+  useLayoutEffect(() => {
+    onAnimatingChange?.(isAnimating);
+  }, [isAnimating, onAnimatingChange]);
 
   const setLiveNode = (node: HTMLDivElement | null) => {
     liveRef.current = node;
@@ -238,6 +246,12 @@ function StackPresence({
   // Pop: live under (still) + frozen cover (slides out).
   const isPush = (exitLayer?.direction ?? direction) > 0;
 
+  const liveLayerClass = isAnimating
+    ? isPush
+      ? ' page-transition-layer--cover'
+      : ' page-transition-layer--under'
+    : ' page-transition-content--stack-settled';
+
   return (
     <StackCoverRevealedContext.Provider value={coverRevealed}>
       {exitLayer && isPush ? (
@@ -264,11 +278,7 @@ function StackPresence({
       <div
         key={pathname}
         ref={isPush && exitLayer ? slideRef : undefined}
-        className={`page-transition-content page-transition-content--stack${
-          isPush && exitLayer && playEnter
-            ? ' page-transition-layer--cover'
-            : ' page-transition-layer--under'
-        }`}
+        className={`page-transition-content page-transition-content--stack${liveLayerClass}`}
       >
         <div ref={setLiveNode}>{children}</div>
       </div>
@@ -312,9 +322,15 @@ function PageTransitionAnimated({
   const immersive = nav === 'stack';
   const playEnter = immersive && pathMetaRef.current.hasNavigated;
   const presenceKey = immersive ? location.pathname : location.key;
+  const [stackAnimating, setStackAnimating] = useState(false);
 
   const settleHeight = () => {
     animatingRef.current = false;
+    // Let settled stack pages size from normal flow (sticky needs real height).
+    if (immersive) {
+      setHeight(undefined);
+      return;
+    }
     const h = contentRef.current?.offsetHeight;
     if (h != null) setHeight(h);
   };
@@ -325,6 +341,10 @@ function PageTransitionAnimated({
 
     const updateHeight = () => {
       if (animatingRef.current) return;
+      if (immersive && !stackAnimating) {
+        setHeight(undefined);
+        return;
+      }
       const next = element.offsetHeight;
       setHeight((prev) => (prev == null || next >= prev ? next : prev));
     };
@@ -333,23 +353,31 @@ function PageTransitionAnimated({
     const observer = new ResizeObserver(updateHeight);
     observer.observe(element);
     return () => observer.disconnect();
-  }, [presenceKey, immersive]);
+  }, [presenceKey, immersive, stackAnimating]);
 
   useLayoutEffect(() => {
     if (!immersive || !pathMetaRef.current.hasNavigated || reducedMotion) {
       return;
     }
     animatingRef.current = true;
+    // Freeze a viewport-tall shell so absolute cover layers have room to slide.
+    const h = Math.max(
+      contentRef.current?.offsetHeight ?? 0,
+      typeof window !== 'undefined' ? window.innerHeight : 0,
+    );
+    if (h > 0) setHeight(h);
   }, [location.pathname, immersive, reducedMotion]);
 
   return (
     <div
-      className={`page-transition${immersive ? ' page-transition--stack' : ''}`}
+      className={`page-transition${immersive ? ' page-transition--stack' : ''}${
+        immersive && stackAnimating ? ' page-transition--stack-animating' : ''
+      }`}
       style={{height: height ?? 'auto'}}
     >
       {immersive ? (
         reducedMotion ? (
-          <div className="page-transition-content page-transition-content--stack">
+          <div className="page-transition-content page-transition-content--stack page-transition-content--stack-settled">
             <div ref={contentRef}>{children}</div>
           </div>
         ) : (
@@ -358,6 +386,7 @@ function PageTransitionAnimated({
             playEnter={playEnter}
             contentRef={contentRef}
             onSettled={settleHeight}
+            onAnimatingChange={setStackAnimating}
           >
             {children}
           </StackPresence>

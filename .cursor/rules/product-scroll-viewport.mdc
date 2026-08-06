@@ -1,0 +1,38 @@
+---
+description: Product page sticky scroll + mobile viewport units (prevent scent-anatomy jitter / VHS wipe)
+globs: app/components/product/**/*.{tsx,ts,css},app/styles/app.css,app/styles/design.css,app/components/layout/PageTransition.tsx
+alwaysApply: false
+---
+
+# Product scroll / mobile viewport
+
+## Root cause of the bottom “wipe”
+
+Chrome’s top/bottom bars show and hide while scrolling. That changes the **visual** viewport (`dvh`) without the user changing settings.
+
+The product page **ends on inkwell (VHS)** but used to paint **vellum on html/body/the settled stack**. During bar show/hide or rubber-band, those layers briefly show through → a cream/vellum rectangle “wiping” the screen. JS-retinting them to inkwell only swapped it for a **dark** wipe. `overscroll-behavior` hid the bounce but **blocks pull-to-refresh** — do not use it.
+
+**Permanent fix:** scroll-roots for product are **always inkwell**. Vellum grain is only on **HeaderBar** + the **hero→scent wrapper** in `ProductPage`. Never put page-end color on a class toggle.
+
+## Paint rules (product)
+
+- `html` / `body` / settled stack shell: **solid inkwell-900** (no vellum tile).
+- Hero→scent wrapper: **`bg-vellum-paper`**.
+- HeaderBar: **`bg-vellum-paper`** (already).
+- VHS stage: **inkwell** + **`min-h-lvh`**.
+- Do **not** retint settled/body on scroll.
+- Do **not** set **`overscroll-behavior`** on product pages.
+
+## Viewport units
+
+- **Scent-anatomy sticky shell**: **`h-dvh min-h-svh`** — play cue above collapsing bottom bar (accept mild layout shift).
+- **VHS stage**: **`min-h-lvh`** — fills chrome-hidden viewport; avoid `dvh` (stage shrinks when the bar returns).
+- **VHS bloom**: **`lvh`/`lvw`**, never **`vmax`** (bar toggle resizes bloom → fake wipe).
+- **Scroll runways / leave `y`**: **`svh`**.
+
+## Overflow / compositing (stack PageTransition)
+
+- Settled stack: **`overflow-x: visible`** on `.page-transition--stack` (ancestor `overflow-x: clip` → sticky jitter, WebKit 247130).
+- Clip **only** while `.page-transition--stack-animating`.
+- Settled: no `transform`, no `contain: paint`, `will-change: auto`, `position: relative`.
+- Sliding covers stay flat cream (`background-image: none`) for iOS; product settled is inkwell as above.

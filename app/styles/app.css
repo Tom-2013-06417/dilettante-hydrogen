@@ -347,7 +347,13 @@ main {
   flex: 1 1 auto;
   min-height: 0;
   width: 100%;
-  /* overflow only while sliding — overflow:hidden breaks sticky (scent→inkwell fade). */
+  /*
+    overflow-x:clip on an ancestor makes position:sticky jitter while pinned
+    (WebKit 247130) — same bug ProductPage documents. Stack only clips while
+    the cover is sliding; settled product scroll needs sticky intact.
+  */
+  overflow-x: visible;
+  /* overflow-y only while sliding — overflow:hidden also breaks sticky. */
 }
 
 .page-transition--stack.page-transition--stack-animating {
@@ -376,14 +382,39 @@ main {
 }
 
 /*
-  After the cover finishes: normal flow, no transform / contain.
-  transform or overflow on ancestors breaks position:sticky (cube exit fade).
+  After the cover finishes: normal flow, no transform / contain / will-change.
+  Those on ancestors break position:sticky (cube exit) or cause scroll jitter.
+  Collection keeps navbar-matching vellum grain. Product overrides to inkwell
+  below (page ends on VHS — see design.css root-cause note).
 */
-.page-transition-content--stack-settled {
+.page-transition-content--stack.page-transition-content--stack-settled {
   contain: none;
+  inset: auto;
   position: relative;
   transform: none;
   will-change: auto;
+  background-color: rgb(var(--vellum-paper-base));
+  background-image:
+    linear-gradient(
+      rgb(var(--vellum-paper-base) / var(--vellum-paper-wash)),
+      rgb(var(--vellum-paper-base) / var(--vellum-paper-wash))
+    ),
+    var(--vellum-paper-texture);
+  background-size:
+    auto,
+    var(--vellum-paper-size) var(--vellum-paper-size);
+  background-repeat: repeat;
+}
+
+/*
+  Product settled shell = solid inkwell, always. Matches VHS so chrome
+  show/hide + rubber-band cannot flash vellum. Hero/scent grain is on the
+  ProductPage wrapper, not here.
+*/
+.main--product
+  .page-transition-content--stack.page-transition-content--stack-settled {
+  background-color: rgb(8 13 8); /* inkwell-900 */
+  background-image: none;
 }
 
 /*

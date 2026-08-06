@@ -93,6 +93,9 @@ type LayerMode = 'idle' | 'exit' | 'enter';
 /**
  * Full-stage ambient glow. Uses a plain <img> (Hydrogen Image wrappers can
  * clip CSS blur) and paints behind the plate across the whole inkwell stage.
+ *
+ * Size with lvh/lvw — not vmax. Chrome bar show/hide changes the larger
+ * viewport axis; vmax bloom resize reads as a dark wipe sliding the stage.
  */
 function VhsStageBloom({slide, mode}: {slide: VhsSlide; mode: LayerMode}) {
   return (
@@ -120,7 +123,7 @@ function VhsStageBloom({slide, mode}: {slide: VhsSlide; mode: LayerMode}) {
       <img
         src={bloomUrl(slide.url)}
         alt=""
-        className="absolute top-1/2 left-1/2 h-[70vmax] w-[50vmax] max-w-none rounded-none object-cover"
+        className="absolute top-1/2 left-1/2 h-[70lvh] w-[50lvw] max-w-none rounded-none object-cover"
         style={{
           filter: 'blur(64px) saturate(1.25)',
           transform: 'translate(-50%, -50%)',
@@ -411,7 +414,13 @@ export function VhsSection({slides, sectionRef}: VhsSectionProps) {
       className="vhs-section relative w-full bg-inkwell-900 text-vellum-100"
       aria-label="Scenes"
     >
-      <div className="relative w-full overflow-hidden bg-inkwell-900">
+      {/*
+        min-h-lvh: do not shrink when Chrome’s bar returns (dvh shrink was
+        revealing the vellum stack as a cream wipe). Plate max-height stays
+        on svh. Wipe is also killed by html.vhs-overscroll (inkwell + no
+        rubber-band) while this section is in view.
+      */}
+      <div className="relative w-full min-h-lvh overflow-hidden bg-inkwell-900">
         {/* Bloom + plates stay unmounted until near — heavy blur/decode fights sticky WebGL. */}
         {mediaArmed && bloomSlide && !reducedMotion ? (
           <VhsStageBloom
@@ -423,7 +432,7 @@ export function VhsSection({slides, sectionRef}: VhsSectionProps) {
 
         <div
           ref={stageRef}
-          className="relative z-10 flex min-h-svh w-full flex-col items-center px-[15svw] py-10 sm:px-24 sm:py-12 lg:px-40"
+          className="relative z-10 flex min-h-lvh w-full flex-col items-center px-[15svw] py-10 sm:px-24 sm:py-12 lg:px-40"
         >
           {slideCount > 0 ? (
             <div className="flex w-full max-w-2xl flex-1 flex-col">
@@ -491,7 +500,7 @@ export function VhsSection({slides, sectionRef}: VhsSectionProps) {
               </div>
             </div>
           ) : (
-            <div className="min-h-svh" aria-hidden />
+            <div className="min-h-lvh" aria-hidden />
           )}
         </div>
       </div>

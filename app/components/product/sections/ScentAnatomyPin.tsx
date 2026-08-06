@@ -51,8 +51,8 @@ export function ScentAnatomyCue({
   );
 
   const leaveY = useTransform(leaveProgress, (p) => {
-    if (reducedMotion) return '0vh';
-    return `${-easeExit(p) * 100}vh`;
+    if (reducedMotion) return '0svh';
+    return `${-easeExit(p) * 100}svh`;
   });
 
   return (

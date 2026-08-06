@@ -147,7 +147,6 @@
 }
 
 .bg-vellum-paper,
-body:has(.main--product),
 body:has(.main--collection) {
   background-color: rgb(var(--vellum-paper-base));
   background-image:
@@ -160,6 +159,22 @@ body:has(.main--collection) {
     auto,
     var(--vellum-paper-size) var(--vellum-paper-size);
   background-repeat: repeat;
+}
+
+/*
+  Product pages END on inkwell (VHS). Root cause of the bottom “wipe”:
+  Chrome’s collapsing bars change the visual viewport; whatever paint is on
+  html/body/the settled stack briefly shows through. If that paint is vellum
+  while the stage is inkwell, you see a cream wipe; if we JS-retint to inkwell,
+  you see a dark wipe. Permanent fix: product html/body/settled shell are
+  always inkwell. Vellum grain lives only on HeaderBar + the hero→scent
+  wrapper (see ProductPage) — never on the scroll-root. Do NOT use
+  overscroll-behavior (blocks pull-to-refresh).
+*/
+html:has(.main--product),
+body:has(.main--product) {
+  background-color: rgb(8 13 8); /* inkwell-900 */
+  background-image: none;
 }
 
 .bg-vellusum {

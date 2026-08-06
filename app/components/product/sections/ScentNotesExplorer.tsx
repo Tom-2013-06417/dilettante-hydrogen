@@ -135,8 +135,8 @@ export function ScentNotesExplorer({
 
   // Transform-only exit (sticky stays pinned) — ease-in lift + fade to inkwell
   const leaveY = useTransform(leaveProgress, (p) => {
-    if (reducedMotion) return '0vh';
-    return `${-easeExit(p) * 100}vh`;
+    if (reducedMotion) return '0svh';
+    return `${-easeExit(p) * 100}svh`;
   });
   // Keep vellum through most of the cube exit; fade to inkwell only at the end
   const vellumOpacity = useTransform(leaveProgress, (p) => {
@@ -196,15 +196,17 @@ export function ScentNotesExplorer({
       ref={setSectionRef}
       id="scent-anatomy"
       className="relative z-10 w-full bg-inkwell-900 font-['trust-3a'] text-inkwell-700"
-      style={{height: `${TOTAL_VH}vh`}}
+      style={{height: `${TOTAL_VH}svh`}}
     >
       {/*
         Sticky shell stays pinned through EXIT_VH. Content lifts via transform
         while vellum fades to inkwell — then VHS continues on the same black.
 
-        Use dvh (not only svh) so the fade layers cover the full visual
-        viewport; a short svh shell left a body-vellum strip at the bottom.
-        Section fill is inkwell so any runway below the shell matches VHS.
+        Use dvh here (VHS stays on lvh): the play cue sits at the shell bottom
+        and must stay above Chrome’s collapsing bottom bar. dvh tracks the
+        visual viewport so the cue is not covered; expect mild layout shift
+        when the bar shows/hides. min-h-svh avoids a too-short first paint.
+        Do not switch VHS to dvh for the same reason without checking jitter.
       */}
       <div className="sticky top-0 z-10 h-dvh min-h-svh overflow-hidden">
         <div className="absolute inset-0 bg-inkwell-900" aria-hidden />
@@ -255,7 +257,7 @@ export function ScentNotesExplorer({
                 </div>
               </div>
 
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex flex-col items-center px-4 pb-6 sm:pb-8">
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex flex-col items-center px-4 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-[max(2rem,env(safe-area-inset-bottom,0px))]">
                 {scenesSectionRef ? (
                   <div className="pointer-events-auto">
                     <ScenesCue

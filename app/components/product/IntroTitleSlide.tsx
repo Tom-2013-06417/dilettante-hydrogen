@@ -21,8 +21,8 @@ type IntroTitleSlideProps = {
  * starting — otherwise the first frames use a fallback face, then the
  * Typekit swap causes a one-frame layout hitch at the start of the slide.
  *
- * Avoids putting Tailwind `opacity-0` on the motion node (it fights Motion’s
- * inline opacity for a frame on startup).
+ * Avoids Tailwind `opacity-0` on the motion node (it fights Motion’s inline
+ * opacity). Animation is armed after mount so hard refresh still plays it.
  */
 export function IntroTitleSlide({
   className = '',
@@ -32,6 +32,7 @@ export function IntroTitleSlide({
 }: IntroTitleSlideProps) {
   const reducedMotion = useReducedMotion();
   const [fontsReady, setFontsReady] = useState(false);
+  const [play, setPlay] = useState(false);
 
   useEffect(() => {
     if (reducedMotion || instant) {
@@ -44,7 +45,6 @@ export function IntroTitleSlide({
     async function waitForFonts() {
       try {
         await document.fonts.ready;
-        // Warm the display face used by ProductTitle (60px / light).
         await document.fonts.load('300 60px wayfinder-cf');
       } catch {
         // If the face isn’t registered yet, still proceed after fonts.ready.
@@ -60,11 +60,17 @@ export function IntroTitleSlide({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reducedMotion, instant]);
 
+  useEffect(() => {
+    if (!fontsReady || instant || reducedMotion) return;
+    const id = requestAnimationFrame(() => setPlay(true));
+    return () => cancelAnimationFrame(id);
+  }, [fontsReady, instant, reducedMotion]);
+
   if (reducedMotion || instant) {
     return <div className={className}>{children}</div>;
   }
 
-  // Keep the title out of the tree’s visible paint until fonts + motion start.
+  // Keep the title out of visible paint until fonts + motion start.
   if (!fontsReady) {
     return (
       <div className={className} style={{opacity: 0}} aria-hidden>
@@ -77,7 +83,7 @@ export function IntroTitleSlide({
     <motion.div
       className={className}
       initial={{opacity: 0, x: -36}}
-      animate={{opacity: 1, x: 0}}
+      animate={play ? {opacity: 1, x: 0} : {opacity: 0, x: -36}}
       transition={{
         type: 'tween',
         duration: PRODUCT_TITLE_SLIDE_DURATION,

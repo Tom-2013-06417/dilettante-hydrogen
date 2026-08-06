@@ -126,6 +126,7 @@ function PageTransitionAnimated({
   const pathMetaRef = useRef({
     pathname: location.pathname,
     direction: 1,
+    hasNavigated: false,
   });
 
   if (pathMetaRef.current.pathname !== location.pathname) {
@@ -137,6 +138,7 @@ function PageTransitionAnimated({
         navigationType,
         nav,
       ),
+      hasNavigated: true,
     };
   }
 
@@ -150,8 +152,12 @@ function PageTransitionAnimated({
   const transition = reducedMotion
     ? {duration: 0.12}
     : {duration: DURATION, ease: EASE};
-  // AnimatePresence initial={false} skips enter on first mount; later navigations animate in.
-  const initial = immersive ? ('enter' as const) : false;
+  // Cold load / refresh: no page slide (lets product intros run on-screen).
+  // After an in-session stack navigation: slide enter for push/pop.
+  const initial =
+    immersive && pathMetaRef.current.hasNavigated
+      ? ('enter' as const)
+      : false;
   // Stack: key on pathname so cart open/close history (same URL, new location.key)
   // cannot remount the product page and replay the entrance animation.
   const presenceKey = immersive ? location.pathname : location.key;
@@ -215,12 +221,19 @@ export function PageTransition({
   children,
   nav = 'history',
 }: PageTransitionProps) {
+  // Stack routes (collection/product) must not go through ClientOnly — that
+  // remounts the page after hydration and kills product intro animations on
+  // direct landings. SPA stack pushes still skip intros via location state.
+  if (nav === 'stack') {
+    return (
+      <PageTransitionAnimated nav={nav}>{children}</PageTransitionAnimated>
+    );
+  }
+
   return (
     <ClientOnly
       fallback={
-        <PageTransitionStatic immersive={nav === 'stack'}>
-          {children}
-        </PageTransitionStatic>
+        <PageTransitionStatic immersive={false}>{children}</PageTransitionStatic>
       }
     >
       <PageTransitionAnimated nav={nav}>{children}</PageTransitionAnimated>

@@ -1,5 +1,5 @@
 import {motion, useReducedMotion} from 'motion/react';
-import type {ReactNode} from 'react';
+import {useEffect, useState, type ReactNode} from 'react';
 import {
   EASE,
   PRODUCT_FADE_DELAY,
@@ -15,7 +15,8 @@ type IntroFadeProps = {
 
 /**
  * Page fade — starts slightly after the title slide so the title leads.
- * `opacity-0` covers SSR / pre-hydration so content doesn’t flash early.
+ * Animation is armed after mount so a hard refresh still plays it (SSR/hydrate
+ * alone often snaps straight to the end state).
  */
 export function IntroFade({
   className = '',
@@ -23,6 +24,13 @@ export function IntroFade({
   instant = false,
 }: IntroFadeProps) {
   const reducedMotion = useReducedMotion();
+  const [play, setPlay] = useState(false);
+
+  useEffect(() => {
+    if (instant || reducedMotion) return;
+    const id = requestAnimationFrame(() => setPlay(true));
+    return () => cancelAnimationFrame(id);
+  }, [instant, reducedMotion]);
 
   if (reducedMotion || instant) {
     return <div className={className}>{children}</div>;
@@ -30,9 +38,9 @@ export function IntroFade({
 
   return (
     <motion.div
-      className={`opacity-0 ${className}`.trim()}
+      className={className}
       initial={{opacity: 0}}
-      animate={{opacity: 1}}
+      animate={{opacity: play ? 1 : 0}}
       transition={{
         type: 'tween',
         duration: PRODUCT_FADE_DURATION,

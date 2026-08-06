@@ -35,3 +35,25 @@ export function parentNavHref(pathname: string): string {
   if (/^\/collections\/?$/.test(pathname)) return '/';
   return '/';
 }
+
+/**
+ * Depth in the collection ↔ product stack (for push/pop transitions).
+ * `null` = outside that stack.
+ */
+export function storefrontStackDepth(pathname: string): number | null {
+  if (/^\/collections\/?$/.test(pathname)) return 1;
+  if (pathname.startsWith('/products/')) return 2;
+  return null;
+}
+
+/** Location state set when opening a product from the collection stack. */
+export const STACK_ENTER_STATE = {stackEnter: true} as const;
+
+export function isStackEnterState(state: unknown): boolean {
+  return (
+    !!state &&
+    typeof state === 'object' &&
+    'stackEnter' in state &&
+    (state as {stackEnter?: unknown}).stackEnter === true
+  );
+}

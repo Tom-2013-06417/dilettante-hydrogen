@@ -250,6 +250,22 @@ body:has(.teaser-page) {
   width: 100%;
 }
 
+.main--product,
+.main--collection {
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
+  /* Shared HeaderBar sits above stack content — match HeaderBar padding + wordmark. */
+  --stack-header-h: 3rem;
+}
+
+@media (min-width: 640px) {
+  .main--product,
+  .main--collection {
+    --stack-header-h: 5.5rem;
+  }
+}
+
 .product-page img,
 .collection-page img {
   border-radius: 0;

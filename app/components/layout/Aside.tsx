@@ -9,7 +9,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import {useLocation, useNavigate} from 'react-router';
+import {useLocation, useNavigate, type NavigateFunction} from 'react-router';
 import {ClientOnly} from '~/components/shared';
 import {
   CART_OPEN_SEARCH_PARAM,
@@ -26,7 +26,7 @@ type AsideContextValue = {
 /** Matches the full-bleed cart breakpoint in app.css (`max-width: 45em`). */
 const MOBILE_CART_MQ = '(max-width: 45em)';
 
-/** Marker on history.state so we recognize the entry we pushed for the cart. */
+/** Marker on location.state so we recognize the entry we pushed for the cart. */
 const CART_HISTORY_STATE_KEY = 'dilettanteCartAside';
 
 /**
@@ -39,21 +39,44 @@ function isMobileCartViewport() {
   return window.matchMedia(MOBILE_CART_MQ).matches;
 }
 
-function historyStateWithoutCart() {
-  const prev = window.history.state;
-  const state =
-    prev && typeof prev === 'object' && !Array.isArray(prev) ? {...prev} : {};
-  delete state[CART_HISTORY_STATE_KEY];
-  return state;
+function asStateObject(state: unknown): Record<string, unknown> {
+  if (state && typeof state === 'object' && !Array.isArray(state)) {
+    return {...(state as Record<string, unknown>)};
+  }
+  return {};
+}
+
+function stateWithoutCart(state: unknown) {
+  const next = asStateObject(state);
+  delete next[CART_HISTORY_STATE_KEY];
+  return Object.keys(next).length ? next : null;
+}
+
+function locationHasCartState(state: unknown) {
+  return asStateObject(state)[CART_HISTORY_STATE_KEY] === true;
 }
 
 /**
  * After leaving the cart entry via back, it sits in the *forward* stack — a
- * forward swipe would briefly restore it. pushState from here drops that
- * forward entry (browser behavior).
+ * forward swipe would briefly restore it. A same-URL navigate push drops that
+ * forward entry (browser behavior) without raw history.pushState, which would
+ * desync React Router's idx/key and remount stack pages.
  */
-function truncateForwardHistory() {
-  window.history.pushState(historyStateWithoutCart(), '');
+function truncateForwardHistory(
+  navigate: NavigateFunction,
+  location: {pathname: string; search: string; hash: string; state: unknown},
+) {
+  navigate(
+    {
+      pathname: location.pathname,
+      search: location.search,
+      hash: location.hash,
+    },
+    {
+      preventScrollReset: true,
+      state: stateWithoutCart(location.state),
+    },
+  );
 }
 
 /**
@@ -134,20 +157,25 @@ Aside.Provider = function AsideProvider({children}: {children: ReactNode}) {
 
   /** True while the open cart owns a history entry we pushed on mobile. */
   const cartHistoryOwnedRef = useRef(false);
-  /** Skip the next popstate — we triggered it with history.back() from the UI. */
+  /** Skip the next POP — we triggered it with navigate(-1) from the UI. */
   const ignorePopRef = useRef(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const locationRef = useRef(location);
+  locationRef.current = location;
   const pathnameRef = useRef(location.pathname);
 
-  const releaseCartHistory = useCallback((opts?: {back?: boolean}) => {
-    if (!cartHistoryOwnedRef.current) return;
-    cartHistoryOwnedRef.current = false;
-    if (opts?.back) {
-      ignorePopRef.current = true;
-      window.history.back();
-    }
-  }, []);
+  const releaseCartHistory = useCallback(
+    (opts?: {back?: boolean}) => {
+      if (!cartHistoryOwnedRef.current) return;
+      cartHistoryOwnedRef.current = false;
+      if (opts?.back) {
+        ignorePopRef.current = true;
+        navigate(-1);
+      }
+    },
+    [navigate],
+  );
 
   const open = useCallback(
     (mode: AsideType) => {
@@ -166,17 +194,25 @@ Aside.Provider = function AsideProvider({children}: {children: ReactNode}) {
         isMobileCartViewport() &&
         !cartHistoryOwnedRef.current
       ) {
-        window.history.pushState(
+        const loc = locationRef.current;
+        navigate(
           {
-            ...historyStateWithoutCart(),
-            [CART_HISTORY_STATE_KEY]: true,
+            pathname: loc.pathname,
+            search: loc.search,
+            hash: loc.hash,
           },
-          '',
+          {
+            preventScrollReset: true,
+            state: {
+              ...asStateObject(loc.state),
+              [CART_HISTORY_STATE_KEY]: true,
+            },
+          },
         );
         cartHistoryOwnedRef.current = true;
       }
     },
-    [releaseCartHistory],
+    [navigate, releaseCartHistory],
   );
 
   const close = useCallback(() => {
@@ -188,26 +224,33 @@ Aside.Provider = function AsideProvider({children}: {children: ReactNode}) {
     }
   }, [releaseCartHistory]);
 
-  // Edge swipe / browser back: close the cart without calling history.back again.
+  // Edge swipe / browser back: close the cart without calling navigate(-1) again.
   // Then drop the abandoned cart entry from the forward stack so a forward swipe
   // cannot resurrect it.
   useEffect(() => {
     const onPopState = () => {
       if (ignorePopRef.current) {
         ignorePopRef.current = false;
-        truncateForwardHistory();
+        // Defer so React Router can finish applying the POP location first.
+        queueMicrotask(() => {
+          truncateForwardHistory(navigate, locationRef.current);
+        });
         return;
       }
       if (typeRef.current === 'cart') {
         const owned = cartHistoryOwnedRef.current;
         cartHistoryOwnedRef.current = false;
         setType('closed');
-        if (owned) truncateForwardHistory();
+        if (owned) {
+          queueMicrotask(() => {
+            truncateForwardHistory(navigate, locationRef.current);
+          });
+        }
       }
     };
     window.addEventListener('popstate', onPopState);
     return () => window.removeEventListener('popstate', onPopState);
-  }, []);
+  }, [navigate]);
 
   // Path changes close the drawer. Search/hash-only updates (e.g. stripping
   // `?cart=t`) must not — that would fight deep-link open.
@@ -218,6 +261,15 @@ Aside.Provider = function AsideProvider({children}: {children: ReactNode}) {
     cartHistoryOwnedRef.current = false;
     setType('closed');
   }, [location.pathname]);
+
+  // If a POP restored a cart-flagged entry (forward swipe before truncate), reopen.
+  useEffect(() => {
+    if (!locationHasCartState(location.state)) return;
+    if (typeRef.current === 'cart') return;
+    if (!isMobileCartViewport()) return;
+    cartHistoryOwnedRef.current = true;
+    setType('cart');
+  }, [location.state, location.key]);
 
   // GET /cart redirects here with `?cart=t`. Strip the flag first, then open —
   // so mobile history.back() on close doesn't revive the query and re-open.

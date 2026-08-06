@@ -1,6 +1,7 @@
 import {Image} from '@shopify/hydrogen';
 import {Link} from 'react-router';
 import {BlueprintRule} from '~/components/product/BlueprintRule';
+import {STACK_ENTER_STATE} from '~/lib/constants';
 
 /** Shopify product id for Forever — long admin title shortened for cards. */
 const FOREVER_PRODUCT_ID = 'gid://shopify/Product/7998517837914';
@@ -40,6 +41,7 @@ export function CollectionProductCard({
   return (
     <Link
       to={`/products/${product.handle}`}
+      state={STACK_ENTER_STATE}
       prefetch="intent"
       className="relative mx-auto flex w-full items-stretch gap-3 bg-vellusum py-4 px-4 shadow-[0_2px_3px_rgba(21,32,21,0.35)] sm:gap-5 sm:px-5 sm:py-5"
     >

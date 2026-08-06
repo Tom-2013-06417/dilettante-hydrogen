@@ -1,5 +1,6 @@
 import {useReducedMotion} from 'motion/react';
 import {useState} from 'react';
+import {useLocation} from 'react-router';
 import type {
   ProductFragment,
   ProductVariantFragment,
@@ -7,7 +8,6 @@ import type {
 import wordmarkInkwell from '~/assets/design/wordmark-inkwell.png';
 import {AddToCartButton} from '~/components/cart';
 import {useAside} from '~/components/layout';
-import {HeaderBar} from '~/components/home/sections/HeaderBar';
 import {BlueprintRule} from '~/components/product/BlueprintRule';
 import {IntroFade} from '~/components/product/IntroFade';
 import {IntroTitleSlide} from '~/components/product/IntroTitleSlide';
@@ -17,6 +17,7 @@ import {
 } from '~/components/product/ProductHeroPhoto';
 import {ProductPrice} from '~/components/product/ProductPrice';
 import {ScentFormatLine} from '~/components/shared/ScentFormatLine';
+import {isStackEnterState} from '~/lib/constants';
 import type {ScentProfile} from '~/lib/scentProfile';
 import {shopifyCdnUrl, CART_LINE_IMAGE_SIZE} from '~/lib/cartLineImage';
 import {ProductBottleBand} from './ProductBottleBand';
@@ -61,7 +62,12 @@ export function ProductHero({
 }: ProductHeroProps) {
   const reducedMotion = useReducedMotion();
   const {open} = useAside();
-  const [titleNoise, setTitleNoise] = useState(Boolean(reducedMotion));
+  const {state} = useLocation();
+  // Stack push already animates the page in — skip nested hero intros.
+  const instantIntro = isStackEnterState(state);
+  const [titleNoise, setTitleNoise] = useState(
+    Boolean(reducedMotion) || instantIntro,
+  );
 
   return (
     <div className="relative z-1 flex min-h-0 w-full flex-1 flex-col text-inkwell-700">
@@ -82,13 +88,11 @@ export function ProductHero({
 
       {/* Title leads; rest of the page fades in shortly after */}
       <div className="relative shrink-0">
-        <IntroFade>
+        <IntroFade instant={instantIntro}>
           <BlueprintRule
             orientation="v"
             className="pointer-events-none absolute inset-y-0 left-4 z-20 text-inkwell-700/35 sm:left-8"
           />
-
-          <HeaderBar showLeftRule={false} />
 
           <div className="relative flex h-[30svh] w-full">
             <div className="w-4 shrink-0 sm:w-8" aria-hidden />
@@ -121,6 +125,7 @@ export function ProductHero({
         {/* Title slides in first (overlaid on hero band) */}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[30svh]">
           <IntroTitleSlide
+            instant={instantIntro}
             className="absolute inset-y-0 left-5 flex items-center justify-start overflow-visible sm:left-9"
             onAnimationComplete={() => setTitleNoise(true)}
           >
@@ -136,7 +141,7 @@ export function ProductHero({
         </div>
       </div>
 
-      <IntroFade>
+      <IntroFade instant={instantIntro}>
         <div className="relative flex min-h-20 w-full shrink-0">
           <BlueprintRule
             orientation="h"
@@ -192,7 +197,7 @@ export function ProductHero({
         </div>
       </IntroFade>
 
-      <IntroFade className="flex min-h-0 flex-1 flex-col">
+      <IntroFade instant={instantIntro} className="flex min-h-0 flex-1 flex-col">
         <ProductBottleBand
           title={title}
           image={image}

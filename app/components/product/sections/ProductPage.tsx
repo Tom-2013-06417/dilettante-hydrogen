@@ -43,7 +43,7 @@ export function ProductPage({
         sections that need it instead; VHS already clips its own stage.
       */}
       <div className="relative z-10">
-        <div className="flex min-h-[calc(100svh-5rem)] flex-col">
+        <div className="flex min-h-[calc(100svh-5rem-var(--stack-header-h,3rem))] flex-col">
           <ProductHero
             title={title}
             titleSubtitle={titleSubtitle}

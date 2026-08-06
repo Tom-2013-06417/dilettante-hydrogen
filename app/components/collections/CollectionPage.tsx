@@ -1,4 +1,3 @@
-import {HeaderBar} from '~/components/home/sections/HeaderBar';
 import {PageContainer} from '~/components/shared';
 import {parseCollectionMetafields} from '~/lib/collectionMetafields';
 import {CollectionHeader} from './CollectionHeader';
@@ -31,9 +30,7 @@ export function CollectionPage({collection}: CollectionPageProps) {
   const tagline = meta.tagline || collection.description?.trim() || undefined;
 
   return (
-    <article className="collection-page relative min-h-svh w-full text-inkwell-700">
-      <HeaderBar className="bg-vellum-paper" />
-
+    <article className="collection-page relative min-h-full w-full text-inkwell-700">
       <PageContainer className="relative z-30 pb-16 sm:pb-24">
         <CollectionHeader
           title={collection.title}

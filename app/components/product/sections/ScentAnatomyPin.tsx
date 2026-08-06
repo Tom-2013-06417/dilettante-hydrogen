@@ -8,10 +8,12 @@ import {
   type Transition,
 } from 'motion/react';
 import {useRef, type RefObject} from 'react';
+import {useLocation} from 'react-router';
 import {
   PRODUCT_FADE_DELAY,
   PRODUCT_FADE_DURATION,
 } from '~/components/home/sections/animations';
+import {isStackEnterState} from '~/lib/constants';
 import {smoothScrollTo} from '~/lib/smoothScroll';
 import {easeExit, leaveMark, PIN, SCRUB_END} from './scentAnatomyTimeline';
 
@@ -28,6 +30,8 @@ export function ScentAnatomyCue({
   scentSectionRef: RefObject<HTMLElement | null>;
 }) {
   const reducedMotion = useReducedMotion();
+  const {state} = useLocation();
+  const stackEnter = isStackEnterState(state);
 
   const {scrollYProgress} = useScroll({
     target: scentSectionRef,
@@ -55,10 +59,12 @@ export function ScentAnatomyCue({
     <motion.div
       className="sticky top-[10%] z-20 flex w-full shrink-0 flex-col items-center justify-center gap-1 pt-4 pb-3 text-inkwell-700/45 sm:pt-5 sm:pb-4"
       style={reducedMotion ? undefined : {y: leaveY}}
-      initial={reducedMotion ? false : {opacity: 0}}
+      initial={reducedMotion || stackEnter ? false : {opacity: 0}}
       animate={{opacity: 1}}
       transition={{
-        delay: PRODUCT_FADE_DELAY + PRODUCT_FADE_DURATION * 0.55,
+        delay: stackEnter
+          ? 0.12
+          : PRODUCT_FADE_DELAY + PRODUCT_FADE_DURATION * 0.55,
         duration: 0.45,
         ease: 'easeOut',
       }}

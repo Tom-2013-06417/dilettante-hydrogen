@@ -5,6 +5,7 @@ import {Aside} from './Aside';
 import {PageTransition} from './PageTransition';
 import {Header, HeaderMenu} from './Header';
 import {CartLineFeedbackProvider, CartMain} from '~/components/cart';
+import {HeaderBar} from '~/components/home/sections/HeaderBar';
 import {
   SEARCH_ENDPOINT,
   SearchFormPredictive,
@@ -31,6 +32,7 @@ export function PageLayout({
   const isProduct = location.pathname.startsWith('/products/');
   const isCollection = /^\/collections\/?$/.test(location.pathname);
   const isImmersive = isHome || isProduct || isCollection;
+  const isStackRoute = isProduct || isCollection;
 
   return (
     <Aside.Provider>
@@ -60,7 +62,12 @@ export function PageLayout({
                   : undefined
           }
         >
-          {isImmersive ? (
+          {isStackRoute ? (
+            <>
+              <HeaderBar className="relative z-50 shrink-0 bg-vellum-paper" />
+              <PageTransition nav="stack">{children}</PageTransition>
+            </>
+          ) : isImmersive ? (
             children
           ) : (
             <PageTransition>{children}</PageTransition>

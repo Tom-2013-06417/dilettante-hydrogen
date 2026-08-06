@@ -343,6 +343,12 @@ main {
   width: 100%;
 }
 
+.page-transition--stack {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+}
+
 .page-transition-content {
   background: var(--color-background);
   inset: 0;
@@ -350,6 +356,22 @@ main {
   top: 0;
   width: 100%;
   will-change: transform;
+}
+
+/* Opaque paper so the incoming screen fully covers the one underneath. */
+.page-transition-content--stack {
+  background-color: rgb(var(--vellum-paper-base));
+  background-image:
+    linear-gradient(
+      rgb(var(--vellum-paper-base) / var(--vellum-paper-wash)),
+      rgb(var(--vellum-paper-base) / var(--vellum-paper-wash))
+    ),
+    var(--vellum-paper-texture);
+  background-size:
+    auto,
+    var(--vellum-paper-size) var(--vellum-paper-size);
+  background-repeat: repeat;
+  min-height: 100%;
 }
 
 @media (prefers-reduced-motion: reduce) {

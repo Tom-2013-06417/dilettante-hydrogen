@@ -10,6 +10,8 @@ type IntroTitleSlideProps = {
   className?: string;
   children: ReactNode;
   onAnimationComplete?: () => void;
+  /** Skip slide — used when a route transition already owns the entrance. */
+  instant?: boolean;
 };
 
 /**
@@ -26,12 +28,16 @@ export function IntroTitleSlide({
   className = '',
   children,
   onAnimationComplete,
+  instant = false,
 }: IntroTitleSlideProps) {
   const reducedMotion = useReducedMotion();
   const [fontsReady, setFontsReady] = useState(false);
 
   useEffect(() => {
-    if (reducedMotion) return;
+    if (reducedMotion || instant) {
+      onAnimationComplete?.();
+      return;
+    }
 
     let cancelled = false;
 
@@ -50,9 +56,11 @@ export function IntroTitleSlide({
     return () => {
       cancelled = true;
     };
-  }, [reducedMotion]);
+    // Intentionally omit onAnimationComplete — parent often passes an inline fn.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reducedMotion, instant]);
 
-  if (reducedMotion) {
+  if (reducedMotion || instant) {
     return <div className={className}>{children}</div>;
   }
 

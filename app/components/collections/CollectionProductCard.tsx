@@ -68,9 +68,9 @@ export function CollectionProductCard({
 
       <div className="z-1 flex w-[65%] min-w-0 shrink-0 flex-col justify-center">
         {number ? (
-          <div className="my-2 inline-flex items-center gap-1 text-[11px] font-bold tracking-[0.02em]">
+          <div className="my-2 inline-flex items-center gap-1 text-[11px] font-bold tracking-[0.02em] lg:text-[13px]">
             No.
-            <span className="flex h-3.5 w-7 items-center justify-center rounded-[50%] bg-inkwell-700 font-['config-mono-vf'] text-[11px] font-medium leading-none text-vellum-100 [font-variant-numeric:slashed-zero]">
+            <span className="flex h-3.5 w-7 items-center justify-center rounded-[50%] bg-inkwell-700 font-['config-mono-vf'] text-[11px] font-medium leading-none text-vellum-100 [font-variant-numeric:slashed-zero] lg:h-4 lg:w-8 lg:text-[13px]">
               {number}
             </span>
           </div>
@@ -82,7 +82,7 @@ export function CollectionProductCard({
             variant="dotted"
             className="pointer-events-none absolute inset-x-0 z-0 text-inkwell-700/18"
           />
-          <span className="relative z-1 -mt-0.5 -mb-1 block wrap-break-word font-['wayfinder-cf'] text-[clamp(1.75rem,9vw,4.25rem)] font-light leading-[0.86] tracking-[-6%]">
+          <span className="relative z-1 -mt-0.5 -mb-1 block wrap-break-word font-['wayfinder-cf'] text-[clamp(1.75rem,9vw,3.75rem)] font-light leading-[0.86] tracking-[-6%]">
             {title}
           </span>
           <BlueprintRule
@@ -93,7 +93,7 @@ export function CollectionProductCard({
         </div>
 
         {tagline ? (
-          <span className="mt-3 font-['trust-3a'] text-[11px] font-normal leading-snug tracking-[0.01em] text-inkwell-700/75 sm:text-[12px]">
+          <span className="mt-3 font-['trust-3a'] text-[11px] font-normal leading-snug tracking-[0.01em] text-inkwell-700/75 sm:text-[12px] lg:text-[14px]">
             {tagline}
           </span>
         ) : null}

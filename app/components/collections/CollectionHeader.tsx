@@ -17,12 +17,12 @@ export function CollectionHeader({
   return (
     <header className="flex flex-col items-center py-7 text-center text-inkwell-700 sm:py-14">
       {launchDateLabel ? (
-        <span className="m-0 font-['config-mono-vf'] text-[9px] font-light uppercase tracking-[0.4em] text-inkwell-700/45">
+        <span className="m-0 font-['config-mono-vf'] text-[9px] font-light uppercase tracking-[0.4em] text-inkwell-700/45 lg:text-[11px]">
           {launchDateLabel}
         </span>
       ) : null}
       <span
-        className={`relative m-0 inline-block font-['config-mono-vf'] text-[16px] font-medium uppercase leading-tight tracking-[0.06em] sm:text-[1.5rem] ${
+        className={`relative m-0 inline-block font-['config-mono-vf'] text-[16px] font-medium uppercase leading-tight tracking-[0.06em] sm:text-[1.5rem] lg:text-[1.8rem] ${
           launchDateLabel ? 'mt-1' : ''
         }`}
       >
@@ -38,7 +38,7 @@ export function CollectionHeader({
         {title}
       </span>
       {tagline ? (
-        <span className="m-0 mt-1 font-['config-mono-vf'] text-[11px] font-light tracking-[0.01em] text-inkwell-700/85 sm:text-[15px]">
+        <span className="m-0 mt-1 font-['config-mono-vf'] text-[11px] font-light tracking-[0.01em] text-inkwell-700/85 sm:text-[15px] lg:text-[18px]">
           {tagline}
         </span>
       ) : null}

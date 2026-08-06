@@ -1,8 +1,9 @@
 import type {ReactNode} from 'react';
 
 /**
- * Standard horizontal inset for page content (backgrounds stay full-bleed).
- * 16px left / right on mobile, 32px from sm — see design.css `.page-container`.
+ * Centered content column (max `--design-content-max`) with horizontal inset.
+ * Backgrounds stay full-bleed on the parent. 16px / 32px from sm — see
+ * design.css `.page-container`.
  */
 export function PageContainer({
   children,

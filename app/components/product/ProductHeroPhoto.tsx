@@ -6,10 +6,10 @@ import {fetchPriorityAttr} from '~/lib/fetchPriority';
 
 /** Layout width hint for the top hero band (title overlay). */
 export const HERO_BAND_IMAGE_SIZES =
-  '(min-width: 768px) min(1100px, 85vw), 100vw';
+  '(min-width: 768px) 680px, 100vw';
 
 /** Side strip beside the short description — much narrower. */
-export const HERO_STRIP_IMAGE_SIZES = '(min-width: 768px) 20vw, 30vw';
+export const HERO_STRIP_IMAGE_SIZES = '(min-width: 768px) 200px, 30vw';
 
 /**
  * Cap CDN candidates at 1200w (~380KB vs ~750KB full master). Enough for the

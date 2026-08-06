@@ -70,7 +70,7 @@ export function ProductHero({
   );
 
   return (
-    <div className="relative z-1 flex min-h-0 w-full flex-1 flex-col text-inkwell-700">
+    <div className="design-content-shell relative z-1 flex min-h-0 w-full flex-1 flex-col text-inkwell-700">
       {/* Warm the retina cart thumbnail for Purchase → drawer. Use prefetch
             (not preload): imagesrcset is preload-only, and an unused preload
             triggers Chrome's "preloaded but not used" warning. */}
@@ -94,7 +94,7 @@ export function ProductHero({
             className="pointer-events-none absolute inset-y-0 left-4 z-20 text-inkwell-700/35 sm:left-8"
           />
 
-          <div className="relative flex h-[30svh] w-full">
+          <div className="relative flex h-[30svh] w-full overflow-hidden">
             <div className="w-4 shrink-0 sm:w-8" aria-hidden />
             <div
               className="relative flex shrink-0 items-center px-2 sm:px-4"
@@ -145,11 +145,11 @@ export function ProductHero({
         <div className="relative flex min-h-20 w-full shrink-0">
           <BlueprintRule
             orientation="h"
-            className="absolute inset-x-0 top-0 text-inkwell-700/35"
+            className="blueprint-rule-h-bleed absolute top-0 text-inkwell-700/35"
           />
           <BlueprintRule
             orientation="h"
-            className="absolute inset-x-0 bottom-0 text-inkwell-700/35"
+            className="blueprint-rule-h-bleed absolute bottom-0 text-inkwell-700/35"
           />
 
           <div className="relative flex w-[60%] flex-col items-start justify-center gap-[0.3rem] px-6 sm:px-10">

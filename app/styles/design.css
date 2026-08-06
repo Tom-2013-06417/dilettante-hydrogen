@@ -94,6 +94,22 @@
   );
 }
 
+/* Break out of a centered content shell to the viewport edges. */
+.blueprint-rule-h-bleed {
+  left: 50%;
+  right: auto;
+  width: 100vw;
+  transform: translateX(-50%);
+}
+
+/* From the rule's left edge to the viewport's right edge only. */
+.blueprint-rule-h-bleed-right {
+  left: 0;
+  right: auto;
+  width: 100vw;
+  transform: none;
+}
+
 .blueprint-rule-v {
   flex: none;
   align-self: stretch;
@@ -203,6 +219,8 @@ body:has(.main--product) {
 
 body:has(.main--home) {
   background-color: rgb(14 22 14);
+  /* Contain 100vw blueprint bleeds without a horizontal scrollbar. */
+  overflow-x: clip;
 }
 
 /* Teaser: paint html/body inkwell so overscroll isn't white (app.css body is
@@ -286,10 +304,24 @@ body:has(.teaser-page) {
   border-radius: 0;
 }
 
+:root {
+  /* Phone-width column on desktop — immersive pages stay vertically composed. */
+  --design-content-max: 680px;
+}
+
 .page-container {
   box-sizing: border-box;
+  margin-inline: auto;
+  max-width: var(--design-content-max);
   padding-left: 16px;
   padding-right: 16px;
+  width: 100%;
+}
+
+/* Centered column without horizontal inset (home panels, product hero). */
+.design-content-shell {
+  margin-inline: auto;
+  max-width: var(--design-content-max);
   width: 100%;
 }
 

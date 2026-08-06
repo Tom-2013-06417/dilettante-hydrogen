@@ -8,14 +8,14 @@ export function BrandIntro({active = false}: {active?: boolean}) {
   const animate = reducedMotion ? 'show' : active ? 'show' : 'hidden';
 
   return (
-    <div className="h-full w-full bg-inkwell-800 p-3 sm:p-4">
+    <div className="h-full w-full bg-inkwell-800 p-3 sm:p-4 lg:p-6">
       <motion.div
-        className="flex h-full w-full flex-col overflow-hidden bg-vellum-100 font-['trust-3a'] text-inkwell-700"
+        className="design-content-shell flex h-full flex-col bg-vellum-100 font-['trust-3a'] text-inkwell-700"
         variants={staggerContainer}
         initial={reducedMotion ? false : 'hidden'}
         animate={animate}
       >
-        <div className="flex min-h-20 grow-4 basis-0">
+        <div className="flex min-h-20 grow-4 basis-0 overflow-hidden">
           <div className="w-[10%] min-w-18 max-w-70">
             <motion.img
               className="h-full w-full object-cover"
@@ -27,8 +27,8 @@ export function BrandIntro({active = false}: {active?: boolean}) {
         </div>
 
         <div className="relative flex items-stretch">
-          <div className="blueprint-rule-h absolute inset-x-0 top-0 text-inkwell-700/35" />
-          <div className="blueprint-rule-h absolute inset-x-0 bottom-0 text-inkwell-700/35" />
+          <div className="blueprint-rule-h blueprint-rule-h-bleed absolute top-0 text-inkwell-700/35" />
+          <div className="blueprint-rule-h blueprint-rule-h-bleed absolute bottom-0 text-inkwell-700/35" />
           <div className="flex w-[10%] min-w-18 max-w-70 flex-none justify-end">
             <div className="blueprint-rule-v text-inkwell-700/35" />
           </div>
@@ -57,8 +57,10 @@ export function BrandIntro({active = false}: {active?: boolean}) {
           </p>
         </motion.div>
 
-        <div className="blueprint-rule-h text-inkwell-700/35" />
-        <div className="flex min-h-25 grow-3 basis-0 justify-end">
+        <div className="relative h-px flex-none">
+          <div className="blueprint-rule-h blueprint-rule-h-bleed absolute top-0 text-inkwell-700/35" />
+        </div>
+        <div className="flex min-h-25 grow-3 basis-0 justify-end overflow-hidden">
           <div className="w-[62%] sm:w-[48%]">
             <motion.img
               className="h-full w-full object-cover"
@@ -68,7 +70,9 @@ export function BrandIntro({active = false}: {active?: boolean}) {
             />
           </div>
         </div>
-        <div className="blueprint-rule-h text-inkwell-700/35" />
+        <div className="relative h-px flex-none">
+          <div className="blueprint-rule-h blueprint-rule-h-bleed absolute top-0 text-inkwell-700/35" />
+        </div>
 
         <motion.div
           className="flex min-h-15 grow-2 basis-0 items-end justify-center pb-6 sm:pb-8"

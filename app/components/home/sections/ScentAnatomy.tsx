@@ -13,9 +13,9 @@ export function ScentAnatomy({active = false}: {active?: boolean}) {
   const animate = reducedMotion ? 'show' : active ? 'show' : 'hidden';
 
   return (
-    <div className="h-full w-full bg-inkwell-800 p-3 sm:p-4">
+    <div className="h-full w-full bg-inkwell-800 p-3 sm:p-4 lg:p-6">
       <motion.div
-        className="flex h-full w-full flex-col overflow-hidden bg-vellum-100 font-['trust-3a'] text-inkwell-700"
+        className="design-content-shell flex h-full flex-col bg-vellum-100 font-['trust-3a'] text-inkwell-700"
         variants={staggerContainer}
         initial={reducedMotion ? false : 'hidden'}
         animate={animate}
@@ -38,7 +38,7 @@ export function ScentAnatomy({active = false}: {active?: boolean}) {
         </motion.div>
 
         <div className="relative flex min-h-0 grow-3 basis-0 flex-col">
-          <div className="blueprint-rule-h absolute inset-x-0 top-0 z-10 text-inkwell-700/35" />
+          <div className="blueprint-rule-h blueprint-rule-h-bleed absolute top-0 z-10 text-inkwell-700/35" />
           <div className="blueprint-rule-v absolute inset-y-0 left-4 z-10 text-inkwell-700/35 sm:left-8" />
           <div className="blueprint-rule-v absolute inset-y-0 right-4 z-10 text-inkwell-700/35 sm:right-8" />
           {['top', 'heart', 'base'].map((tier) => (
@@ -46,7 +46,7 @@ export function ScentAnatomy({active = false}: {active?: boolean}) {
               key={tier}
               className="relative flex min-h-0 grow basis-0 items-center"
             >
-              <div className="blueprint-rule-h absolute inset-x-0 bottom-0 text-inkwell-700/35" />
+              <div className="blueprint-rule-h blueprint-rule-h-bleed absolute bottom-0 text-inkwell-700/35" />
               <motion.p
                 className="w-[55%] pr-8 text-right text-[15px] tracking-[0.06em] text-inkwell-700/80"
                 variants={revealRightItem}
@@ -55,19 +55,21 @@ export function ScentAnatomy({active = false}: {active?: boolean}) {
               </motion.p>
             </div>
           ))}
-          <motion.img
-            className="absolute inset-y-0 left-[55%] right-8 z-5 h-full w-auto max-w-none object-cover sm:right-12"
-            src={fig02}
-            alt=""
-            variants={wipeItem}
-          />
+          <div className="pointer-events-none absolute inset-y-0 left-[55%] right-8 z-5 overflow-hidden sm:right-12">
+            <motion.img
+              className="h-full w-full object-cover"
+              src={fig02}
+              alt=""
+              variants={wipeItem}
+            />
+          </div>
         </div>
 
         <motion.div
           className="relative flex flex-none items-center px-6 py-6 sm:px-8"
           variants={fadeUpItem}
         >
-          <div className="blueprint-rule-h absolute inset-x-0 bottom-0 text-inkwell-700/35" />
+          <div className="blueprint-rule-h blueprint-rule-h-bleed absolute bottom-0 text-inkwell-700/35" />
           <div className="blueprint-rule-v absolute inset-y-0 left-4 text-inkwell-700/35 sm:left-8" />
           <div className="blueprint-rule-v absolute inset-y-0 right-4 text-inkwell-700/35 sm:right-8" />
           <div className="pl-4 sm:pl-6">

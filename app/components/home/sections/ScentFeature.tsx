@@ -16,16 +16,16 @@ export function ScentFeature({active = false}: {active?: boolean}) {
   const animate = reducedMotion ? 'show' : active ? 'show' : 'hidden';
 
   return (
-    <div className="h-full w-full bg-inkwell-800 p-3 sm:p-4">
+    <div className="h-full w-full bg-inkwell-800 p-3 sm:p-4 lg:p-6">
       <motion.div
-        className="flex h-full w-full flex-col overflow-hidden bg-vellum-100 font-['trust-3a'] text-inkwell-700"
+        className="design-content-shell flex h-full flex-col bg-vellum-100 font-['trust-3a'] text-inkwell-700"
         variants={staggerContainer}
         initial={reducedMotion ? false : 'hidden'}
         animate={animate}
       >
         <div className="relative flex min-h-0 grow-5 basis-0 flex-col">
           <motion.div
-            className="pointer-events-none absolute inset-x-0 bottom-0 top-[11%] flex"
+            className="pointer-events-none absolute inset-x-0 bottom-0 top-[11%] flex overflow-hidden"
             variants={wipeItem}
           >
             <div
@@ -63,8 +63,8 @@ export function ScentFeature({active = false}: {active?: boolean}) {
           className="relative flex flex-none items-center"
           variants={fadeUpItem}
         >
-          <div className="blueprint-rule-h absolute inset-x-0 top-0 text-inkwell-700/35" />
-          <div className="blueprint-rule-h absolute inset-x-0 bottom-0 text-inkwell-700/35" />
+          <div className="blueprint-rule-h blueprint-rule-h-bleed absolute top-0 text-inkwell-700/35" />
+          <div className="blueprint-rule-h blueprint-rule-h-bleed absolute bottom-0 text-inkwell-700/35" />
           <div className="flex min-w-0 flex-col gap-y-1.5 gap-x-2 py-6 pl-6 pr-6 sm:pl-8">
             <p className="font-['config-mono-vf'] text-[12px] tracking-[0.06em] text-inkwell-700/65">
               citrus&ensp;&bull;&ensp;floral&ensp;&bull;&ensp;musk
@@ -76,7 +76,7 @@ export function ScentFeature({active = false}: {active?: boolean}) {
           <div className="ml-auto mr-6 h-16 w-16 flex-none bg-inkwell-600 sm:mr-10" />
         </motion.div>
 
-        <div className="flex min-h-0 grow-4 basis-0">
+        <div className="flex min-h-0 grow-4 basis-0 overflow-hidden">
           <div className="w-[38%] min-w-30">
             <motion.img
               className="h-full w-full object-cover"

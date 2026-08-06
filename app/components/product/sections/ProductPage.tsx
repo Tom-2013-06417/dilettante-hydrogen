@@ -50,7 +50,9 @@ export function ProductPage({
         sections that need it instead; VHS already clips its own stage.
       */}
       <div className="relative z-10 bg-vellum-paper">
-        <div className="flex min-h-[calc(100svh-5rem-var(--stack-header-h,3rem))] flex-col">
+        {/* Full-width clip so 100vw hero rule bleeds don't spawn a scrollbar;
+            keep this off the sticky parent above (WebKit sticky + clip jitter). */}
+        <div className="flex min-h-[calc(100svh-5rem-var(--stack-header-h,3rem))] flex-col overflow-x-clip">
           <ProductHero
             title={title}
             titleSubtitle={titleSubtitle}

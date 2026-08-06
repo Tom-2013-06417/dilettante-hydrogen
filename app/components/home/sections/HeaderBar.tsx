@@ -61,7 +61,7 @@ export function HeaderBar({
             />
           </Link>
         </div>
-        <div className="relative ml-auto flex items-center px-2 pb-2 pt-4 sm:hidden">
+        <div className="relative ml-auto flex items-center px-2 pb-2 pt-4 sm:px-4 sm:pb-5 sm:pt-8">
           <CartToggle cart={cart} />
         </div>
       </PageContainer>

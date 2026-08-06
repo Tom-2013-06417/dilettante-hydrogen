@@ -1,9 +1,10 @@
 import {ShoppingBagIcon} from '@heroicons/react/24/outline';
-import {Link} from 'react-router';
+import {Link, useLocation} from 'react-router';
 import wordmarkInkwell from '~/assets/design/wordmark-inkwell.png';
 import {useAside} from '~/components/layout';
 import {BlueprintRule} from '~/components/product/BlueprintRule';
 import {PageContainer} from '~/components/shared';
+import {parentNavHref} from '~/lib/constants';
 
 export function HeaderBar({
   className = '',
@@ -14,6 +15,8 @@ export function HeaderBar({
   showLeftRule?: boolean;
 }) {
   const {open} = useAside();
+  const {pathname} = useLocation();
+  const logoTo = parentNavHref(pathname);
 
   return (
     <header
@@ -39,7 +42,7 @@ export function HeaderBar({
             orientation="v"
             className="pointer-events-none absolute inset-y-0 right-0 text-inkwell-700/35"
           />
-          <Link to="/" prefetch="intent">
+          <Link to={logoTo} prefetch="intent">
             <img
               className="h-6 w-auto sm:h-9"
               src={wordmarkInkwell}

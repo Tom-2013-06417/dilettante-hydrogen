@@ -25,3 +25,13 @@ export function shouldOpenCartFromSearch(search: string) {
   const value = new URLSearchParams(search).get(CART_OPEN_SEARCH_PARAM);
   return value === CART_OPEN_SEARCH_VALUE || value === 'open' || value === 'true';
 }
+
+/**
+ * Logo / brand link: one level up the storefront hierarchy.
+ * product → collection → home; anything else falls back to home.
+ */
+export function parentNavHref(pathname: string): string {
+  if (pathname.startsWith('/products/')) return '/collections';
+  if (/^\/collections\/?$/.test(pathname)) return '/';
+  return '/';
+}

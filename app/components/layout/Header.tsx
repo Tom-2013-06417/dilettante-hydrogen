@@ -1,12 +1,12 @@
 import {Suspense} from 'react';
-import {Await, NavLink, useAsyncValue} from 'react-router';
+import {Await, NavLink, useAsyncValue, useLocation} from 'react-router';
 import {
   type CartViewPayload,
   useAnalytics,
   useOptimisticCart,
 } from '@shopify/hydrogen';
 import type {HeaderQuery, CartApiQueryFragment} from 'storefrontapi.generated';
-import {cartOpenHref} from '~/lib/constants';
+import {cartOpenHref, parentNavHref} from '~/lib/constants';
 import {useAside} from './Aside';
 
 interface HeaderProps {
@@ -25,11 +25,14 @@ export function Header({
   publicStoreDomain,
 }: HeaderProps) {
   const {shop, menu} = header;
+  const {pathname} = useLocation();
+  const logoTo = parentNavHref(pathname);
+
   return (
     <header className="header">
       <NavLink
         prefetch="intent"
-        to="/"
+        to={logoTo}
         className="header-logo"
         style={activeLinkStyle}
         end

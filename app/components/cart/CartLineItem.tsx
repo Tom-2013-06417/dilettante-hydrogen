@@ -162,8 +162,8 @@ export function CartLineItem({
         </div>
       </div>
 
-      {/* Prices stack on the left, stepper on the right. Quantity errors sit on
-          their own row below so they stay a single right-aligned line. */}
+      {/* Prices stack on the left, stepper on the right. Error slot is always
+          reserved below so enter/exit never shifts following content. */}
       <div className="mt-3 mb-3 flex items-end justify-between gap-3">
         {unitPrice ? (
           <div className="min-w-0 font-['config-mono-vf'] tracking-[0.04em]">
@@ -179,22 +179,24 @@ export function CartLineItem({
         ) : null}
         <CartLineQuantity line={line} quantity={quantity} />
       </div>
-      <AnimatePresence>
-        {quantityError ? (
-          <motion.p
-            key="cart-line-qty-error"
-            {...QTY_ERROR_MOTION}
-            className="m-0 flex items-center justify-end gap-1.5 font-['trust-3a'] text-[11px] tracking-[0.02em] text-vellum-100/80"
-            role="alert"
-          >
-            <ExclamationTriangleIcon
-              aria-hidden="true"
-              className="size-4 shrink-0"
-            />
-            <span className="min-w-0 truncate">{quantityError}</span>
-          </motion.p>
-        ) : null}
-      </AnimatePresence>
+      <div className="relative h-3 overflow-hidden">
+        <AnimatePresence>
+          {quantityError ? (
+            <motion.p
+              key="cart-line-qty-error"
+              {...QTY_ERROR_MOTION}
+              className="absolute inset-x-0 top-0 m-0 flex h-3 items-center justify-end gap-1.5 font-['trust-3a'] text-[11px] leading-none tracking-[0.02em] text-vellum-100/80"
+              role="alert"
+            >
+              <ExclamationTriangleIcon
+                aria-hidden="true"
+                className="size-3 shrink-0"
+              />
+              <span className="min-w-0 truncate">{quantityError}</span>
+            </motion.p>
+          ) : null}
+        </AnimatePresence>
+      </div>
 
       {lineItemChildren ? (
         <div>

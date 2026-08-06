@@ -6,6 +6,7 @@ import {
   useOptimisticCart,
 } from '@shopify/hydrogen';
 import type {HeaderQuery, CartApiQueryFragment} from 'storefrontapi.generated';
+import {cartOpenHref} from '~/lib/constants';
 import {useAside} from './Aside';
 
 interface HeaderProps {
@@ -148,7 +149,7 @@ function CartBadge({count}: {count: number}) {
 
   return (
     <a
-      href="/cart"
+      href={cartOpenHref()}
       onClick={(e) => {
         e.preventDefault();
         open('cart');

@@ -1,5 +1,4 @@
 import {CartForm} from '@shopify/hydrogen';
-import type {CartUserError, CartWarning} from '@shopify/hydrogen/storefront-api-types';
 import {
   createContext,
   useCallback,
@@ -12,6 +11,12 @@ import {
 import {useFetcher, useFetchers} from 'react-router';
 import type {CartLine} from './CartLineItem';
 import type {CartLayout} from './CartMain';
+import {
+  type CartActionData,
+  lineErrorsFromStockWarnings,
+  messageForQuantityIssue,
+  useCartLineFeedback,
+} from './CartLineFeedback';
 
 /** Wait this long after the last +/- click before sending one update. */
 const DEBOUNCE_MS = 500;
@@ -36,13 +41,6 @@ type Draft = {
 /** lineId -> the quantity the shopper wants, not yet confirmed by the server. */
 type Drafts = Record<string, Draft>;
 
-/** Shape returned by the `/cart` action for LinesUpdate (and other mutations). */
-type CartActionData = {
-  errors?: Array<{message: string} | string> | null;
-  userErrors?: CartUserError[] | null;
-  warnings?: CartWarning[] | null;
-};
-
 type CartLineUpdatesValue = {
   /** Record a desired quantity and (re)arm the single debounced submit. */
   setQuantity: (line: CartLine, quantity: number) => void;
@@ -57,21 +55,22 @@ type CartLineUpdatesValue = {
 };
 
 /**
- * Map the LinesUpdate response onto the line ids that were just submitted.
+ * Map a LinesUpdate response onto the line ids that were just submitted.
  * Stock issues arrive as warnings with a CartLine `target`; validation failures
  * as userErrors whose `field` indexes into the submitted `lines` array.
  */
-function lineErrorsFromResponse(
+function lineErrorsFromUpdateResponse(
   submittedIds: string[],
   data: CartActionData,
 ): Record<string, string> {
-  const out: Record<string, string> = {};
+  const out = lineErrorsFromStockWarnings(data);
   const submitted = new Set(submittedIds);
+  const qtyByLine = new Map(
+    (data.cart?.lines?.nodes ?? []).map((line) => [line.id, line.quantity]),
+  );
 
-  for (const warning of data.warnings ?? []) {
-    if (submitted.has(warning.target)) {
-      out[warning.target] = warning.message;
-    }
+  for (const id of Object.keys(out)) {
+    if (!submitted.has(id)) delete out[id];
   }
 
   for (const userError of data.userErrors ?? []) {
@@ -79,19 +78,21 @@ function lineErrorsFromResponse(
     const index =
       linesAt >= 0 ? Number(userError.field?.[linesAt + 1]) : Number.NaN;
     const lineId = Number.isInteger(index) ? submittedIds[index] : undefined;
-    if (lineId) {
-      out[lineId] = userError.message;
-    } else if (submittedIds.length === 1) {
-      out[submittedIds[0]] = userError.message;
-    }
+    const resolvedId =
+      lineId ?? (submittedIds.length === 1 ? submittedIds[0] : undefined);
+    if (!resolvedId) continue;
+    out[resolvedId] = messageForQuantityIssue(
+      userError.code,
+      qtyByLine.get(resolvedId),
+    );
   }
 
-  const graphQlMessage = (data.errors ?? [])
-    .map((error) => (typeof error === 'string' ? error : error.message))
-    .filter(Boolean)
-    .join('; ');
-  if (graphQlMessage && submittedIds.length === 1 && !out[submittedIds[0]]) {
-    out[submittedIds[0]] = graphQlMessage;
+  if (
+    (data.errors?.length ?? 0) > 0 &&
+    submittedIds.length === 1 &&
+    !out[submittedIds[0]]
+  ) {
+    out[submittedIds[0]] = messageForQuantityIssue(undefined);
   }
 
   return out;
@@ -106,22 +107,31 @@ const CartLineUpdatesContext = createContext<CartLineUpdatesValue | null>(null);
  * removed (and the whole drawer unmounts when it closes), which would drop a
  * pending edit. Holding one timer here also lets several lines edited in the
  * same window batch into a single LinesUpdate.
+ *
+ * Line error copy lives in CartLineFeedbackProvider (above `<Await>`) so
+ * Purchase warnings survive cart revalidation remounts.
  */
 export function CartLineUpdatesProvider({
   children,
   layout,
   lines,
+  serverLines = [],
 }: {
   children: React.ReactNode;
   layout: CartLayout;
   lines: CartLine[];
+  /** Non-optimistic qty baseline for Purchase clamp detection. */
+  serverLines?: Array<{
+    quantity: number;
+    merchandise?: {id?: string} | null;
+  }>;
 }) {
-  // The aside and the /cart page are mounted at the same time on /cart, so the
-  // key must differ per layout or one instance's submit cancels the other's.
+  const {getLineError, setLineErrors, clearLineError, syncQuantities} =
+    useCartLineFeedback();
+
+  // Key by layout so concurrent cart UIs (if any) don't cancel each other's submits.
   const fetcher = useFetcher({key: `cart-lines-update-${layout}`});
   const [drafts, setDrafts] = useState<Drafts>({});
-  /** lineId -> last quantity-update message from the server (warning/error). */
-  const [lineErrors, setLineErrors] = useState<Record<string, string>>({});
 
   // Mirrors `drafts` so the timer callback reads the newest values without
   // having to re-arm itself on every render.
@@ -141,6 +151,18 @@ export function CartLineUpdatesProvider({
   const dueRef = useRef(false);
   const linesRef = useRef(lines);
   linesRef.current = lines;
+
+  // Prefer server cart qty so an optimistic Purchase bump cannot poison the
+  // pre-add baseline used for clamp detection.
+  useEffect(() => {
+    if (mutating) return;
+    syncQuantities(
+      serverLines.map((line) => ({
+        merchandiseId: line.merchandise?.id,
+        quantity: line.quantity,
+      })),
+    );
+  }, [mutating, serverLines, syncQuantities]);
 
   const commitDrafts = useCallback((next: Drafts) => {
     draftsRef.current = next;
@@ -196,17 +218,12 @@ export function CartLineUpdatesProvider({
       });
 
       // A fresh edit supersedes whatever the last response said about this line.
-      setLineErrors((prev) => {
-        if (!(line.id in prev)) return prev;
-        const next = {...prev};
-        delete next[line.id];
-        return next;
-      });
+      clearLineError(line.id);
 
       if (timerRef.current) clearTimeout(timerRef.current);
       timerRef.current = setTimeout(flush, DEBOUNCE_MS);
     },
-    [commitDrafts, flush],
+    [clearLineError, commitDrafts, flush],
   );
 
   const cancelQuantity = useCallback(
@@ -222,14 +239,9 @@ export function CartLineUpdatesProvider({
         }
       }
 
-      setLineErrors((prev) => {
-        if (!(lineId in prev)) return prev;
-        const next = {...prev};
-        delete next[lineId];
-        return next;
-      });
+      clearLineError(lineId);
     },
-    [commitDrafts],
+    [clearLineError, commitDrafts],
   );
 
   // Send a pending edit rather than losing it when the drawer closes.
@@ -258,7 +270,7 @@ export function CartLineUpdatesProvider({
     }
     commitDrafts(next);
 
-    const fromResponse = lineErrorsFromResponse(
+    const fromResponse = lineErrorsFromUpdateResponse(
       submittedIds,
       fetcher.data as CartActionData,
     );
@@ -270,7 +282,7 @@ export function CartLineUpdatesProvider({
       }
       return nextErrors;
     });
-  }, [commitDrafts, fetcher.state, fetcher.data]);
+  }, [commitDrafts, fetcher.state, fetcher.data, setLineErrors]);
 
   // Keep draft keys pointing at lines that exist, so nothing is submitted
   // against a dead id and nothing holds the cart in a busy state.
@@ -332,10 +344,17 @@ export function CartLineUpdatesProvider({
       setQuantity,
       cancelQuantity,
       getDraftQuantity: (lineId: string) => drafts[lineId]?.quantity,
-      getLineError: (lineId: string) => lineErrors[lineId],
+      getLineError,
       isCartBusy: mutating || hasDrafts,
     }),
-    [cancelQuantity, drafts, hasDrafts, lineErrors, mutating, setQuantity],
+    [
+      cancelQuantity,
+      drafts,
+      getLineError,
+      hasDrafts,
+      mutating,
+      setQuantity,
+    ],
   );
 
   return (

@@ -4,7 +4,7 @@ import type {CartApiQueryFragment, HeaderQuery} from 'storefrontapi.generated';
 import {Aside} from './Aside';
 import {PageTransition} from './PageTransition';
 import {Header, HeaderMenu} from './Header';
-import {CartMain} from '~/components/cart';
+import {CartLineFeedbackProvider, CartMain} from '~/components/cart';
 import {
   SEARCH_ENDPOINT,
   SearchFormPredictive,
@@ -29,38 +29,44 @@ export function PageLayout({
   const location = useLocation();
   const isHome = location.pathname === '/';
   const isProduct = location.pathname.startsWith('/products/');
-  // Detail only — leave /collections and /collections/all on the default chrome.
-  const isCollectionDetail = /^\/collections\/(?!all(?:\/|$))[^/]+\/?$/.test(
-    location.pathname,
-  );
-  const isImmersive = isHome || isProduct || isCollectionDetail;
+  const isCollection = /^\/collections\/?$/.test(location.pathname);
+  const isImmersive = isHome || isProduct || isCollection;
 
   return (
     <Aside.Provider>
-      <CartAside cart={cart} />
-      <SearchAside />
-      <MobileMenuAside header={header} publicStoreDomain={publicStoreDomain} />
-      {header && !isImmersive ? (
-        <Header
+      <CartLineFeedbackProvider>
+        <CartAside cart={cart} />
+        <SearchAside />
+        <MobileMenuAside
           header={header}
-          cart={cart}
-          isLoggedIn={isLoggedIn}
           publicStoreDomain={publicStoreDomain}
         />
-      ) : null}
-      <main
-        className={
-          isHome
-            ? 'main--home'
-            : isProduct
-              ? 'main--product'
-              : isCollectionDetail
-                ? 'main--collection'
-                : undefined
-        }
-      >
-        {isImmersive ? children : <PageTransition>{children}</PageTransition>}
-      </main>
+        {header && !isImmersive ? (
+          <Header
+            header={header}
+            cart={cart}
+            isLoggedIn={isLoggedIn}
+            publicStoreDomain={publicStoreDomain}
+          />
+        ) : null}
+        <main
+          className={
+            isHome
+              ? 'main--home'
+              : isProduct
+                ? 'main--product'
+                : isCollection
+                  ? 'main--collection'
+                  : undefined
+          }
+        >
+          {isImmersive ? (
+            children
+          ) : (
+            <PageTransition>{children}</PageTransition>
+          )}
+        </main>
+      </CartLineFeedbackProvider>
     </Aside.Provider>
   );
 }

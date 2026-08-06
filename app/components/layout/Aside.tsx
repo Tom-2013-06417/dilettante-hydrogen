@@ -9,8 +9,12 @@ import {
   useRef,
   useState,
 } from 'react';
-import {useLocation} from 'react-router';
+import {useLocation, useNavigate} from 'react-router';
 import {ClientOnly} from '~/components/shared';
+import {
+  CART_OPEN_SEARCH_PARAM,
+  shouldOpenCartFromSearch,
+} from '~/lib/constants';
 
 type AsideType = 'search' | 'cart' | 'mobile' | 'closed';
 type AsideContextValue = {
@@ -24,6 +28,12 @@ const MOBILE_CART_MQ = '(max-width: 45em)';
 
 /** Marker on history.state so we recognize the entry we pushed for the cart. */
 const CART_HISTORY_STATE_KEY = 'dilettanteCartAside';
+
+/**
+ * Survives Strict Mode remounts while we replace `?cart=t` out of the URL
+ * before opening (so mobile back-stack isn't poisoned by the query).
+ */
+let pendingCartOpen = false;
 
 function isMobileCartViewport() {
   return window.matchMedia(MOBILE_CART_MQ).matches;
@@ -127,7 +137,8 @@ Aside.Provider = function AsideProvider({children}: {children: ReactNode}) {
   /** Skip the next popstate — we triggered it with history.back() from the UI. */
   const ignorePopRef = useRef(false);
   const location = useLocation();
-  const locationKeyRef = useRef(location.key);
+  const navigate = useNavigate();
+  const pathnameRef = useRef(location.pathname);
 
   const releaseCartHistory = useCallback((opts?: {back?: boolean}) => {
     if (!cartHistoryOwnedRef.current) return;
@@ -198,15 +209,45 @@ Aside.Provider = function AsideProvider({children}: {children: ReactNode}) {
     return () => window.removeEventListener('popstate', onPopState);
   }, []);
 
-  // In-app navigation while the drawer is open: close it and abandon the
-  // history marker (the router already moved — don't history.back()).
+  // Path changes close the drawer. Search/hash-only updates (e.g. stripping
+  // `?cart=t`) must not — that would fight deep-link open.
   useEffect(() => {
-    if (locationKeyRef.current === location.key) return;
-    locationKeyRef.current = location.key;
+    if (pathnameRef.current === location.pathname) return;
+    pathnameRef.current = location.pathname;
     if (typeRef.current === 'closed') return;
     cartHistoryOwnedRef.current = false;
     setType('closed');
-  }, [location.key]);
+  }, [location.pathname]);
+
+  // GET /cart redirects here with `?cart=t`. Strip the flag first, then open —
+  // so mobile history.back() on close doesn't revive the query and re-open.
+  useEffect(() => {
+    if (shouldOpenCartFromSearch(location.search)) {
+      pendingCartOpen = true;
+      const params = new URLSearchParams(location.search);
+      params.delete(CART_OPEN_SEARCH_PARAM);
+      const search = params.toString();
+      navigate(
+        {
+          pathname: location.pathname,
+          search: search ? `?${search}` : '',
+          hash: location.hash,
+        },
+        {replace: true, preventScrollReset: true},
+      );
+      return;
+    }
+
+    if (!pendingCartOpen) return;
+    pendingCartOpen = false;
+    open('cart');
+  }, [
+    location.hash,
+    location.pathname,
+    location.search,
+    navigate,
+    open,
+  ]);
 
   const value = useMemo(
     () => ({

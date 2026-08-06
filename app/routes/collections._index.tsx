@@ -1,14 +1,15 @@
-import {useLoaderData, Link} from 'react-router';
+import {useLoaderData} from 'react-router';
 import type {Route} from './+types/collections._index';
-import {getPaginationVariables, Image} from '@shopify/hydrogen';
-import type {CollectionFragment} from 'storefrontapi.generated';
-import {PaginatedResourceSection} from '~/components/shared';
+import {getPaginationVariables, Analytics} from '@shopify/hydrogen';
+import {CollectionPage} from '~/components/collections';
+import {DEBUT_COLLECTION_HANDLE, pageTitle} from '~/lib/constants';
+
+export const meta: Route.MetaFunction = ({data}) => {
+  return [{title: pageTitle(data?.collection.title)}];
+};
 
 export async function loader(args: Route.LoaderArgs) {
-  // Start fetching non-critical data without blocking time to first byte
   const deferredData = loadDeferredData(args);
-
-  // Await the critical data required to render initial state of the page
   const criticalData = await loadCriticalData(args);
 
   return {...deferredData, ...criticalData};
@@ -19,18 +20,26 @@ export async function loader(args: Route.LoaderArgs) {
  * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
  */
 async function loadCriticalData({context, request}: Route.LoaderArgs) {
+  const {storefront} = context;
   const paginationVariables = getPaginationVariables(request, {
-    pageBy: 4,
+    pageBy: 24,
   });
 
-  const [{collections}] = await Promise.all([
-    context.storefront.query(COLLECTIONS_QUERY, {
-      variables: paginationVariables,
+  const [{collection}] = await Promise.all([
+    storefront.query(COLLECTION_QUERY, {
+      variables: {handle: DEBUT_COLLECTION_HANDLE, ...paginationVariables},
     }),
-    // Add other queries here, so that they are loaded in parallel
   ]);
 
-  return {collections};
+  if (!collection) {
+    throw new Response(`Collection ${DEBUT_COLLECTION_HANDLE} not found`, {
+      status: 404,
+    });
+  }
+
+  return {
+    collection,
+  };
 }
 
 /**
@@ -38,95 +47,91 @@ async function loadCriticalData({context, request}: Route.LoaderArgs) {
  * fetched after the initial page load. If it's unavailable, the page should still 200.
  * Make sure to not throw any errors here, as it will cause the page to 500.
  */
-function loadDeferredData({context}: Route.LoaderArgs) {
+function loadDeferredData(_args: Route.LoaderArgs) {
   return {};
 }
 
 export default function Collections() {
-  const {collections} = useLoaderData<typeof loader>();
+  const {collection} = useLoaderData<typeof loader>();
 
   return (
-    <div className="collections">
-      <h1>Collections</h1>
-      <PaginatedResourceSection<CollectionFragment>
-        connection={collections}
-        resourcesClassName="collections-grid"
-      >
-        {({node: collection, index}) => (
-          <CollectionItem
-            key={collection.id}
-            collection={collection}
-            index={index}
-          />
-        )}
-      </PaginatedResourceSection>
-    </div>
+    <>
+      <CollectionPage collection={collection} />
+      <Analytics.CollectionView
+        data={{
+          collection: {
+            id: collection.id,
+            handle: collection.handle,
+          },
+        }}
+      />
+    </>
   );
 }
 
-function CollectionItem({
-  collection,
-  index,
-}: {
-  collection: CollectionFragment;
-  index: number;
-}) {
-  return (
-    <Link
-      className="collection-item"
-      key={collection.id}
-      to={`/collections/${collection.handle}`}
-      prefetch="intent"
-    >
-      {collection?.image && (
-        <Image
-          alt={collection.image.altText || collection.title}
-          aspectRatio="1/1"
-          data={collection.image}
-          loading={index < 3 ? 'eager' : undefined}
-          sizes="(min-width: 45em) 400px, 100vw"
-        />
-      )}
-      <h5>{collection.title}</h5>
-    </Link>
-  );
-}
-
-const COLLECTIONS_QUERY = `#graphql
-  fragment Collection on Collection {
+const COLLECTION_PRODUCT_FRAGMENT = `#graphql
+  fragment CollectionProduct on Product {
     id
-    title
     handle
-    image {
+    title
+    featuredImage {
       id
-      url
       altText
+      url
       width
       height
     }
+    scentNumber: metafield(namespace: "custom", key: "scent_number") {
+      type
+      value
+    }
+    scentTagline: metafield(namespace: "custom", key: "scent_tagline") {
+      type
+      value
+    }
   }
-  query StoreCollections(
+` as const;
+
+// NOTE: https://shopify.dev/docs/api/storefront/latest/objects/collection
+const COLLECTION_QUERY = `#graphql
+  ${COLLECTION_PRODUCT_FRAGMENT}
+  query Collection(
+    $handle: String!
     $country: CountryCode
-    $endCursor: String
-    $first: Int
     $language: LanguageCode
+    $first: Int
     $last: Int
     $startCursor: String
+    $endCursor: String
   ) @inContext(country: $country, language: $language) {
-    collections(
-      first: $first,
-      last: $last,
-      before: $startCursor,
-      after: $endCursor
-    ) {
-      nodes {
-        ...Collection
+    collection(handle: $handle) {
+      id
+      handle
+      title
+      description
+      launchDate: metafield(namespace: "custom", key: "launch_date") {
+        type
+        value
       }
-      pageInfo {
-        hasNextPage
-        hasPreviousPage
-        startCursor
-        endCursor
+      tagline: metafield(namespace: "custom", key: "tagline") {
+        type
+        value
+      }
+      products(
+        first: $first,
+        last: $last,
+        before: $startCursor,
+        after: $endCursor
+      ) {
+        nodes {
+          ...CollectionProduct
+        }
+        pageInfo {
+          hasPreviousPage
+          hasNextPage
+          endCursor
+          startCursor
+        }
       }
     }
   }

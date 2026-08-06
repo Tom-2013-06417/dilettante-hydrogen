@@ -1,17 +1,20 @@
-import {useLoaderData, data, type HeadersFunction} from 'react-router';
+import {data, redirect, type HeadersFunction} from 'react-router';
 import type {Route} from './+types/cart';
 import type {CartQueryDataReturn} from '@shopify/hydrogen';
 import {CartForm} from '@shopify/hydrogen';
-import {CartMain} from '~/components/cart';
 
-import {pageTitle} from '~/lib/constants';
-
-export const meta: Route.MetaFunction = () => {
-  return [{title: pageTitle('Cart')}];
-};
+import {
+  CART_OPEN_REDIRECT_PATH,
+  CART_OPEN_SEARCH_PARAM,
+  CART_OPEN_SEARCH_VALUE,
+} from '~/lib/constants';
 
 export const headers: HeadersFunction = ({actionHeaders}) => actionHeaders;
 
+/**
+ * Cart mutations (add/update/remove/discounts) still POST here.
+ * There is no dedicated cart page — GET redirects and opens the aside.
+ */
 export async function action({request, context}: Route.ActionArgs) {
   const {cart} = context;
 
@@ -99,18 +102,17 @@ export async function action({request, context}: Route.ActionArgs) {
   );
 }
 
-export async function loader({context}: Route.LoaderArgs) {
-  const {cart} = context;
-  return await cart.get();
+export async function loader({request}: Route.LoaderArgs) {
+  const url = new URL(request.url);
+  const target = new URL(CART_OPEN_REDIRECT_PATH, url.origin);
+  target.searchParams.set(CART_OPEN_SEARCH_PARAM, CART_OPEN_SEARCH_VALUE);
+  for (const [key, value] of url.searchParams) {
+    if (key === CART_OPEN_SEARCH_PARAM) continue;
+    if (!target.searchParams.has(key)) target.searchParams.set(key, value);
+  }
+  return redirect(`${target.pathname}${target.search}`);
 }
 
 export default function Cart() {
-  const cart = useLoaderData<typeof loader>();
-
-  return (
-    <div className="cart">
-      <h1>Cart</h1>
-      <CartMain layout="page" cart={cart} />
-    </div>
-  );
+  return null;
 }

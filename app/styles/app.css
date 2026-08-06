@@ -436,7 +436,7 @@ main {
 }
 
 .cart-line {
-  padding: 0.75rem 0;
+  padding: 0.75rem 0 0;
 }
 
 .cart-line-inner {
@@ -603,7 +603,7 @@ aside.aside-cart .cart-summary-aside {
   border-top: 1px solid var(--color-vellum-100);
   flex-shrink: 0;
   margin-top: auto;
-  padding: 1rem 0;
+  padding: 0.75rem 0;
   position: static;
   width: auto;
 }

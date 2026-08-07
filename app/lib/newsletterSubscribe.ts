@@ -169,6 +169,20 @@ const CONSENT_UPDATE = `
   }
 `;
 
+/**
+ * Consent timestamp required for Shopify Email / Flow "Customer subscribed to
+ * email marketing" automations to fire from Admin API updates. Must be within
+ * the last 24 hours. See:
+ * https://shopify.dev/changelog/apps-can-now-trigger-marketing-automations-that-use-the-customer-subscribed-to-email-marketing-trigger
+ */
+function emailMarketingConsentInput() {
+  return {
+    marketingState: 'SUBSCRIBED' as const,
+    marketingOptInLevel: 'SINGLE_OPT_IN' as const,
+    consentUpdatedAt: new Date().toISOString(),
+  };
+}
+
 async function setMarketingConsent(
   shopDomain: string,
   token: string,
@@ -181,10 +195,7 @@ async function setMarketingConsent(
     {
       input: {
         customerId,
-        emailMarketingConsent: {
-          marketingState: 'SUBSCRIBED',
-          marketingOptInLevel: 'SINGLE_OPT_IN',
-        },
+        emailMarketingConsent: emailMarketingConsentInput(),
       },
     },
   );
@@ -240,10 +251,7 @@ export async function subscribeTeaserEmail(
         input: {
           email,
           tags: ['newsletter', 'teaser'],
-          emailMarketingConsent: {
-            marketingState: 'SUBSCRIBED',
-            marketingOptInLevel: 'SINGLE_OPT_IN',
-          },
+          emailMarketingConsent: emailMarketingConsentInput(),
         },
       },
     );
@@ -258,6 +266,13 @@ export async function subscribeTeaserEmail(
 
     const createErrors = create.data?.customerCreate?.userErrors ?? [];
     if (!createErrors.length && create.data?.customerCreate?.customer?.id) {
+      // Consent on create alone may not fire welcome automations; update with
+      // a fresh consentUpdatedAt so Shopify Email / Flow triggers run.
+      await setMarketingConsent(
+        shopDomain,
+        token,
+        create.data.customerCreate.customer.id,
+      );
       return {ok: true, message: 'Subscribed'};
     }
 

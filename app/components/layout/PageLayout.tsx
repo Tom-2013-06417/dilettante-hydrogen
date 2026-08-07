@@ -53,7 +53,7 @@ export function PageLayout({
           header={header}
           publicStoreDomain={publicStoreDomain}
         />
-      {header && !drawsOwnHeader ? (
+        {header && !drawsOwnHeader ? (
           <Header
             header={header}
             cart={cart}
@@ -67,9 +67,11 @@ export function PageLayout({
               ? 'main--home'
               : isProduct
                 ? 'main--product'
-                : isStatic
-                  ? 'main--static'
-                  : undefined
+                : isCollection
+                  ? 'main--collection'
+                  : isStatic
+                    ? 'main--static'
+                    : undefined
           }
         >
           {isStackRoute ? (

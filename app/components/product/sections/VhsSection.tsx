@@ -325,7 +325,10 @@ export function VhsSection({
 
   useEffect(() => {
     if (!plateReady) return;
-    const timer = window.setTimeout(() => setChromeReady(true), CHROME_DELAY_MS);
+    const timer = window.setTimeout(
+      () => setChromeReady(true),
+      CHROME_DELAY_MS,
+    );
     return () => window.clearTimeout(timer);
   }, [plateReady]);
 
@@ -568,10 +571,7 @@ export function VhsSection({
                   keeps that readable to a screen reader, which the ticks alone
                   would not announce.
                 */}
-                <span
-                  className="text-vellum-100"
-                  style={{filter: CHROME_GLOW}}
-                >
+                <span className="text-vellum-100" style={{filter: CHROME_GLOW}}>
                   <ProductNumberBadge
                     number={scentProfile.number}
                     variant="plain"
@@ -634,9 +634,7 @@ export function VhsSection({
                   onPointerUp={endPlatePointer}
                   onPointerCancel={onPlatePointerCancel}
                   role={slideCount > 1 ? 'group' : undefined}
-                  aria-roledescription={
-                    slideCount > 1 ? 'carousel' : undefined
-                  }
+                  aria-roledescription={slideCount > 1 ? 'carousel' : undefined}
                   aria-label={
                     slideCount > 1
                       ? `Scene ${index + 1} of ${slideCount}. Swipe left or right to change.`
@@ -674,7 +672,7 @@ export function VhsSection({
                    leading-[0.72], so its box bottom sits a good 10px above the
                    descenders and the measured gap reads much tighter than it
                    is. mt is the compensating pull back toward the plate. */
-                className="mt-5 flex w-full shrink-0 flex-col items-center gap-9 overflow-visible text-center"
+                className="mt-2 flex w-full shrink-0 flex-col items-center gap-9 overflow-visible text-center"
                 initial={false}
                 animate={{opacity: chromeReady ? 1 : 0}}
                 transition={{duration: 0.4, ease: 'easeOut', delay: 0.06}}

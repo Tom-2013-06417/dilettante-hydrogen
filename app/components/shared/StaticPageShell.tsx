@@ -13,10 +13,10 @@ const BODY_CLASS = {
 } as const;
 
 /**
- * Chrome for every static page: the site header over a plain vellum field, with
- * a mono title and a body column. `[&_p]:leading-6!` and the `!` on the title
- * margins are required because reset.css sets unlayered `p`/`h1` rules that
- * outrank Tailwind's layered utilities.
+ * Chrome for every static page: the site header over the shared vellum paper
+ * grain, with a mono title and a body column. `[&_p]:leading-6!` and the `!`
+ * on the title margins are required because reset.css sets unlayered `p`/`h1`
+ * rules that outrank Tailwind's layered utilities.
  *
  * /about does NOT use this — it has its own layout (see app/routes/about.tsx).
  */
@@ -30,7 +30,7 @@ export function StaticPageShell({
   children: ReactNode;
 }) {
   return (
-    <div className="static-page flex min-h-svh w-full flex-col bg-vellum-100 font-['trust-3a'] text-inkwell-700">
+    <div className="static-page flex min-h-svh w-full flex-col bg-vellum-paper font-['trust-3a'] text-inkwell-700">
       <HeaderBar />
       <section className="grow">
         <PageContainer>

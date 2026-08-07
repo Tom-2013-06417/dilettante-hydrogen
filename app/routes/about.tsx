@@ -20,7 +20,7 @@ const [ABOUT_LEAD, ...ABOUT_BODY] = ABOUT_PARAGRAPHS;
  */
 export default function AboutRoute() {
   return (
-    <div className="about-page static-page flex min-h-svh w-full flex-col bg-vellum-100 font-['trust-3a'] text-inkwell-700">
+    <div className="about-page static-page flex min-h-svh w-full flex-col bg-vellum-paper font-['trust-3a'] text-inkwell-700">
       <HeaderBar />
 
       <section className="grow text-[14px] tracking-[0.02em] [&_p]:leading-6! sm:text-[15px]">

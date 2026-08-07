@@ -143,8 +143,8 @@
 }
 
 /*
-  Paper grain on body (product + collection) and .bg-vellum-paper (e.g. sticky
-  navbar). Same stack everywhere so wash strength matches.
+  Paper grain on body (collection + static) and .bg-vellum-paper (e.g. sticky
+  navbar, static page shells). Same stack everywhere so wash strength matches.
   --vellum-paper-wash is the solid veil over the texture (0.5 ≈ 50% grain).
 
   Elevated plates (collection cards, product title) use .bg-vellusum with a
@@ -163,7 +163,9 @@
 }
 
 .bg-vellum-paper,
-body:has(.main--collection) {
+body:has(.main--collection),
+html:has(.main--static),
+body:has(.main--static) {
   background-color: rgb(var(--vellum-paper-base));
   background-image:
     linear-gradient(
@@ -234,12 +236,6 @@ body:has(.main--product) {
    slack or SiteFooter floats mid-viewport on short pages. */
 body > main {
   flex: 1 1 auto;
-}
-
-/* Static template: paint html/body vellum so overscroll matches the page. */
-html:has(.main--static),
-body:has(.main--static) {
-  background-color: rgb(255 246 230);
 }
 
 /* Teaser: paint html/body inkwell so overscroll isn't white (app.css body is

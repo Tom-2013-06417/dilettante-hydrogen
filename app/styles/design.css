@@ -142,9 +142,16 @@
   position: relative;
 }
 
+/* History shell defaults to white (--color-background). Static pages paint
+   their own grain on .static-page; keep the absolute transition layer clear
+   so a momentarily-tall shell never flashes a white band above the footer. */
+.main--static .page-transition-content {
+  background: transparent;
+}
+
 /*
-  Paper grain on body (product + collection) and .bg-vellum-paper (e.g. sticky
-  navbar). Same stack everywhere so wash strength matches.
+  Paper grain on body (collection + static) and .bg-vellum-paper (e.g. sticky
+  navbar, static page shells). Same stack everywhere so wash strength matches.
   --vellum-paper-wash is the solid veil over the texture (0.5 ≈ 50% grain).
 
   Elevated plates (collection cards, product title) use .bg-vellusum with a
@@ -163,7 +170,9 @@
 }
 
 .bg-vellum-paper,
-body:has(.main--collection) {
+body:has(.main--collection),
+html:has(.main--static),
+body:has(.main--static) {
   background-color: rgb(var(--vellum-paper-base));
   background-image:
     linear-gradient(
@@ -217,10 +226,19 @@ body:has(.main--product) {
   }
 }
 
-body:has(.main--home) {
+body:has(.main--home),
+body:has(.main--product) {
   background-color: rgb(14 22 14);
   /* Contain 100vw blueprint bleeds without a horizontal scrollbar. */
   overflow-x: clip;
+}
+
+/* Sticky footer: body is a flex column (reset.css), so main has to absorb the
+   slack or SiteFooter floats mid-viewport on short pages. Do NOT floor
+   .page-transition at 100svh here — the footer sits outside main, so that
+   forced a full-viewport empty band above it on short static pages. */
+body > main {
+  flex: 1 1 auto;
 }
 
 /* Teaser: paint html/body inkwell so overscroll isn't white (app.css body is
@@ -249,14 +267,14 @@ body:has(.teaser-page) {
    Chrome iOS) often ignores author styles on the fill itself. Keep trying to
    match inkwell on engines that allow it, and always pad the submit control
    so the light arrow stays readable when the UA paints light blue. */
-.teaser-page #teaser-email {
+.subscribe-email {
   background-color: rgb(14 22 14);
 }
 
-.teaser-page #teaser-email:-webkit-autofill,
-.teaser-page #teaser-email:-webkit-autofill:hover,
-.teaser-page #teaser-email:-webkit-autofill:focus,
-.teaser-page #teaser-email:-webkit-autofill:active {
+.subscribe-email:-webkit-autofill,
+.subscribe-email:-webkit-autofill:hover,
+.subscribe-email:-webkit-autofill:focus,
+.subscribe-email:-webkit-autofill:active {
   -webkit-text-fill-color: rgb(255 246 230) !important;
   caret-color: rgb(255 246 230);
   color: rgb(255 246 230) !important;
@@ -270,13 +288,14 @@ body:has(.teaser-page) {
     color 99999s ease-out 0s;
 }
 
-.teaser-page .teaser-email-submit {
+.subscribe-submit {
   background-color: rgb(14 22 14);
 }
 
 .main--home,
 .main--product,
-.main--collection {
+.main--collection,
+.main--static {
   margin: 0;
   max-width: none;
   padding: 0;

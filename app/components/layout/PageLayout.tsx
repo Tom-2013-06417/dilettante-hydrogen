@@ -4,6 +4,8 @@ import type {CartApiQueryFragment, HeaderQuery} from 'storefrontapi.generated';
 import {Aside} from './Aside';
 import {PageTransition} from './PageTransition';
 import {Header, HeaderMenu} from './Header';
+import {SiteFooter} from './SiteFooter';
+import {STATIC_PAGE_PATHS} from '~/lib/staticPages';
 import {CartLineFeedbackProvider, CartMain} from '~/components/cart';
 import {HeaderBar} from '~/components/home/sections/HeaderBar';
 import {
@@ -31,8 +33,16 @@ export function PageLayout({
   const isHome = location.pathname === '/';
   const isProduct = location.pathname.startsWith('/products/');
   const isCollection = /^\/collections\/?$/.test(location.pathname);
+  const isStatic = STATIC_PAGE_PATHS.has(location.pathname);
+  // Immersive pages are full-bleed and skip the page transition.
   const isImmersive = isHome || isProduct || isCollection;
   const isStackRoute = isProduct || isCollection;
+  // Static pages draw their own HeaderBar, so they opt out of the chrome header —
+  // but they still animate in like any other routed page.
+  const drawsOwnHeader = isImmersive || isStatic;
+  // Home is a JS-driven snap deck of h-svh sections; trailing content would sit
+  // outside that scroll logic, so it's the one route without a footer.
+  const showFooter = !isHome;
 
   return (
     <Aside.Provider>
@@ -43,7 +53,7 @@ export function PageLayout({
           header={header}
           publicStoreDomain={publicStoreDomain}
         />
-        {header && !isImmersive ? (
+        {header && !drawsOwnHeader ? (
           <Header
             header={header}
             cart={cart}
@@ -59,7 +69,9 @@ export function PageLayout({
                 ? 'main--product'
                 : isCollection
                   ? 'main--collection'
-                  : undefined
+                  : isStatic
+                    ? 'main--static'
+                    : undefined
           }
         >
           {isStackRoute ? (
@@ -73,6 +85,7 @@ export function PageLayout({
             <PageTransition>{children}</PageTransition>
           )}
         </main>
+        {showFooter ? <SiteFooter /> : null}
       </CartLineFeedbackProvider>
     </Aside.Provider>
   );

@@ -1,5 +1,8 @@
 export const SITE_TITLE = 'Dilettante';
 
+/** Sole storefront collection until multi-collection UX ships. */
+export const DEBUT_COLLECTION_HANDLE = 'debut-collection';
+
 /** Social profiles linked from the footer. Both use the @dilettante.perfumery handle. */
 export const SOCIAL_LINKS = [
   {

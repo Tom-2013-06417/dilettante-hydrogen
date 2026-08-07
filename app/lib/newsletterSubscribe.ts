@@ -248,10 +248,12 @@ export async function subscribeTeaserEmail(
       token,
       CUSTOMER_CREATE,
       {
+        // Create without consent, then set it once below. Setting consent on
+        // create *and* via customerEmailMarketingConsentUpdate can fire Flow
+        // twice (duplicate welcome emails).
         input: {
           email,
           tags: ['newsletter', 'teaser'],
-          emailMarketingConsent: emailMarketingConsentInput(),
         },
       },
     );
@@ -266,8 +268,6 @@ export async function subscribeTeaserEmail(
 
     const createErrors = create.data?.customerCreate?.userErrors ?? [];
     if (!createErrors.length && create.data?.customerCreate?.customer?.id) {
-      // Consent on create alone may not fire welcome automations; update with
-      // a fresh consentUpdatedAt so Shopify Email / Flow triggers run.
       await setMarketingConsent(
         shopDomain,
         token,

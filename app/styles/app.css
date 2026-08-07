@@ -436,6 +436,11 @@ main {
   will-change: transform;
 }
 
+/* Home ↔ collection: cover rises from below instead of from the right. */
+.page-transition-layer--cover.page-transition-layer--axis-y {
+  transform: translate3d(0, 100%, 0);
+}
+
 .page-transition-layer--cover.page-transition-layer--in {
   transform: translate3d(0, 0, 0);
 }

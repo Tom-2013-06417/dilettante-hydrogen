@@ -80,7 +80,7 @@ export function HomePage() {
               transition={
                 reducedMotion
                   ? {duration: 0.01}
-                  : {delay: CTA_DELAY, duration: 0.01}
+                  : {delay: CTA_DELAY, duration: 0.8, ease: [0.22, 1, 0.36, 1]}
               }
             >
               <Link

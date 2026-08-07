@@ -34,9 +34,10 @@ export function PageLayout({
   const isProduct = location.pathname.startsWith('/products/');
   const isCollection = /^\/collections\/?$/.test(location.pathname);
   const isStatic = STATIC_PAGE_PATHS.has(location.pathname);
-  // Immersive pages are full-bleed and skip the page transition.
+  // Immersive pages are full-bleed (no site chrome header).
   const isImmersive = isHome || isProduct || isCollection;
-  const isStackRoute = isProduct || isCollection;
+  // Home ↔ collection ↔ product share the frozen CSS stack cover.
+  const isStackRoute = isHome || isProduct || isCollection;
   // Static pages draw their own HeaderBar, so they opt out of the chrome header —
   // but they still animate in like any other routed page.
   const drawsOwnHeader = isImmersive || isStatic;
@@ -75,12 +76,17 @@ export function PageLayout({
           }
         >
           {isStackRoute ? (
-            <>
-              <HeaderBar className="relative z-50 shrink-0 bg-vellum-paper" />
-              <PageTransition nav="stack">{children}</PageTransition>
-            </>
-          ) : isImmersive ? (
-            children
+            <PageTransition nav="stack">
+              {/*
+                Header lives inside the frozen/sliding layer so home → collection
+                can rise as one cover (navbar included). Collection ↔ product
+                still freezes the outgoing paint the same way.
+              */}
+              {!isHome ? (
+                <HeaderBar className="relative z-50 shrink-0 bg-vellum-paper" />
+              ) : null}
+              {children}
+            </PageTransition>
           ) : (
             <PageTransition>{children}</PageTransition>
           )}

@@ -11,7 +11,7 @@ import {
 } from 'react';
 import {useLocation, useNavigationType} from 'react-router';
 import {ClientOnly} from '~/components/shared';
-import {storefrontStackDepth} from '~/lib/constants';
+import {storefrontStackAxis, storefrontStackDepth} from '~/lib/constants';
 
 /** History (non-stack) transitions. */
 const HISTORY_EASE = [0.32, 0.72, 0, 1] as const;
@@ -58,11 +58,14 @@ type PageTransitionProps = {
   nav?: PageTransitionNav;
 };
 
+type StackAxis = 'x' | 'y';
+
 type FrozenExit = {
   key: string;
   /** Live DOM clone — cheaper + keeps decoded images vs innerHTML. */
   node: Node;
   direction: number;
+  axis: StackAxis;
 };
 
 /**
@@ -145,9 +148,15 @@ function StackPresence({
   if (pathRef.current !== pathname) {
     const source = liveRef.current;
     const clone = source?.cloneNode(true) ?? null;
+    const fromPath = pathRef.current;
     exitRef.current =
       clone != null
-        ? {key: pathRef.current, node: clone, direction}
+        ? {
+            key: fromPath,
+            node: clone,
+            direction,
+            axis: storefrontStackAxis(fromPath, pathname),
+          }
         : null;
     pathRef.current = pathname;
   }
@@ -245,10 +254,12 @@ function StackPresence({
   // Push: frozen under (still) + live cover (slides in).
   // Pop: live under (still) + frozen cover (slides out).
   const isPush = (exitLayer?.direction ?? direction) > 0;
+  const axis = exitLayer?.axis ?? 'x';
+  const axisClass = axis === 'y' ? ' page-transition-layer--axis-y' : '';
 
   const liveLayerClass = isAnimating
     ? isPush
-      ? ' page-transition-layer--cover'
+      ? ` page-transition-layer--cover${axisClass}`
       : ' page-transition-layer--under'
     : ' page-transition-content--stack-settled';
 
@@ -268,7 +279,7 @@ function StackPresence({
         <div
           key={`cover-${exitLayer.key}`}
           ref={slideRef}
-          className="page-transition-content page-transition-content--stack page-transition-layer--cover page-transition-layer--in"
+          className={`page-transition-content page-transition-content--stack page-transition-layer--cover page-transition-layer--in${axisClass}`}
           aria-hidden
         >
           <div className="page-transition-frozen" ref={attachFrozen} />

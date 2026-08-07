@@ -51,13 +51,28 @@ export function parentNavHref(pathname: string): string {
 }
 
 /**
- * Depth in the collection ↔ product stack (for push/pop transitions).
+ * Depth in the home ↔ collection ↔ product stack (for push/pop transitions).
  * `null` = outside that stack.
  */
 export function storefrontStackDepth(pathname: string): number | null {
+  if (pathname === '/') return 0;
   if (/^\/collections\/?$/.test(pathname)) return 1;
   if (pathname.startsWith('/products/')) return 2;
   return null;
+}
+
+/**
+ * Slide axis for a stack hop. Home ↔ collection is vertical (cover rises);
+ * collection ↔ product stays horizontal (cover from the right).
+ */
+export function storefrontStackAxis(
+  fromPathname: string,
+  toPathname: string,
+): 'x' | 'y' {
+  const from = storefrontStackDepth(fromPathname);
+  const to = storefrontStackDepth(toPathname);
+  if (from === 0 || to === 0) return 'y';
+  return 'x';
 }
 
 /** Location state set when opening a product from the collection stack. */

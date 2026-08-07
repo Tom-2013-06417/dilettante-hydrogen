@@ -302,11 +302,16 @@ body:has(.teaser-page) {
   width: 100%;
 }
 
+.main--home,
 .main--product,
 .main--collection {
   display: flex;
   flex-direction: column;
   min-height: 100svh;
+}
+
+.main--product,
+.main--collection {
   /* Shared HeaderBar sits above stack content — match HeaderBar padding + wordmark. */
   --stack-header-h: 3rem;
 }
@@ -316,6 +321,17 @@ body:has(.teaser-page) {
   .main--collection {
     --stack-header-h: 5.5rem;
   }
+}
+
+/*
+  Home settled shell = solid inkwell (matches hero). Collection keeps vellum;
+  product overrides separately. Only settled — sliding layers keep the shared
+  stack fill so a collection cover isn't retinted mid-pop.
+*/
+.main--home
+  .page-transition-content--stack.page-transition-content--stack-settled {
+  background-color: rgb(14 22 14); /* inkwell-800 */
+  background-image: none;
 }
 
 .product-page img,

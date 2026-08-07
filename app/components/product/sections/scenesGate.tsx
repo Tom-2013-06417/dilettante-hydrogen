@@ -23,10 +23,18 @@ const FILL_DISTANCE_PX = 700;
 const DRAIN_MULTIPLIER = 2.5;
 
 /**
- * An upward gesture snaps the cue back to empty (and closes the panel) once it
- * covers this much distance at this speed. Both thresholds matter: distance
- * alone fires on a slow drag, speed alone fires on a single stray wheel tick.
- * Kept cheap on purpose — leaving is the easy direction.
+ * Upward travel while the panel is open that closes it. Far shorter than
+ * FILL_DISTANCE_PX — leaving is the easy direction. Without this, only a
+ * velocity-gated flick could dismiss, and gentle trackpad coasts were
+ * swallowed forever (page frozen on the scenes panel).
+ */
+const CLOSE_DISTANCE_PX = 140;
+
+/**
+ * An upward flick snaps the cue empty (and closes the panel) once it covers
+ * this much distance at this speed. Both thresholds matter: distance alone
+ * would fire on a slow drag, speed alone on a single stray wheel tick.
+ * The gradual CLOSE_DISTANCE_PX path above covers the slow case.
  */
 const RESET_MIN_TRAVEL_PX = 32;
 const RESET_VELOCITY_PX_PER_MS = 0.8;
@@ -172,8 +180,21 @@ export function ScenesGateProvider({children}: {children: ReactNode}) {
           return wasOpen;
         }
 
-        // While open the page must not creep behind the panel.
-        if (openRef.current) return true;
+        // While open: drain toward close on any upward travel. A gentle
+        // trackpad coast never hits the flick velocity above, but ~140px
+        // of upward delta is enough to leave. Keep eating the gesture so
+        // the page can't creep behind the panel.
+        if (openRef.current) {
+          const next = Math.max(0, fill.get() + dy / CLOSE_DISTANCE_PX);
+          fill.set(next);
+          if (next <= 0) {
+            closeScenes();
+            swallowRestOfGesture = true;
+            swallowStartedAt = now;
+          }
+          return true;
+        }
+
         fill.set(
           Math.max(0, fill.get() + (dy * DRAIN_MULTIPLIER) / FILL_DISTANCE_PX),
         );

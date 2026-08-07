@@ -345,8 +345,10 @@ function PageTransitionAnimated({
         setHeight(undefined);
         return;
       }
-      const next = element.offsetHeight;
-      setHeight((prev) => (prev == null || next >= prev ? next : prev));
+      // Track content both ways once settled. Grow-only left a tall empty shell
+      // after FAQ accordion collapses (absolute white page-transition-content
+      // filled the gap above the footer).
+      setHeight(element.offsetHeight);
     };
     updateHeight();
 
@@ -356,17 +358,27 @@ function PageTransitionAnimated({
   }, [presenceKey, immersive, stackAnimating]);
 
   useLayoutEffect(() => {
-    if (!immersive || !pathMetaRef.current.hasNavigated || reducedMotion) {
+    if (!pathMetaRef.current.hasNavigated) return;
+
+    if (immersive) {
+      if (reducedMotion) return;
+      animatingRef.current = true;
+      // Freeze a viewport-tall shell so absolute cover layers have room to slide.
+      const h = Math.max(
+        contentRef.current?.offsetHeight ?? 0,
+        typeof window !== 'undefined' ? window.innerHeight : 0,
+      );
+      if (h > 0) setHeight(h);
       return;
     }
+
+    // History: hold the shell at max(prev, next) until exit finishes so a
+    // shorter destination can't collapse under the outgoing absolute layer.
     animatingRef.current = true;
-    // Freeze a viewport-tall shell so absolute cover layers have room to slide.
-    const h = Math.max(
-      contentRef.current?.offsetHeight ?? 0,
-      typeof window !== 'undefined' ? window.innerHeight : 0,
+    setHeight((prev) =>
+      Math.max(prev ?? 0, contentRef.current?.offsetHeight ?? 0),
     );
-    if (h > 0) setHeight(h);
-  }, [location.pathname, immersive, reducedMotion]);
+  }, [presenceKey, immersive, reducedMotion]);
 
   return (
     <div

@@ -142,6 +142,13 @@
   position: relative;
 }
 
+/* History shell defaults to white (--color-background). Static pages paint
+   their own grain on .static-page; keep the absolute transition layer clear
+   so a momentarily-tall shell never flashes a white band above the footer. */
+.main--static .page-transition-content {
+  background: transparent;
+}
+
 /*
   Paper grain on body (collection + static) and .bg-vellum-paper (e.g. sticky
   navbar, static page shells). Same stack everywhere so wash strength matches.
@@ -226,14 +233,10 @@ body:has(.main--product) {
   overflow-x: clip;
 }
 
-/* The transition wrapper sizes itself from its absolutely-positioned content,
-   so give the static template a viewport floor to stretch into. */
-.main--static .page-transition {
-  min-height: 100svh;
-}
-
 /* Sticky footer: body is a flex column (reset.css), so main has to absorb the
-   slack or SiteFooter floats mid-viewport on short pages. */
+   slack or SiteFooter floats mid-viewport on short pages. Do NOT floor
+   .page-transition at 100svh here — the footer sits outside main, so that
+   forced a full-viewport empty band above it on short static pages. */
 body > main {
   flex: 1 1 auto;
 }

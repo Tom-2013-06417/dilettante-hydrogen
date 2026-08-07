@@ -20,7 +20,7 @@ const [ABOUT_LEAD, ...ABOUT_BODY] = ABOUT_PARAGRAPHS;
  */
 export default function AboutRoute() {
   return (
-    <div className="about-page static-page flex min-h-svh w-full flex-col bg-vellum-paper font-['trust-3a'] text-inkwell-700">
+    <div className="about-page static-page flex w-full flex-col bg-vellum-paper font-['trust-3a'] text-inkwell-700">
       <HeaderBar />
 
       <section className="grow text-[14px] tracking-[0.02em] [&_p]:leading-6! sm:text-[15px]">
@@ -63,7 +63,7 @@ export default function AboutRoute() {
 
           {/* svw, not %, so the measure is 75% of the screen rather than of
               the container (which is already inset 16/32px). */}
-          <div className="flex max-w-[85svw] flex-col gap-y-5 pb-24 pl-2 pr-8 pt-5">
+          <div className="flex max-w-[85svw] flex-col gap-y-5 pb-12 pl-2 pr-8 pt-5 sm:pb-16">
             {ABOUT_BODY.map((paragraph) => (
               <p key={paragraph}>{paragraph}</p>
             ))}

@@ -30,11 +30,11 @@ export function StaticPageShell({
   children: ReactNode;
 }) {
   return (
-    <div className="static-page flex min-h-svh w-full flex-col bg-vellum-paper font-['trust-3a'] text-inkwell-700">
+    <div className="static-page flex w-full flex-col bg-vellum-paper font-['trust-3a'] text-inkwell-700">
       <HeaderBar />
       <section className="grow">
         <PageContainer>
-          <div className="pb-24 pl-2 pr-8 pt-6 sm:pt-10">
+          <div className="pb-12 pl-2 pr-8 pt-6 sm:pb-16 sm:pt-10">
             <h1 className="mb-4! mt-6! font-['config-mono-vf'] text-[20px] font-bold uppercase tracking-[0.14em] sm:text-[24px]">
               {title}
             </h1>

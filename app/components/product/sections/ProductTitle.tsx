@@ -5,6 +5,11 @@ type ProductTitleProps = {
   subtitle?: string;
   className?: string;
   /**
+   * Colour for the "No." line. It sits outside the vellum plate, so on a dark
+   * ground it has to be tinted separately from the title itself.
+   */
+  numberClassName?: string;
+  /**
    * SVG noise filter is paint-heavy while sliding. Keep false during intro,
    * then enable after the enter animation completes.
    */
@@ -20,6 +25,7 @@ export function ProductTitle({
   title,
   subtitle,
   className = '',
+  numberClassName = '',
   enableNoise = true,
 }: ProductTitleProps) {
   const noiseStyle = enableNoise
@@ -28,7 +34,9 @@ export function ProductTitle({
 
   return (
     <div className={`relative overflow-visible ${className}`}>
-      <div className="mb-1 inline-flex items-center gap-1 text-[12px] font-bold tracking-[0.02em] lg:text-[14px]">
+      <div
+        className={`mb-1 inline-flex items-center gap-1 text-[12px] font-bold tracking-[0.02em] lg:text-[14px] ${numberClassName}`}
+      >
         No.
         <span className="flex h-4.25 w-8 items-center justify-center rounded-[50%] bg-inkwell-700 font-['config-mono-vf'] text-[12px] font-medium leading-none text-vellum-100 [font-variant-numeric:slashed-zero] lg:h-5 lg:w-9 lg:text-[14px]">
           {number}

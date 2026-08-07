@@ -74,26 +74,26 @@ export const FAQ_ITEMS: FaqItem[] = [
   {
     question: 'Are Dilettante perfumes safe?',
     answer: [
-      'All of our perfumes conform to the 51st Amendment of the IFRA (International Fragrance Association) Standards, a set of safety rules setting the maximum usage of materials in fine fragrances. That said, as with all fragrances, there is still a small risk of allergic reactions in some people. Please test on a small patch of skin before purchase.',
-      'While we don’t sell to Europe (yet), we also have a list of potential allergens per fragrance in compliance with the EU Cosmetics Regulation. You may find the list on the external packaging of your perfume or on the website.',
-      'We use sugarcane-extracted deodorized ethanol from BC Fragrances.',
+      'All of our perfumes conform to the 51st Amendment of the IFRA (International Fragrance Association) Standards, a set of safety rules setting the maximum usage of materials in fine fragrances. That said, as with all fragrances, there is still a small risk of allergic reactions in some people. Please test on a small patch of skin before wearing.',
+      'We also have a list of potential allergens per fragrance in compliance with the EU Cosmetics Regulation. You may find the list on the external packaging of your perfume.',
+      'We use sugarcane-extracted deodorized ethanol from BC Fragrances; a safety data sheet (SDS) is available upon request.',
     ],
   },
   {
     question: 'Are Dilettante perfumes all-natural?',
     answer: [
       'No, we use a combination of premium naturals (essential oils, absolutes, extracts, molecular distillations) and synthetic materials. We’ve realized that we tend to use more naturals than the typical perfumer though, hence the longer list of allergens.',
-      'A “clean” and “all-natural” perfume is misleading at best and fearmongering at worst. “Clean” is a buzzword that can mean anything, and contrary to popular belief, naturals are not inherently safe. We use naturals at safe levels though.',
+      'Marketing a perfume as “clean” or “all-natural” is misleading at best and fearmongering at worst. “Clean” is a buzzword that can mean anything, and contrary to popular belief, naturals are not inherently safe. We use naturals only at levels established as safe.',
     ],
   },
   {
     question: 'Are Dilettante perfumes vegan?',
-    answer: ['Yes. No animal by-product is used for the perfumes.'],
+    answer: ['Yes. No animal by-product is used in the perfumes.'],
   },
   {
-    question: 'Do you ship to all countries?',
+    question: 'Where do you ship?',
     answer: [
-      'We only ship to the Philippines right now as we find our footing as a small business. Stay tuned!',
+      'We only ship within the Philippines right now as we find our footing as a small business. Stay tuned!',
       'For consignment inquiries, please reach out to hello@dilettanteperfumery.com.',
     ],
   },
@@ -112,8 +112,7 @@ export const FAQ_ITEMS: FaqItem[] = [
   {
     question: 'How are orders shipped?',
     answer: [
-      'All local orders are fulfilled via J&T. Orders are fulfilled within 2–3 business days from ordering, except for those made during launch week, which will be fulfilled Aug 15th onwards.',
-      'Please contact us if you’d like to use a different courier.',
+      'Local orders ship via J&T by default, though we can use other local couriers on request. Orders are fulfilled within 2–3 business days from ordering, except for those made during launch week, which will be fulfilled Aug 15th onwards.',
     ],
   },
 ];
@@ -121,9 +120,9 @@ export const FAQ_ITEMS: FaqItem[] = [
 /** Body copy for /about, in order. First person — this is Paulo's page. */
 export const ABOUT_PARAGRAPHS = [
   'My name is Paulo, the founder and perfumer of Dilettante Perfumery.',
-  'I’ve been working in corporate/tech for the past decade, and I’m so happy I found perfumery as a creative outlet. I’ve spent the past couple of years pouring all my pent up creative energy into making wearable art. I even got a Level 2 Award at the Asian Perfumery Foundation!',
+  'I’ve been working in corporate/tech for the past decade, and I’m so happy I found perfumery as a creative outlet. I’ve spent the past couple of years pouring all my pent-up creative energy into making wearable art. I even got a Level 2 Certification from the Asian Perfumery Foundation!',
   'I created Dilettante as a reminder to myself to embrace the joy and hard work of making art—to relish being a dilettante.',
-  'While Dilettante is a very personal project of mine, it would also not be possible without the help of my friends. The best art, really, is one borne out of community. Thank you to these wonderful artists, and go work with them: they rock!',
+  'While Dilettante is a very personal project of mine, it would also not be possible without the help of my friends. The best art, really, is born of community. Thank you to these wonderful artists, and go work with them: they rock!',
 ];
 
 /** Credits list rendered under the closing paragraph of /about. */

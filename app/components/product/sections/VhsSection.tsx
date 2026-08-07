@@ -5,17 +5,19 @@ import {
   useEffect,
   useRef,
   useState,
-  type MutableRefObject,
   type PointerEvent as ReactPointerEvent,
-  type RefObject,
 } from 'react';
+import type {ProductFragment} from 'storefrontapi.generated';
+import {ProductPurchaseButton} from '~/components/product/ProductPurchaseButton';
 import {fetchPriorityAttr} from '~/lib/fetchPriority';
+import type {ScentProfile} from '~/lib/scentProfile';
 import {
   shopifyImageUrl,
   VHS_BLOOM_WIDTH,
   VHS_PLATE_WIDTH,
   type VhsSlide,
 } from '~/lib/vhsMetafields';
+import {ProductTitle} from './ProductTitle';
 
 const AUTO_ADVANCE_MS = 4000;
 /** Exit crop + enter slam share the same gate speed. */
@@ -88,8 +90,19 @@ const PROJECTOR_FRAME_MASK = {
 
 type VhsSectionProps = {
   slides: VhsSlide[];
-  sectionRef?: RefObject<HTMLElement | null>;
+  /** True once the overlay has been expanded — drives the staged reveal. */
+  open: boolean;
+  title: string;
+  /** Parenthetical under the title, matching the hero treatment. */
+  titleSubtitle?: string;
+  scentProfile: ScentProfile;
+  selectedVariant: ProductFragment['selectedOrFirstAvailableVariant'];
 };
+
+/** Beat between the first plate landing and the rest of the panel arriving. */
+const CHROME_DELAY_MS = 260;
+/** Never strand the panel empty on a slow or failed decode. */
+const PLATE_DECODE_TIMEOUT_MS = 1200;
 
 type LayerMode = 'idle' | 'exit' | 'enter';
 
@@ -205,20 +218,28 @@ function VhsSlideLayer({
 type Phase = 'idle' | 'exiting' | 'entering';
 
 /**
- * Product VHS section. Continues from scent-anatomy’s inkwell exit fade —
- * solid inkwell-900 stage, then a projector-gate slideshow.
+ * Product scenes panel: solid inkwell-900 stage behind a projector-gate
+ * slideshow, with the scent title and Purchase carried over from the hero.
+ *
+ * Sized to fill its parent (ScenesOverlay's fixed box) rather than the
+ * viewport — the old lvh floor existed to stop a vellum wipe when Chrome’s bar
+ * returned, and the overlay now owns that box.
+ *
+ * Reveal is staged: the first plate lands alone, then everything else follows a
+ * beat later, so the expansion reads as a projector striking up.
  */
-export function VhsSection({slides, sectionRef}: VhsSectionProps) {
-  const stageRef = useRef<HTMLDivElement>(null);
+export function VhsSection({
+  slides,
+  open,
+  title,
+  titleSubtitle,
+  scentProfile,
+  selectedVariant,
+}: VhsSectionProps) {
   const localSectionRef = useRef<HTMLElement | null>(null);
-  const setSectionRef = useCallback(
-    (node: HTMLDivElement | null) => {
-      localSectionRef.current = node;
-      if (!sectionRef) return;
-      (sectionRef as MutableRefObject<HTMLElement | null>).current = node;
-    },
-    [sectionRef],
-  );
+  const setSectionRef = useCallback((node: HTMLDivElement | null) => {
+    localSectionRef.current = node;
+  }, []);
   const busyRef = useRef(false);
   const swipeRef = useRef<{
     pointerId: number;
@@ -229,7 +250,9 @@ export function VhsSection({slides, sectionRef}: VhsSectionProps) {
   const reducedMotion = useReducedMotion();
   /** Latch: mount bloom/plates only when near — avoids decode jank during scent anatomy. */
   const [mediaArmed, setMediaArmed] = useState(false);
-  const [carouselActive, setCarouselActive] = useState(false);
+  /** Staged reveal: first plate, then the rest of the panel. */
+  const [plateReady, setPlateReady] = useState(false);
+  const [chromeReady, setChromeReady] = useState(false);
   const [index, setIndex] = useState(0);
   const [phase, setPhase] = useState<Phase>('idle');
   const [outgoing, setOutgoing] = useState<number | null>(null);
@@ -273,22 +296,45 @@ export function VhsSection({slides, sectionRef}: VhsSectionProps) {
     };
   }, [mediaArmed]);
 
+  // Hold the panel empty until the first plate can actually paint. A
+  // half-decoded image arriving with the expansion reads as a glitch, not a cut.
   useEffect(() => {
-    const el = stageRef.current;
-    if (!el) return;
+    if (!open || plateReady || slideCount === 0) return;
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        const next = Boolean(
-          entry?.isIntersecting && entry.intersectionRatio >= 0.55,
-        );
-        setCarouselActive((prev) => (prev === next ? prev : next));
-      },
-      {threshold: [0.55, 0.75, 1]},
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
+    let cancelled = false;
+    const done = () => {
+      if (!cancelled) setPlateReady(true);
+    };
+
+    const img = new window.Image();
+    img.src = plateUrl(slides[0]!.url);
+    if (typeof img.decode === 'function') {
+      img.decode().then(done, done);
+    } else {
+      img.onload = done;
+      img.onerror = done;
+    }
+    const timer = window.setTimeout(done, PLATE_DECODE_TIMEOUT_MS);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [open, plateReady, slideCount, slides]);
+
+  useEffect(() => {
+    if (!plateReady) return;
+    const timer = window.setTimeout(() => setChromeReady(true), CHROME_DELAY_MS);
+    return () => window.clearTimeout(timer);
+  }, [plateReady]);
+
+  // Rewind on close so the reveal replays next time — the plate is cached by
+  // then, so the second run is the same beat without the decode wait.
+  useEffect(() => {
+    if (open) return;
+    setPlateReady(false);
+    setChromeReady(false);
+  }, [open]);
 
   // Prefetch after arming, on idle — don't fight the scent-anatomy scroll thread.
   useEffect(() => {
@@ -327,12 +373,12 @@ export function VhsSection({slides, sectionRef}: VhsSectionProps) {
 
   // Keep neighbors warm while the carousel runs (auto + swipe either way).
   useEffect(() => {
-    if (!carouselActive || slideCount <= 1) return;
+    if (!chromeReady || slideCount <= 1) return;
     const next = slides[(index + 1) % slideCount];
     const prev = slides[(index - 1 + slideCount) % slideCount];
     if (next) prefetchPlate(next.url);
     if (prev && prev !== next) prefetchPlate(prev.url);
-  }, [carouselActive, index, slideCount, slides]);
+  }, [chromeReady, index, slideCount, slides]);
 
   const advanceTo = useCallback(
     (next: number) => {
@@ -454,7 +500,7 @@ export function VhsSection({slides, sectionRef}: VhsSectionProps) {
   }, [phase]);
 
   useEffect(() => {
-    if (!carouselActive) return;
+    if (!chromeReady) return;
     if (slideCount <= 1) return;
     if (reducedMotion) return;
     if (phase !== 'idle') return;
@@ -470,7 +516,7 @@ export function VhsSection({slides, sectionRef}: VhsSectionProps) {
     }, AUTO_ADVANCE_MS);
 
     return () => window.clearInterval(timer);
-  }, [advanceTo, carouselActive, index, phase, reducedMotion, slideCount]);
+  }, [advanceTo, chromeReady, index, phase, reducedMotion, slideCount]);
 
   const outgoingSlide = outgoing != null ? slides[outgoing] : null;
   const currentSlide =
@@ -487,18 +533,12 @@ export function VhsSection({slides, sectionRef}: VhsSectionProps) {
     <div
       ref={setSectionRef}
       id="scenes"
-      className="vhs-section relative w-full bg-inkwell-900 text-vellum-100"
+      className="vhs-section relative h-full w-full bg-inkwell-900 text-vellum-100"
       aria-label="Scenes"
     >
-      {/*
-        min-h-lvh: do not shrink when Chrome’s bar returns (dvh shrink was
-        revealing the vellum stack as a cream wipe). Plate max-height stays
-        on svh. Wipe is also killed by html.vhs-overscroll (inkwell + no
-        rubber-band) while this section is in view.
-      */}
-      <div className="relative w-full min-h-lvh overflow-hidden bg-inkwell-900">
+      <div className="relative h-full w-full overflow-hidden bg-inkwell-900">
         {/* Bloom + plates stay unmounted until near — heavy blur/decode fights sticky WebGL. */}
-        {mediaArmed && bloomSlide && !reducedMotion ? (
+        {plateReady && bloomSlide && !reducedMotion ? (
           <VhsStageBloom
             key={`bloom-${bloomSlide.id}-${bloomMode}`}
             slide={bloomSlide}
@@ -506,13 +546,17 @@ export function VhsSection({slides, sectionRef}: VhsSectionProps) {
           />
         ) : null}
 
-        <div
-          ref={stageRef}
-          className="relative z-10 flex min-h-lvh w-full flex-col items-center px-[15svw] py-10 sm:px-24 sm:py-12 lg:px-40"
-        >
+        <div className="relative z-10 flex h-full w-full flex-col items-center px-[15svw] py-8 sm:px-24 sm:py-10 lg:px-40">
           {slideCount > 0 ? (
-            <div className="flex w-full max-w-2xl flex-1 flex-col">
-              <div className="mb-3 flex w-full shrink-0 items-end justify-between">
+            /* max-w-lg, not 2xl: the title plate and Purchase now share this
+               column, and a wider one leaves the plate squat and letterboxed. */
+            <div className="flex w-full max-w-lg flex-1 flex-col">
+              <motion.div
+                className="mb-3 flex w-full shrink-0 items-end justify-between"
+                initial={false}
+                animate={{opacity: chromeReady ? 1 : 0}}
+                transition={{duration: 0.4, ease: 'easeOut'}}
+              >
                 <p
                   className="m-0 font-['trust-3a'] text-[12px] font-medium tracking-[0.04em] text-vellum-100 tabular-nums sm:text-[13px]"
                   style={{filter: CHROME_GLOW}}
@@ -551,11 +595,21 @@ export function VhsSection({slides, sectionRef}: VhsSectionProps) {
                     );
                   })}
                 </ol>
-              </div>
+              </motion.div>
 
-              <div className="relative min-h-0 w-full flex-1">
+              {/*
+                The plate sizes from its height, not its width: the title row
+                below is shrink-0, and a width-driven aspect box overflows the
+                column on short viewports and pushes Purchase off screen.
+              */}
+              <motion.div
+                className="relative flex min-h-0 w-full flex-1 justify-center"
+                initial={false}
+                animate={{opacity: plateReady ? 1 : 0}}
+                transition={{duration: 0.35, ease: 'easeOut'}}
+              >
                 <div
-                  className="relative mx-auto aspect-2/3 h-full max-h-[clamp(42svh,70svh,78svh)] w-full touch-pan-y select-none [&_img]:[-webkit-user-drag:none]"
+                  className="relative aspect-2/3 h-full w-auto max-w-full touch-pan-y select-none [&_img]:[-webkit-user-drag:none]"
                   onPointerDown={onPlatePointerDown}
                   onPointerMove={onPlatePointerMove}
                   onPointerUp={endPlatePointer}
@@ -588,10 +642,39 @@ export function VhsSection({slides, sectionRef}: VhsSectionProps) {
                     />
                   ) : null}
                 </div>
-              </div>
+              </motion.div>
+
+              {/*
+                Same title treatment as the hero band. text-inkwell-700 has to
+                be restated: the plate is vellum, and the panel's own
+                text-vellum-100 would otherwise paint the wordmark invisible.
+              */}
+              {/*
+                Stacked below sm: the title is whitespace-nowrap by design and
+                bleeds past the column exactly as it does on the hero, which
+                would otherwise shove Purchase off the right edge.
+              */}
+              <motion.div
+                className="mt-5 flex w-full shrink-0 flex-col items-start gap-3 overflow-visible text-inkwell-700 sm:flex-row sm:items-end sm:justify-between sm:gap-4"
+                initial={false}
+                animate={{opacity: chromeReady ? 1 : 0}}
+                transition={{duration: 0.4, ease: 'easeOut', delay: 0.06}}
+              >
+                <ProductTitle
+                  number={scentProfile.number}
+                  title={title}
+                  subtitle={titleSubtitle}
+                  numberClassName="text-vellum-100"
+                />
+                <ProductPurchaseButton
+                  className="shrink-0 sm:mb-1"
+                  selectedVariant={selectedVariant}
+                  scentNumber={scentProfile.number}
+                />
+              </motion.div>
             </div>
           ) : (
-            <div className="min-h-lvh" aria-hidden />
+            <div className="h-full" aria-hidden />
           )}
         </div>
       </div>

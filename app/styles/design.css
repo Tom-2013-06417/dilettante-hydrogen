@@ -187,18 +187,21 @@ body:has(.main--static) {
 }
 
 /*
-  Product pages END on inkwell (VHS). Root cause of the bottom “wipe”:
-  Chrome’s collapsing bars change the visual viewport; whatever paint is on
-  html/body/the settled stack briefly shows through. If that paint is vellum
-  while the stage is inkwell, you see a cream wipe; if we JS-retint to inkwell,
-  you see a dark wipe. Permanent fix: product html/body/settled shell are
-  always inkwell. Vellum grain lives only on HeaderBar + the hero→scent
-  wrapper (see ProductPage) — never on the scroll-root. Do NOT use
-  overscroll-behavior (blocks pull-to-refresh).
+  Root cause of the bottom “wipe”: Chrome’s collapsing bars change the visual
+  viewport, and whatever paint is on html/body/the settled stack briefly shows
+  through. The fix is to match the scroll-root paint to whatever the page
+  actually ends on.
+
+  That used to be inkwell, because the document ended on the VHS block. It now
+  ends on the scent-anatomy stage — the scenes panel is a fixed overlay, not a
+  section — so these are vellum. Flat fill only, no grain: the texture belongs
+  on HeaderBar + the hero→scent wrapper (see ProductPage), never on the
+  scroll-root. Do NOT use overscroll-behavior (blocks pull-to-refresh); the
+  scenes gate already swallows bottom overscroll on its own.
 */
 html:has(.main--product),
 body:has(.main--product) {
-  background-color: rgb(8 13 8); /* inkwell-900 */
+  background-color: rgb(var(--vellum-paper-base));
   background-image: none;
 }
 
@@ -226,9 +229,13 @@ body:has(.main--product) {
   }
 }
 
-body:has(.main--home),
-body:has(.main--product) {
+body:has(.main--home) {
   background-color: rgb(14 22 14);
+  /* Contain 100vw blueprint bleeds without a horizontal scrollbar. */
+  overflow-x: clip;
+}
+
+body:has(.main--product) {
   /* Contain 100vw blueprint bleeds without a horizontal scrollbar. */
   overflow-x: clip;
 }

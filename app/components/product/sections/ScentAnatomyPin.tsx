@@ -1,28 +1,39 @@
-import {PlayIcon} from '@heroicons/react/24/solid';
-import {
-  motion,
-  useReducedMotion,
-  useScroll,
-  useTransform,
-  type TargetAndTransition,
-  type Transition,
-} from 'motion/react';
-import {useRef, type RefObject} from 'react';
+import {motion, useReducedMotion, useScroll, useTransform} from 'motion/react';
+import {type RefObject} from 'react';
 import {useLocation} from 'react-router';
 import {
   PRODUCT_FADE_DELAY,
   PRODUCT_FADE_DURATION,
 } from '~/components/home/sections/animations';
 import {isStackEnterState} from '~/lib/constants';
-import {smoothScrollTo} from '~/lib/smoothScroll';
-import {easeExit, leaveMark, PIN, SCRUB_END} from './scentAnatomyTimeline';
+import {PIN, SCRUB_END} from './scentAnatomyTimeline';
+import {useScenesGate} from './scenesGate';
+
+/**
+ * Both scroll cues on the product page share this outlined-box form.
+ * `rounded-none` is needed: tailwind.css's base layer gives every button a
+ * --radius-button corner.
+ */
+const CUE_BUTTON_CLASS =
+  "flex shrink-0 cursor-pointer items-center gap-x-2 rounded-none border border-inkwell-700 bg-transparent px-2.5 py-1.5 font-['config-mono-vf'] text-[14px] tracking-[0.06em] text-inkwell-700 sm:text-[15px]";
+
+function CueArrow() {
+  return (
+    <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M12 5v14M19 12l-7 7-7-7"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 
 /**
  * Starts at the bottom of the first fold. On scroll it rises and sticks at
- * ~20% from the top. Parent spans through the cube section.
- *
- * Leave matches the cube’s transform exit (SCRUB_END runway) — ease-in-out
- * lift in sync with the sticky shell, not native release.
+ * ~20% from the top, then fades out once the cube pins.
  */
 export function ScentAnatomyCue({
   scentSectionRef,
@@ -39,12 +50,6 @@ export function ScentAnatomyCue({
     offset: ['start end', `${SCRUB_END} start`],
   });
 
-  const mark = leaveMark();
-  const {scrollYProgress: leaveProgress} = useScroll({
-    target: scentSectionRef,
-    offset: [`${mark} end`, `${mark} start`],
-  });
-
   // Rests at 0.75, not 1 — the class below covers the reduced-motion path,
   // where no inline motion style is applied.
   const arrowOpacity = useTransform(
@@ -56,15 +61,9 @@ export function ScentAnatomyCue({
     v < 0.08 ? 'none' : 'auto',
   );
 
-  const leaveY = useTransform(leaveProgress, (p) => {
-    if (reducedMotion) return '0svh';
-    return `${-easeExit(p) * 100}svh`;
-  });
-
   return (
     <motion.div
       className="sticky top-[20%] z-20 flex w-full shrink-0 flex-col items-center justify-center gap-1 pt-4 pb-3 text-inkwell-700/45 sm:pt-5 sm:pb-4"
-      style={reducedMotion ? undefined : {y: leaveY}}
       initial={reducedMotion || stackEnter ? false : {opacity: 0}}
       animate={{opacity: 1}}
       transition={{
@@ -77,7 +76,7 @@ export function ScentAnatomyCue({
     >
       <motion.button
         type="button"
-        className="flex shrink-0 cursor-pointer items-center gap-x-2 rounded-none border border-inkwell-700 bg-transparent px-2.5 py-1.5 font-['config-mono-vf'] text-[14px] tracking-[0.06em] text-inkwell-700 opacity-75 transition-opacity hover:opacity-100 sm:text-[15px]"
+        className={`${CUE_BUTTON_CLASS} opacity-75 transition-opacity hover:opacity-100`}
         aria-label="Scroll to scent anatomy"
         style={
           reducedMotion
@@ -94,76 +93,29 @@ export function ScentAnatomyCue({
           });
         }}
       >
-        <svg
-          className="h-4 w-4 shrink-0"
-          viewBox="0 0 24 24"
-          fill="none"
-          aria-hidden
-        >
-          <path
-            d="M12 5v14M19 12l-7 7-7-7"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-        Info
+        <CueArrow />
+        Anatomy
       </motion.button>
     </motion.div>
   );
 }
 
-/**
- * GSAP CustomBounce–style pulse (endAtStart): one hit, then decaying
- * bounces that settle at rest before the next cycle.
- *
- * Module scope keeps the identity stable — the parent re-renders on every
- * scroll frame, and fresh objects here restart the keyframes (visible flicker).
- * @see https://www.gsap.com/docs/v3/Eases/
- */
-const BEAT_TRANSITION: Transition = {
-  duration: 2,
-  repeat: Infinity,
-  times: [0, 0.14, 0.28, 0.4, 0.5, 0.58, 0.66, 0.73, 0.82, 1],
-  // Slight ease between apexes so it feels physical, not stepped
-  ease: [
-    [0.22, 1, 0.36, 1], // punch up
-    [0.55, 0.05, 0.8, 0.4], // fall
-    [0.22, 1.2, 0.36, 1], // bounce 1
-    [0.55, 0.05, 0.75, 0.45],
-    [0.22, 1.15, 0.36, 1], // bounce 2
-    [0.55, 0.08, 0.7, 0.5],
-    [0.22, 1.1, 0.36, 1], // bounce 3
-    [0.45, 0.1, 0.55, 1], // settle
-    'linear', // rest
-  ],
-};
-
-const BEAT_KEYFRAMES: TargetAndTransition = {
-  scale: [1, 1.12, 0.94, 1.055, 0.975, 1.025, 0.99, 1.008, 1, 1],
-};
-
-const SPIN_TRANSITION: Transition = {
-  duration: 12,
-  repeat: Infinity,
-  ease: 'linear',
-};
-
-const SPIN_KEYFRAMES: TargetAndTransition = {rotate: 360};
+/** Width of the soft edge where the label crosses from inkwell to vellum. */
+const LABEL_FEATHER_PX = 14;
 
 /**
- * Play control on the scent-anatomy sticky shell. Fades in after the cube
- * explodes; scrolls to the scenes / VHS section.
+ * Terminal control on the scent-anatomy stage. Fades in once the cube
+ * explodes, then fills as the reader overscrolls the end of the page — see
+ * scenesGate. Deliberately unlabelled; the scenes panel is meant to arrive
+ * unannounced.
  */
 export function ScenesCue({
   scentSectionRef,
-  scenesSectionRef,
 }: {
   scentSectionRef: RefObject<HTMLElement | null>;
-  scenesSectionRef: RefObject<HTMLElement | null>;
 }) {
   const reducedMotion = useReducedMotion();
+  const {fill, cueRef, openScenes} = useScenesGate();
 
   const {scrollYProgress} = useScroll({
     target: scentSectionRef,
@@ -177,64 +129,56 @@ export function ScenesCue({
     [0, 1],
   );
 
-  const scrollToScenes = () => {
-    const el = scenesSectionRef.current;
-    if (el) smoothScrollTo(el, {duration: 1800});
-  };
-
-  // Only fire scroll if press started on this button (ignore scroll-gesture ends)
-  const pressRef = useRef(false);
+  const wash = useTransform(fill, (v) => `inset(0 ${(1 - v) * 100}% 0 0)`);
+  /**
+   * The vellum twin is faded in across a soft band that travels with the wash,
+   * rather than clipped hard at its edge. A hard edge crossing the glyphs reads
+   * as a rendering fault; tinting the whole label at once instead leaves
+   * whichever half hasn't caught up sitting at almost no contrast.
+   *
+   * Runs -6%…106% so the band is fully off the button at both ends.
+   */
+  const labelMask = useTransform(fill, (v) => {
+    const edge = -6 + v * 112;
+    return `linear-gradient(to right, #000 calc(${edge}% - ${LABEL_FEATHER_PX}px), transparent calc(${edge}% + ${LABEL_FEATHER_PX}px))`;
+  });
 
   return (
     <motion.div
       className="flex w-full items-center justify-center"
       style={reducedMotion ? {opacity: 1} : {opacity}}
     >
-      <div className="relative flex size-14 items-center justify-center">
-        {/* Dashed ring — steady moderate spin, no pulse */}
+      {/*
+        Opacity is driven inline on the wrapper above, so the button keeps a
+        working CSS hover. touch-manipulation avoids the mobile double-tap delay.
+      */}
+      <button
+        ref={cueRef}
+        type="button"
+        className={`${CUE_BUTTON_CLASS} relative touch-manipulation overflow-hidden opacity-75 transition-opacity hover:opacity-100`}
+        aria-label="Open scenes"
+        onClick={openScenes}
+      >
         <motion.span
-          className="pointer-events-none absolute inset-0 rounded-full border border-dashed border-inkwell-700/50"
+          className="pointer-events-none absolute inset-0 bg-inkwell-700"
+          style={{clipPath: wash}}
           aria-hidden
-          animate={reducedMotion ? undefined : SPIN_KEYFRAMES}
-          transition={reducedMotion ? undefined : SPIN_TRANSITION}
         />
-        {/*
-          Static hit target (pulse is on the inner visual only).
-          touch-manipulation avoids the mobile double-tap delay.
-        */}
-        <button
-          type="button"
-          className="relative flex size-14 cursor-pointer touch-manipulation items-center justify-center border-0 bg-transparent p-0"
-          aria-label="Play scenes"
-          onPointerDown={(e) => {
-            if (e.button === 0) pressRef.current = true;
-          }}
-          onPointerCancel={() => {
-            pressRef.current = false;
-          }}
-          onPointerUp={(e) => {
-            if (e.button !== 0 || !pressRef.current) return;
-            pressRef.current = false;
-            e.stopPropagation();
-            scrollToScenes();
-          }}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              scrollToScenes();
-            }
-          }}
+        {/* aria-hidden on the glyphs: "???" reads as punctuation noise to a
+            screen reader, and the button's own label already covers it. */}
+        <span className="relative z-10 flex items-center gap-x-2">
+          <CueArrow />
+          <span aria-hidden>???</span>
+        </span>
+        <motion.span
+          className="pointer-events-none absolute inset-0 z-10 flex items-center gap-x-2 px-2.5 py-1.5 text-vellum-100"
+          style={{maskImage: labelMask, WebkitMaskImage: labelMask}}
+          aria-hidden
         >
-          <motion.span
-            className="pointer-events-none flex size-12 items-center justify-center rounded-full bg-inkwell-700 text-vellum-100 will-change-transform"
-            aria-hidden
-            animate={reducedMotion ? undefined : BEAT_KEYFRAMES}
-            transition={reducedMotion ? undefined : BEAT_TRANSITION}
-          >
-            <PlayIcon className="size-5 translate-x-px" />
-          </motion.span>
-        </button>
-      </div>
+          <CueArrow />
+          <span>???</span>
+        </motion.span>
+      </button>
     </motion.div>
   );
 }

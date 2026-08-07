@@ -1,0 +1,154 @@
+/**
+ * Hand-authored static pages linked from SiteFooter. These are plain routes, not
+ * Shopify-managed content — see the note in SiteFooter about the policy links.
+ */
+export type FaqItem = {
+  question: string;
+  /** One string per paragraph. */
+  answer: string[];
+};
+
+export type StaticPage = {
+  /** Route path, also the key used to look the page up. */
+  path: string;
+  /** Mono heading rendered on the page. */
+  title: string;
+  /** Label used in the footer link list. */
+  navLabel: string;
+  paragraphs: string[];
+};
+
+const PLACEHOLDER = 'Copy for this page has not been written yet.';
+
+export const STATIC_PAGES: StaticPage[] = [
+  {
+    // Body comes from FAQ_ITEMS below — the route renders an accordion, not prose.
+    path: '/faq',
+    title: 'FAQ',
+    navLabel: 'FAQ',
+    paragraphs: [],
+  },
+  {
+    path: '/privacy-policy',
+    title: 'Privacy Policy',
+    navLabel: 'Privacy Policy',
+    paragraphs: [PLACEHOLDER],
+  },
+  {
+    path: '/refund-policy',
+    title: 'Refund Policy',
+    navLabel: 'Refund Policy',
+    paragraphs: [PLACEHOLDER],
+  },
+  {
+    path: '/terms-of-service',
+    title: 'Terms of Service',
+    navLabel: 'Terms of Service',
+    paragraphs: [PLACEHOLDER],
+  },
+  {
+    path: '/shipping',
+    title: 'Shipping',
+    navLabel: 'Shipping',
+    paragraphs: [PLACEHOLDER],
+  },
+  {
+    path: '/returns-and-cancellation',
+    title: 'Returns and Cancellation',
+    navLabel: 'Returns and Cancellation',
+    paragraphs: [PLACEHOLDER],
+  },
+];
+
+/**
+ * Question-and-answer copy for the /faq accordion. Each `answer` entry is one
+ * paragraph.
+ */
+export const FAQ_ITEMS: FaqItem[] = [
+  {
+    question: 'How are Dilettante perfumes made?',
+    answer: [
+      'Our perfumes are composed and made in-house and in small batches by the perfumer, Paulo Pascua.',
+    ],
+  },
+  {
+    question: 'Are Dilettante perfumes safe?',
+    answer: [
+      'All of our perfumes conform to the 51st Amendment of the IFRA (International Fragrance Association) Standards, a set of safety rules setting the maximum usage of materials in fine fragrances. That said, as with all fragrances, there is still a small risk of allergic reactions in some people. Please test on a small patch of skin before purchase.',
+      'While we don’t sell to Europe (yet), we also have a list of potential allergens per fragrance in compliance with the EU Cosmetics Regulation. You may find the list on the external packaging of your perfume or on the website.',
+      'We use sugarcane-extracted deodorized ethanol from BC Fragrances.',
+    ],
+  },
+  {
+    question: 'Are Dilettante perfumes all-natural?',
+    answer: [
+      'No, we use a combination of premium naturals (essential oils, absolutes, extracts, molecular distillations) and synthetic materials. We’ve realized that we tend to use more naturals than the typical perfumer though, hence the longer list of allergens.',
+      'A “clean” and “all-natural” perfume is misleading at best and fearmongering at worst. “Clean” is a buzzword that can mean anything, and contrary to popular belief, naturals are not inherently safe. We use naturals at safe levels though.',
+    ],
+  },
+  {
+    question: 'Are Dilettante perfumes vegan?',
+    answer: ['Yes. No animal by-product is used for the perfumes.'],
+  },
+  {
+    question: 'Do you ship to all countries?',
+    answer: [
+      'We only ship to the Philippines right now as we find our footing as a small business. Stay tuned!',
+      'For consignment inquiries, please reach out to hello@dilettanteperfumery.com.',
+    ],
+  },
+  {
+    question: 'Do you offer refills?',
+    answer: [
+      'We don’t, but if you wish to order a new bottle without the packaging, please reach out to us.',
+    ],
+  },
+  {
+    question: 'Do you accept returns?',
+    answer: [
+      'Unfortunately, we do not offer returns, unless there is a problem with the bottle or the box.',
+    ],
+  },
+  {
+    question: 'How are orders shipped?',
+    answer: [
+      'All local orders are fulfilled via J&T. Orders are fulfilled within 2–3 business days from ordering, except for those made during launch week, which will be fulfilled Aug 15th onwards.',
+      'Please contact us if you’d like to use a different courier.',
+    ],
+  },
+];
+
+/** Body copy for /about, in order. First person — this is Paulo's page. */
+export const ABOUT_PARAGRAPHS = [
+  'My name is Paulo, the founder and perfumer of Dilettante Perfumery.',
+  'I’ve been working in corporate/tech for the past decade, and I’m so happy I found perfumery as a creative outlet. I’ve spent the past couple of years pouring all my pent up creative energy into making wearable art. I even got a Level 2 Award at the Asian Perfumery Foundation!',
+  'I created Dilettante as a reminder to myself to embrace the joy and hard work of making art—to relish being a dilettante.',
+  'While Dilettante is a very personal project of mine, it would also not be possible without the help of my friends. The best art, really, is one borne out of community. Thank you to these wonderful artistes, and go work with them: they rock!',
+];
+
+/** Credits list rendered under the closing paragraph of /about. */
+export const ABOUT_CREDITS = [
+  'Lazir Caluya, brand designer and social media',
+  'Diego Dimaano, website designer, personality hire, everywoman',
+  'Tom Lopez, website developer, shopify god, tagaluto ng pancit canton',
+  'Denise Lopez, copywriter',
+  'Bimpoman and Gerald del Pilar, photographers',
+  'Ansis Sy, operations manager, beta tester, moral support, my partner',
+  'Nico, Gio, Nica, and Wigo, our four cats, welcome distractions',
+];
+
+/**
+ * Every path that renders the static template, including the standalone About
+ * page at /about. PageLayout uses this to decide which routes draw their own
+ * HeaderBar and get the `main--static` treatment.
+ */
+export const STATIC_PAGE_PATHS = new Set([
+  '/about',
+  ...STATIC_PAGES.map((page) => page.path),
+]);
+
+export function getStaticPage(path: string): StaticPage {
+  const page = STATIC_PAGES.find((candidate) => candidate.path === path);
+  if (!page) throw new Error(`Unknown static page: ${path}`);
+  return page;
+}

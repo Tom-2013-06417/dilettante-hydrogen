@@ -2,6 +2,7 @@ import {Image} from '@shopify/hydrogen';
 import {AnimatePresence, motion} from 'motion/react';
 import {useCallback, useEffect, useRef, useState, type FormEvent} from 'react';
 import {useFetcher, useNavigation, useRevalidator} from 'react-router';
+import {SubscribeForm} from '~/components/shared';
 import wordmarkVellum from '~/assets/design/wordmark-vellum.svg';
 import fig01 from '~/assets/design/fig-01.jpg';
 import fig02 from '~/assets/design/fig-02.jpg';
@@ -46,6 +47,34 @@ function CtaArrowIcon({className}: {className?: string}) {
         strokeWidth="1.25"
         strokeLinecap="square"
         strokeLinejoin="miter"
+      />
+    </svg>
+  );
+}
+
+function CtaSpinnerIcon({className}: {className?: string}) {
+  return (
+    <svg
+      className={className}
+      width="14"
+      height="14"
+      viewBox="0 0 14 14"
+      fill="none"
+      aria-hidden
+    >
+      <circle
+        cx="7"
+        cy="7"
+        r="5.25"
+        stroke="currentColor"
+        strokeOpacity="0.25"
+        strokeWidth="1.25"
+      />
+      <path
+        d="M12.25 7a5.25 5.25 0 0 0-5.25-5.25"
+        stroke="currentColor"
+        strokeWidth="1.25"
+        strokeLinecap="square"
       />
     </svg>
   );
@@ -253,104 +282,10 @@ export function TeaserPage({slides: productSlides}: TeaserPageProps) {
           aria-hidden
         />
 
-        <div className="w-full max-w-56 shrink-0 pb-[clamp(1svh,5svh,8svh)] sm:max-w-60">
-          {subscribed ? (
-            <div
-              className={`${CTA_SHELL} relative justify-center pr-9 text-center`}
-              role="status"
-            >
-              <span className="min-w-0 truncate">
-                {subscribe.data?.message ?? 'Subscribed'}
-              </span>
-              <span className="pointer-events-none absolute top-1/2 right-2.5 -translate-y-1/2 text-vellum-100">
-                <CtaCheckIcon />
-              </span>
-            </div>
-          ) : signupOpen ? (
-            <subscribe.Form
-              method="post"
-              action="/teaser"
-              onSubmit={onSubscribeSubmit}
-              className="relative w-full transition-opacity duration-200"
-            >
-              <input type="hidden" name="intent" value="subscribe" />
-              <label className="sr-only" htmlFor="teaser-email">
-                Email
-              </label>
-              <div className="relative">
-                <input
-                  ref={emailRef}
-                  id="teaser-email"
-                  name="email"
-                  type="email"
-                  inputMode="email"
-                  required
-                  autoComplete="email"
-                  autoCorrect="off"
-                  autoCapitalize="off"
-                  spellCheck={false}
-                  placeholder="Email address"
-                  disabled={busy}
-                  value={emailValue}
-                  onChange={(e) => {
-                    const next = e.target.value;
-                    setEmailValue(next);
-                    if (!next.trim()) {
-                      clearEmailErrors();
-                    } else if (emailError) {
-                      setEmailError(null);
-                    }
-                  }}
-                  onBlur={() => {
-                    if (emailValue.trim()) validateAndClearError(emailValue);
-                  }}
-                  onKeyDown={(e) => {
-                    if (e.key !== 'Enter') return;
-                    // Ensure Enter submits the fetcher form (arrow = same path).
-                    e.preventDefault();
-                    e.currentTarget.form?.requestSubmit();
-                  }}
-                  className={`${CTA_SHELL} m-0 min-w-0 pr-9 text-left outline-none placeholder:text-vellum-100/55`}
-                />
-                <button
-                  type="submit"
-                  disabled={busy}
-                  aria-label={subscribing ? 'Submitting' : 'Subscribe'}
-                  className="teaser-email-submit absolute top-1/2 right-2.5 flex h-5 w-5 -translate-y-1/2 cursor-pointer items-center justify-center border-0 p-0 text-vellum-100 disabled:opacity-70"
-                >
-                  {subscribing ? (
-                    <Spinner className="motion-safe:animate-[teaser-spin_0.7s_linear_infinite]" />
-                  ) : (
-                    <CtaArrowIcon />
-                  )}
-                </button>
-                <AnimatePresence>
-                  {subscribeError ? (
-                    <motion.p
-                      key="teaser-email-error"
-                      initial={{opacity: 0, y: -6}}
-                      animate={{opacity: 1, y: 0}}
-                      exit={{opacity: 0, y: -6}}
-                      transition={{duration: 0.15, ease: 'easeOut'}}
-                      className="pointer-events-none absolute top-[calc(100%+0.75rem)] right-0 left-0 m-0 text-center font-['trust-3a'] text-[11px] tracking-[0.02em] text-vellum-100/80"
-                      role="alert"
-                    >
-                      {subscribeError}
-                    </motion.p>
-                  ) : null}
-                </AnimatePresence>
-              </div>
-            </subscribe.Form>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setSignupOpen(true)}
-              className={`${CTA_SHELL} cursor-pointer justify-center transition-[border-color,opacity] duration-200 hover:border-vellum-100 hover:opacity-90`}
-            >
-              Join our mailing list
-            </button>
-          )}
-        </div>
+        <SubscribeForm
+          className="w-full max-w-[14rem] shrink-0 pb-[clamp(1svh,5svh,8svh)] sm:max-w-[15rem]"
+          disabled={busy}
+        />
       </div>
     </div>
   );

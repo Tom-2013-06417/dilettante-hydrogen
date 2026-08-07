@@ -1,7 +1,18 @@
 export const SITE_TITLE = 'Dilettante';
 
-/** Sole storefront collection until multi-collection UX ships. */
-export const DEBUT_COLLECTION_HANDLE = 'debut-collection';
+/** Social profiles linked from the footer. Both use the @dilettante.perfumery handle. */
+export const SOCIAL_LINKS = [
+  {
+    id: 'instagram',
+    label: 'Instagram',
+    href: 'https://www.instagram.com/dilettante.perfumery/',
+  },
+  {
+    id: 'tiktok',
+    label: 'Tiktok',
+    href: 'https://www.tiktok.com/@dilettante.perfumery',
+  },
+] as const;
 
 export function pageTitle(...parts: Array<string | undefined | null>) {
   const suffix = parts.filter(Boolean).join(' | ');

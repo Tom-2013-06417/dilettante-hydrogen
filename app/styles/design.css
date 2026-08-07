@@ -217,10 +217,29 @@ body:has(.main--product) {
   }
 }
 
-body:has(.main--home) {
+body:has(.main--home),
+body:has(.main--product) {
   background-color: rgb(14 22 14);
   /* Contain 100vw blueprint bleeds without a horizontal scrollbar. */
   overflow-x: clip;
+}
+
+/* The transition wrapper sizes itself from its absolutely-positioned content,
+   so give the static template a viewport floor to stretch into. */
+.main--static .page-transition {
+  min-height: 100svh;
+}
+
+/* Sticky footer: body is a flex column (reset.css), so main has to absorb the
+   slack or SiteFooter floats mid-viewport on short pages. */
+body > main {
+  flex: 1 1 auto;
+}
+
+/* Static template: paint html/body vellum so overscroll matches the page. */
+html:has(.main--static),
+body:has(.main--static) {
+  background-color: rgb(255 246 230);
 }
 
 /* Teaser: paint html/body inkwell so overscroll isn't white (app.css body is
@@ -249,14 +268,14 @@ body:has(.teaser-page) {
    Chrome iOS) often ignores author styles on the fill itself. Keep trying to
    match inkwell on engines that allow it, and always pad the submit control
    so the light arrow stays readable when the UA paints light blue. */
-.teaser-page #teaser-email {
+.subscribe-email {
   background-color: rgb(14 22 14);
 }
 
-.teaser-page #teaser-email:-webkit-autofill,
-.teaser-page #teaser-email:-webkit-autofill:hover,
-.teaser-page #teaser-email:-webkit-autofill:focus,
-.teaser-page #teaser-email:-webkit-autofill:active {
+.subscribe-email:-webkit-autofill,
+.subscribe-email:-webkit-autofill:hover,
+.subscribe-email:-webkit-autofill:focus,
+.subscribe-email:-webkit-autofill:active {
   -webkit-text-fill-color: rgb(255 246 230) !important;
   caret-color: rgb(255 246 230);
   color: rgb(255 246 230) !important;
@@ -270,13 +289,14 @@ body:has(.teaser-page) {
     color 99999s ease-out 0s;
 }
 
-.teaser-page .teaser-email-submit {
+.subscribe-submit {
   background-color: rgb(14 22 14);
 }
 
 .main--home,
 .main--product,
-.main--collection {
+.main--collection,
+.main--static {
   margin: 0;
   max-width: none;
   padding: 0;

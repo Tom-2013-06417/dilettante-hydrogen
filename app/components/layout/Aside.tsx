@@ -297,13 +297,7 @@ Aside.Provider = function AsideProvider({children}: {children: ReactNode}) {
     if (!pendingCartOpen) return;
     pendingCartOpen = false;
     open('cart');
-  }, [
-    location.hash,
-    location.pathname,
-    location.search,
-    navigate,
-    open,
-  ]);
+  }, [location.hash, location.pathname, location.search, navigate, open]);
 
   const value = useMemo(
     () => ({

@@ -484,7 +484,9 @@ export function PageTransition({
   return (
     <ClientOnly
       fallback={
-        <PageTransitionStatic immersive={false}>{children}</PageTransitionStatic>
+        <PageTransitionStatic immersive={false}>
+          {children}
+        </PageTransitionStatic>
       }
     >
       <PageTransitionAnimated nav={nav}>{children}</PageTransitionAnimated>

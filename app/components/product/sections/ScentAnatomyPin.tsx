@@ -19,7 +19,12 @@ const CUE_BUTTON_CLASS =
 
 function CueArrow() {
   return (
-    <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden>
+    <svg
+      className="h-4 w-4 shrink-0"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden
+    >
       <path
         d="M12 5v14M19 12l-7 7-7-7"
         stroke="currentColor"

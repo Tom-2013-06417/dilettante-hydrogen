@@ -286,7 +286,7 @@ export function TeaserPage({slides: productSlides}: TeaserPageProps) {
         />
 
         <SubscribeForm
-          className="w-full max-w-[14rem] shrink-0 pb-[clamp(1svh,5svh,8svh)] sm:max-w-[15rem]"
+          className="w-full max-w-56 shrink-0 pb-[clamp(1svh,5svh,8svh)] sm:max-w-60"
           disabled={busy}
         />
       </div>

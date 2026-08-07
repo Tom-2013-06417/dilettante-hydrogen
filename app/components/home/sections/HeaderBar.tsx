@@ -112,7 +112,7 @@ function CartBagButton({count}: {count: number}) {
       <ShoppingBagIcon className="relative h-5 w-5" aria-hidden="true" />
       {count > 0 ? (
         <span
-          className="absolute -right-[4px] -top-[2px] font-['config-mono-vf'] text-[10px] leading-none text-inkwell-700"
+          className="absolute -right-1 -top-0.5 font-['config-mono-vf'] text-[10px] leading-none text-inkwell-700"
           aria-hidden="true"
         >
           {count}

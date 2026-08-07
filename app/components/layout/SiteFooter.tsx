@@ -91,7 +91,7 @@ export function SiteFooter() {
   return (
     <footer className="site-footer w-full bg-inkwell-800 font-['trust-3a'] text-vellum-100">
       <PageContainer>
-        <div className="flex flex-col items-center gap-y-3 pt-[18px] pb-[12px]">
+        <div className="flex flex-col items-center gap-y-3 pt-4.5 pb-3">
           <nav aria-label="Footer">
             <ul className={`${LIST_CLASS} justify-center gap-x-6`}>
               {PAGE_LINKS.map((link) => (

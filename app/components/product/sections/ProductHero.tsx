@@ -167,7 +167,10 @@ export function ProductHero({
         </div>
       </IntroFade>
 
-      <IntroFade instant={instantIntro} className="flex min-h-0 flex-1 flex-col">
+      <IntroFade
+        instant={instantIntro}
+        className="flex min-h-0 flex-1 flex-col"
+      >
         <ProductBottleBand
           title={title}
           image={image}

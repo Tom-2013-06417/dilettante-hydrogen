@@ -1,9 +1,6 @@
 import {Suspense} from 'react';
 import {Await, NavLink, useAsyncValue, useLocation} from 'react-router';
-import {
-  type CartViewPayload,
-  useAnalytics,
-} from '@shopify/hydrogen';
+import {type CartViewPayload, useAnalytics} from '@shopify/hydrogen';
 import type {HeaderQuery, CartApiQueryFragment} from 'storefrontapi.generated';
 import {useCartItemCount} from '~/components/cart';
 import {cartOpenHref, parentNavHref} from '~/lib/constants';

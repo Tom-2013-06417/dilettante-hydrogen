@@ -366,14 +366,7 @@ export function CartLineUpdatesProvider({
       getLineError,
       isCartBusy: mutating || hasDrafts,
     }),
-    [
-      cancelQuantity,
-      drafts,
-      getLineError,
-      hasDrafts,
-      mutating,
-      setQuantity,
-    ],
+    [cancelQuantity, drafts, getLineError, hasDrafts, mutating, setQuantity],
   );
 
   return (

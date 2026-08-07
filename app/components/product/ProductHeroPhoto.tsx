@@ -5,8 +5,7 @@ import {ProductHeroImageVeil} from '~/components/product/ProductHeroImageVeil';
 import {fetchPriorityAttr} from '~/lib/fetchPriority';
 
 /** Layout width hint for the top hero band (title overlay). */
-export const HERO_BAND_IMAGE_SIZES =
-  '(min-width: 768px) 680px, 100vw';
+export const HERO_BAND_IMAGE_SIZES = '(min-width: 768px) 680px, 100vw';
 
 /** Side strip beside the short description — much narrower. */
 export const HERO_STRIP_IMAGE_SIZES = '(min-width: 768px) 200px, 30vw';

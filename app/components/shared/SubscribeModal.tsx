@@ -95,7 +95,7 @@ export function SubscribeModal({open, onClose}: SubscribeModalProps) {
             it centres the card on 40svh rather than mid-viewport, sitting a
             little above true centre.
           */}
-          <div className="mt-[40svh] w-full max-w-[32rem] -translate-y-1/2">
+          <div className="mt-[40svh] w-full max-w-lg -translate-y-1/2">
             <motion.div
               role="dialog"
               aria-modal

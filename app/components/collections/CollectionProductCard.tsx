@@ -70,7 +70,7 @@ export function CollectionProductCard({
         {number ? (
           <div className="my-2 inline-flex items-center gap-1 text-[11px] font-bold tracking-[0.02em] lg:text-[16px]">
             No.
-            <span className="flex h-3.5 w-7 items-center justify-center rounded-[50%] bg-inkwell-700 font-['config-mono-vf'] text-[11px] font-medium leading-none text-vellum-100 [font-variant-numeric:slashed-zero] lg:h-[19px] lg:w-[38px] lg:text-[16px]">
+            <span className="flex h-3.5 w-7 items-center justify-center rounded-[50%] bg-inkwell-700 font-['config-mono-vf'] text-[11px] font-medium leading-none text-vellum-100 [font-variant-numeric:slashed-zero] lg:h-4.75 lg:w-9.5 lg:text-[16px]">
               {number}
             </span>
           </div>

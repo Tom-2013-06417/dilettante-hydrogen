@@ -54,7 +54,7 @@ export function ProductPage({
         */}
         <div className="relative z-10 bg-vellum-paper">
           {/* Full-width clip so 100vw hero rule bleeds don't spawn a scrollbar;
-              keep this off the sticky parent above (WebKit sticky + clip jitter). */}
+              keep this off the sticky parent above (WebKit + clip jitter). */}
           <div className="flex min-h-[calc(100svh-5rem-var(--stack-header-h,3rem))] flex-col overflow-x-clip">
             <ProductHero
               title={title}

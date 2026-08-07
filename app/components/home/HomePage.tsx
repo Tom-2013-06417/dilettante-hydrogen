@@ -74,7 +74,7 @@ export function HomePage() {
               pages' CTAs can't drift apart.
             */}
             <motion.div
-              className="w-full max-w-[14rem] sm:max-w-[15rem]"
+              className="w-full max-w-56 sm:max-w-60"
               initial={reducedMotion ? false : {opacity: 0}}
               animate={{opacity: 1}}
               transition={

@@ -46,7 +46,7 @@ This is app-level only (Shopify storefront password protection stays off so the 
 While gated, unlock the full site for yourself by setting the cookie in DevTools:
 
 ```js
-document.cookie = "site_preview=YOUR_TOKEN; path=/; max-age=2592000"
+document.cookie = 'site_preview=YOUR_TOKEN; path=/; max-age=2592000';
 ```
 
 Local defaults are in `.env` / `.env.example`. On Oxygen, set `PUBLIC_SITE_LAUNCHED=false` and `SITE_PREVIEW_TOKEN` in the environment.

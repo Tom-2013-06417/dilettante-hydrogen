@@ -48,7 +48,9 @@ export function cartOpenHref(path: string = CART_OPEN_REDIRECT_PATH) {
 
 export function shouldOpenCartFromSearch(search: string) {
   const value = new URLSearchParams(search).get(CART_OPEN_SEARCH_PARAM);
-  return value === CART_OPEN_SEARCH_VALUE || value === 'open' || value === 'true';
+  return (
+    value === CART_OPEN_SEARCH_VALUE || value === 'open' || value === 'true'
+  );
 }
 
 /**

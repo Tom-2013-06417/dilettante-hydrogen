@@ -173,9 +173,7 @@ export function CartLineFeedbackProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [lineErrors, setLineErrorsState] = useState<Record<string, string>>(
-    {},
-  );
+  const [lineErrors, setLineErrorsState] = useState<Record<string, string>>({});
   const [draftQuantities, setDraftQuantitiesState] = useState<
     Record<string, number>
   >({});

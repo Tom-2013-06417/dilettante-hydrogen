@@ -1,5 +1,6 @@
 import {Image} from '@shopify/hydrogen';
 import type {ProductVariantFragment} from 'storefrontapi.generated';
+import bottleImage from '~/assets/design/bottle_grain.png';
 import wordmarkInkwell from '~/assets/design/wordmark-inkwell.png';
 import {BlueprintRule} from '~/components/product/BlueprintRule';
 import {
@@ -8,9 +9,7 @@ import {
 } from '~/components/product/ProductHeroPhoto';
 import type {ScentProfile} from '~/lib/scentProfile';
 
-/** Content > Files upload on the Dilettante Shopify store */
-const BOTTLE_IMAGE =
-  'https://cdn.shopify.com/s/files/1/0717/5258/1210/files/bottle_1.png';
+const BOTTLE_IMAGE = bottleImage;
 
 type ProductBottleBandProps = {
   title: string;
@@ -78,7 +77,7 @@ export function ProductBottleBand({
         />
 
         <div className="flex shrink-0 flex-col gap-3 px-8 py-4">
-          <span className="max-w-[36ch] font-['trust-3a'] text-[13px] italic leading-[1.4] tracking-[0.02em] text-inkwell-700/70 lg:text-[16px]">
+          <span className="max-w-[36ch] font-['trust-3a'] text-[13px] italic leading-[1.6] tracking-[0.02em] text-inkwell-700/70 lg:text-[16px]">
             {scentProfile.shortDescription}
           </span>
           {scentProfile.heroNotes.length ? (
@@ -94,13 +93,13 @@ export function ProductBottleBand({
 
       {/* Clip only the bottle overhang — keep bleed rules outside this box. */}
       <div className="pointer-events-none absolute inset-0 z-2 overflow-x-clip">
-        <div className="absolute bottom-0 left-0 h-1/2 max-h-44 aspect-187/178 translate-x-[-25%] translate-y-[5%]">
+        <div className="absolute bottom-0 left-0 h-[65%] max-h-60 aspect-1000/1236 -translate-x-[8%] translate-y-[12%]">
           <Image
             alt={`${title} bottle`}
             className="h-full w-full object-contain object-bottom-left"
             src={BOTTLE_IMAGE}
-            width={187}
-            height={178}
+            width={1000}
+            height={1236}
             sizes="50vw"
           />
         </div>

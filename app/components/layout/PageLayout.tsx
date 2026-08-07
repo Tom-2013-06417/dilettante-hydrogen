@@ -33,6 +33,7 @@ export function PageLayout({
   const isHome = location.pathname === '/';
   const isProduct = location.pathname.startsWith('/products/');
   const isCollection = /^\/collections\/?$/.test(location.pathname);
+  const isStatic = STATIC_PAGE_PATHS.has(location.pathname);
   // Immersive pages are full-bleed and skip the page transition.
   const isImmersive = isHome || isProduct || isCollection;
   const isStackRoute = isProduct || isCollection;
@@ -42,7 +43,6 @@ export function PageLayout({
   // Home is a JS-driven snap deck of h-svh sections; trailing content would sit
   // outside that scroll logic, so it's the one route without a footer.
   const showFooter = !isHome;
-
 
   return (
     <Aside.Provider>

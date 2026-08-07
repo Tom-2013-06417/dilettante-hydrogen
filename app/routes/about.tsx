@@ -16,15 +16,30 @@ const [ABOUT_LEAD, ...ABOUT_BODY] = ABOUT_PARAGRAPHS;
 /**
  * /about has its own layout rather than StaticPageShell: the portrait sits
  * flush under the header and bleeds off the right edge, with the title and
- * lead paragraph bottom-aligned to it in the column alongside.
+ * lead paragraph bottom-aligned to it in the column alongside. A vertical
+ * blueprint rule runs the portrait's right edge from the header to the footer.
  */
 export default function AboutRoute() {
   return (
-    <div className="about-page static-page flex w-full flex-col bg-vellum-paper font-['trust-3a'] text-inkwell-700">
+    <div className="about-page static-page flex min-h-full w-full flex-col bg-vellum-paper font-['trust-3a'] text-inkwell-700">
       <HeaderBar />
 
-      <section className="grow text-[14px] tracking-[0.02em] [&_p]:leading-6! sm:text-[15px]">
-        <PageContainer>
+      {/*
+        Full-height column under the header so the portrait's right-edge rule
+        can run from the header's bottom rule straight to the footer.
+        `div`, not `section` — reset.css adds bottom padding to every section.
+      */}
+      <div className="relative grow text-[14px] tracking-[0.02em] [&_p]:leading-6! sm:text-[15px]">
+        <PageContainer className="relative h-full">
+          {/*
+            Right edge of the portrait column (= page-container's right edge;
+            the image cancels the inset with -mr). Spans the whole column.
+          */}
+          <BlueprintRule
+            orientation="v"
+            className="pointer-events-none absolute inset-y-0 right-0 z-10 text-inkwell-700/35"
+          />
+
           {/*
             No top padding — the portrait is meant to butt against the header's
             bottom rule. `items-stretch` + `justify-end` on the left cell is
@@ -40,19 +55,14 @@ export default function AboutRoute() {
             </div>
 
             {/*
-              Bottom and left rules only — the top meets the header's rule and
-              the right runs off-screen. BlueprintRule rather than a dashed
-              border so the dash rhythm matches the header exactly.
+              Bottom rule only — the top meets the header's rule, the right is
+              the full-height rule above, and the left stays open to the lead.
             */}
             <div className="relative -mr-4 aspect-square overflow-hidden sm:-mr-8">
               <img
                 src={aboutPortrait}
                 alt="Paulo behind the Dilettante Perfumery stand, the five debut scents laid out in front of the display board."
                 className="h-full w-full rounded-none object-cover object-[50%_35%]"
-              />
-              <BlueprintRule
-                orientation="v"
-                className="pointer-events-none absolute inset-y-0 left-0 text-inkwell-700/35"
               />
               <BlueprintRule
                 orientation="h"
@@ -76,7 +86,7 @@ export default function AboutRoute() {
             </ul>
           </div>
         </PageContainer>
-      </section>
+      </div>
     </div>
   );
 }

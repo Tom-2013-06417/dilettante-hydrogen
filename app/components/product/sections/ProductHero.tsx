@@ -71,6 +71,15 @@ export function ProductHero({
 
   return (
     <div className="design-content-shell relative z-1 flex min-h-0 w-full flex-1 flex-col text-inkwell-700">
+      {/*
+        Desktop only: right edge of the hero image, from under the stack
+        HeaderBar down to ProductBottleBand's bottom rule (above SCENT ANATOMY).
+      */}
+      <BlueprintRule
+        orientation="v"
+        className="pointer-events-none absolute inset-y-0 right-0 z-10 hidden text-inkwell-700/35 md:block"
+      />
+
       {/* Warm the retina cart thumbnail for Purchase → drawer. Use prefetch
             (not preload): imagesrcset is preload-only, and an unused preload
             triggers Chrome's "preloaded but not used" warning. */}
@@ -143,13 +152,14 @@ export function ProductHero({
 
       <IntroFade instant={instantIntro}>
         <div className="relative flex min-h-20 w-full shrink-0">
+          {/* Starts at the left V rule (continued from the navbar), not the shell edge. */}
           <BlueprintRule
             orientation="h"
-            className="blueprint-rule-h-bleed absolute top-0 text-inkwell-700/35"
+            className="absolute top-0 right-0 left-4 text-inkwell-700/35 sm:left-8"
           />
           <BlueprintRule
             orientation="h"
-            className="blueprint-rule-h-bleed absolute bottom-0 text-inkwell-700/35"
+            className="absolute inset-x-0 bottom-0 text-inkwell-700/35"
           />
 
           <div className="relative flex w-[60%] flex-col items-start justify-center gap-[0.3rem] px-6 sm:px-10">

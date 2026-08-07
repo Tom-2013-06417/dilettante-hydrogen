@@ -63,10 +63,10 @@ export function ProductBottleBand({
             {scentProfile.olfactoryFamily.join(' · ')}
           </span>
         ) : null}
-        {/* Starts at the image/text split; bleeds only to the right screen edge. */}
+        {/* Starts at the image/text split; stops at the content shell edge. */}
         <BlueprintRule
           orientation="h"
-          className="blueprint-rule-h-bleed-right absolute bottom-0 z-1 text-inkwell-700/35"
+          className="absolute inset-x-0 bottom-0 z-1 text-inkwell-700/35"
         />
       </div>
 
@@ -91,7 +91,7 @@ export function ProductBottleBand({
         <div className="min-h-0 flex-1" aria-hidden />
       </div>
 
-      {/* Clip only the bottle overhang — keep bleed rules outside this box. */}
+      {/* Clip only the bottle overhang — keep the bottom rule outside this box. */}
       <div className="pointer-events-none absolute inset-0 z-2 overflow-x-clip">
         <div className="absolute bottom-0 left-0 h-[65%] max-h-60 aspect-1000/1236 -translate-x-[8%] translate-y-[12%]">
           <Image
@@ -107,7 +107,7 @@ export function ProductBottleBand({
 
       <BlueprintRule
         orientation="h"
-        className="blueprint-rule-h-bleed absolute bottom-0 z-1 text-inkwell-700/35"
+        className="absolute inset-x-0 bottom-0 z-1 text-inkwell-700/35"
       />
     </div>
   );

@@ -152,12 +152,12 @@
 */
 :root {
   --vellum-paper-size: 500px;
-  --vellum-paper-texture: url('/vellum-test-1.jpg');
+  --vellum-paper-texture: url('/vellum-paper-texture.jpg');
   --vellum-paper-wash: 0.3;
   --vellum-paper-base: 255 246 230;
 
   --vellusum-size: 250px;
-  --vellusum-texture: url('/vellum-test-1.jpg');
+  --vellusum-texture: url('/vellum-paper-texture.jpg');
   --vellusum-wash: 0.5;
   --vellusum-base: 255 246 230;
 }

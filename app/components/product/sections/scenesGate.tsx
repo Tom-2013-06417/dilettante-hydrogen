@@ -13,18 +13,30 @@ import {
 
 /**
  * Overscroll past the document bottom, in px, needed to fill the scenes cue.
- * Roughly two trackpad flicks — long enough to read as deliberate, short
- * enough that nobody thinks the page is stuck.
+ * Deliberately long, and deliberately asymmetric with the exit below:
+ * committing to the scenes panel should cost more than turning around and
+ * heading back up to the hero.
  */
-const FILL_DISTANCE_PX = 460;
+const FILL_DISTANCE_PX = 700;
+
+/** Scrolling up empties the cue this many times faster than filling it. */
+const DRAIN_MULTIPLIER = 2.5;
 
 /**
  * An upward gesture snaps the cue back to empty (and closes the panel) once it
  * covers this much distance at this speed. Both thresholds matter: distance
  * alone fires on a slow drag, speed alone fires on a single stray wheel tick.
+ * Kept cheap on purpose — leaving is the easy direction.
  */
-const RESET_MIN_TRAVEL_PX = 48;
-const RESET_VELOCITY_PX_PER_MS = 1.1;
+const RESET_MIN_TRAVEL_PX = 32;
+const RESET_VELOCITY_PX_PER_MS = 0.8;
+
+/**
+ * Hard cap on how long a dismissal may keep eating a gesture. Trackpad
+ * momentum fires for well over a second with no gap between events, and
+ * without this the page stays frozen for the whole coast.
+ */
+const SWALLOW_MAX_MS = 320;
 
 /** Slack for "the document is scrolled to the bottom". */
 const BOTTOM_EPSILON_PX = 6;
@@ -114,6 +126,7 @@ export function ScenesGateProvider({children}: {children: ReactNode}) {
      * a viewport above the cue they just came from.
      */
     let swallowRestOfGesture = false;
+    let swallowStartedAt = 0;
 
     const atBottom = () =>
       document.documentElement.scrollHeight -
@@ -128,7 +141,7 @@ export function ScenesGateProvider({children}: {children: ReactNode}) {
     const drive = (dy: number, now: number): boolean => {
       const continuing = now - lastEventAt <= GESTURE_GAP_MS;
       if (swallowRestOfGesture) {
-        if (continuing) {
+        if (continuing && now - swallowStartedAt < SWALLOW_MAX_MS) {
           lastEventAt = now;
           return true;
         }
@@ -155,12 +168,15 @@ export function ScenesGateProvider({children}: {children: ReactNode}) {
           // looking at the cue. A flick that only emptied the cue is let
           // through — scrolling back up the page is what they asked for.
           swallowRestOfGesture = wasOpen;
+          swallowStartedAt = now;
           return wasOpen;
         }
 
         // While open the page must not creep behind the panel.
         if (openRef.current) return true;
-        fill.set(Math.max(0, fill.get() + dy / FILL_DISTANCE_PX));
+        fill.set(
+          Math.max(0, fill.get() + (dy * DRAIN_MULTIPLIER) / FILL_DISTANCE_PX),
+        );
         return false;
       }
 

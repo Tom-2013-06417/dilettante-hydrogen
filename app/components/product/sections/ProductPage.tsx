@@ -158,7 +158,7 @@ function ScenesOverlay({
       className="fixed inset-0 z-40 overflow-hidden bg-inkwell-900"
       initial={false}
       animate={{clipPath: open ? 'inset(0px 0px 0px 0px)' : collapsed}}
-      transition={{duration: 0.26, ease: [0.16, 1, 0.3, 1]}}
+      transition={{duration: 0.16, ease: [0.16, 1, 0.3, 1]}}
       aria-hidden={!open}
     >
       {/*

@@ -17,7 +17,7 @@ import {
   VHS_PLATE_WIDTH,
   type VhsSlide,
 } from '~/lib/vhsMetafields';
-import {ProductTitle} from './ProductTitle';
+import {ProductNumberBadge, ProductTitle} from './ProductTitle';
 
 const AUTO_ADVANCE_MS = 4000;
 /** Exit crop + enter slam share the same gate speed. */
@@ -557,13 +557,23 @@ export function VhsSection({
                 animate={{opacity: chromeReady ? 1 : 0}}
                 transition={{duration: 0.4, ease: 'easeOut'}}
               >
-                <p
-                  className="m-0 font-['trust-3a'] text-[12px] font-medium tracking-[0.04em] text-vellum-100 tabular-nums sm:text-[13px]"
+                {/*
+                  The scent number takes the counter's slot — the tick marks
+                  beside it already show which scene is up. The live region
+                  keeps that readable to a screen reader, which the ticks alone
+                  would not announce.
+                */}
+                <span
+                  className="text-vellum-100"
                   style={{filter: CHROME_GLOW}}
-                  aria-live="polite"
                 >
-                  <span className="sr-only">Slideshow</span>
-                  {label}
+                  <ProductNumberBadge
+                    number={scentProfile.number}
+                    variant="plain"
+                  />
+                </span>
+                <p className="sr-only m-0" aria-live="polite">
+                  Scene {label} of {slideCount}
                 </p>
                 {/* Fixed-height slot so grow/shrink never shifts the plate below. */}
                 <ol className="m-0 flex h-7 list-none items-end gap-1.5 p-0">
@@ -603,13 +613,17 @@ export function VhsSection({
                 column on short viewports and pushes Purchase off screen.
               */}
               <motion.div
-                className="relative flex min-h-0 w-full flex-1 justify-center"
+                className="relative flex min-h-0 w-full flex-1 items-center justify-center"
                 initial={false}
                 animate={{opacity: plateReady ? 1 : 0}}
                 transition={{duration: 0.35, ease: 'easeOut'}}
               >
+                {/* max-h as a share of the slot, not an svh value: the slot is
+                    what is left after the chrome and title rows, and that
+                    differs enough between phone and desktop that a fixed
+                    viewport unit over- or under-shoots at one end. */}
                 <div
-                  className="relative aspect-2/3 h-full w-auto max-w-full touch-pan-y select-none [&_img]:[-webkit-user-drag:none]"
+                  className="relative aspect-2/3 h-full max-h-[88%] w-auto max-w-full touch-pan-y select-none [&_img]:[-webkit-user-drag:none]"
                   onPointerDown={onPlatePointerDown}
                   onPointerMove={onPlatePointerMove}
                   onPointerUp={endPlatePointer}
@@ -645,29 +659,31 @@ export function VhsSection({
               </motion.div>
 
               {/*
-                Same title treatment as the hero band. text-inkwell-700 has to
-                be restated: the plate is vellum, and the panel's own
-                text-vellum-100 would otherwise paint the wordmark invisible.
-              */}
-              {/*
-                Stacked below sm: the title is whitespace-nowrap by design and
-                bleeds past the column exactly as it does on the hero, which
-                would otherwise shove Purchase off the right edge.
+                Hero type, no furniture: the vellum plate and its dashed rules
+                belong on paper, and the No. badge has moved up to the chrome
+                row. Centred stack — the title is whitespace-nowrap by design,
+                so a side-by-side row shoves Purchase off the edge on mobile.
               */}
               <motion.div
-                className="mt-5 flex w-full shrink-0 flex-col items-start gap-3 overflow-visible text-inkwell-700 sm:flex-row sm:items-end sm:justify-between sm:gap-4"
+                /* gap-9 rather than something smaller: the title runs at
+                   leading-[0.72], so its box bottom sits a good 10px above the
+                   descenders and the measured gap reads much tighter than it
+                   is. mt is the compensating pull back toward the plate. */
+                className="mt-5 flex w-full shrink-0 flex-col items-center gap-9 overflow-visible text-center"
                 initial={false}
                 animate={{opacity: chromeReady ? 1 : 0}}
                 transition={{duration: 0.4, ease: 'easeOut', delay: 0.06}}
               >
                 <ProductTitle
+                  variant="bare"
+                  showNumber={false}
                   number={scentProfile.number}
                   title={title}
                   subtitle={titleSubtitle}
-                  numberClassName="text-vellum-100"
                 />
                 <ProductPurchaseButton
-                  className="shrink-0 sm:mb-1"
+                  className="shrink-0"
+                  tone="vellum"
                   selectedVariant={selectedVariant}
                   scentNumber={scentProfile.number}
                 />

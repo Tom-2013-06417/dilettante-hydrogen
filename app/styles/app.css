@@ -407,13 +407,14 @@ main {
 }
 
 /*
-  Product settled shell = solid inkwell, always. Matches VHS so chrome
-  show/hide + rubber-band cannot flash vellum. Hero/scent grain is on the
+  Product settled shell = flat vellum. The page ends on the scent-anatomy stage
+  now (the scenes panel is a fixed overlay), so this matches it and chrome
+  show/hide + rubber-band cannot flash a dark band. Hero/scent grain is on the
   ProductPage wrapper, not here.
 */
 .main--product
   .page-transition-content--stack.page-transition-content--stack-settled {
-  background-color: rgb(8 13 8); /* inkwell-900 */
+  background-color: rgb(var(--vellum-paper-base));
   background-image: none;
 }
 

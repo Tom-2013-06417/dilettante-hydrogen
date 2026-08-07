@@ -6,9 +6,8 @@ import type {
   ProductVariantFragment,
 } from 'storefrontapi.generated';
 import wordmarkInkwell from '~/assets/design/wordmark-inkwell.png';
-import {AddToCartButton} from '~/components/cart';
-import {useAside} from '~/components/layout';
 import {BlueprintRule} from '~/components/product/BlueprintRule';
+import {ProductPurchaseButton} from '~/components/product/ProductPurchaseButton';
 import {IntroFade} from '~/components/product/IntroFade';
 import {IntroTitleSlide} from '~/components/product/IntroTitleSlide';
 import {
@@ -22,23 +21,6 @@ import type {ScentProfile} from '~/lib/scentProfile';
 import {shopifyCdnUrl, CART_LINE_IMAGE_SIZE} from '~/lib/cartLineImage';
 import {ProductBottleBand} from './ProductBottleBand';
 import {ProductTitle} from './ProductTitle';
-
-/** Merge product-page scent number onto the variant so optimistic cart lines
- *  match the shape the cart query eventually returns. */
-function withCartLineScentNumber<T extends {product?: object | null}>(
-  variant: T,
-  scentNumber: string,
-): T {
-  const value = scentNumber.trim();
-  if (!value) return variant;
-  return {
-    ...variant,
-    product: {
-      ...variant.product,
-      scentNumber: {value},
-    },
-  };
-}
 
 type ProductHeroProps = {
   title: string;
@@ -61,7 +43,6 @@ export function ProductHero({
   scentProfile,
 }: ProductHeroProps) {
   const reducedMotion = useReducedMotion();
-  const {open} = useAside();
   const {state} = useLocation();
   // Stack push already animates the page in — skip nested hero intros.
   const instantIntro = isStackEnterState(state);
@@ -178,31 +159,10 @@ export function ProductHero({
           </div>
 
           <div className="relative flex w-[40%] items-center justify-center">
-            <AddToCartButton
-              className="cursor-pointer border-0 bg-[#152015] px-5 py-2.5 font-['config-mono-vf'] text-[13px] font-bold uppercase tracking-[0.08em] text-vellum-100 transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 sm:px-6 sm:py-3 sm:text-[14px]"
-              disabled={!selectedVariant?.availableForSale}
-              onClick={() => open('cart')}
-              lines={
-                selectedVariant
-                  ? [
-                      {
-                        merchandiseId: selectedVariant.id,
-                        quantity: 1,
-                        // Optimistic cart uses selectedVariant as the line's
-                        // merchandise. Stitch scentNumber from the already-
-                        // loaded product page so "No." is present on first
-                        // paint and the thumbnail does not resize later.
-                        selectedVariant: withCartLineScentNumber(
-                          selectedVariant,
-                          scentProfile.number,
-                        ),
-                      },
-                    ]
-                  : []
-              }
-            >
-              {selectedVariant?.availableForSale ? 'Purchase' : 'Sold out'}
-            </AddToCartButton>
+            <ProductPurchaseButton
+              selectedVariant={selectedVariant}
+              scentNumber={scentProfile.number}
+            />
           </div>
         </div>
       </IntroFade>

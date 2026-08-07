@@ -59,9 +59,27 @@ function TiktokIcon({className}: {className?: string}) {
   );
 }
 
+/** Envelope drawn to match the Instagram mark's thin-stroke language. */
+function EmailIcon({className}: {className?: string}) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      aria-hidden
+    >
+      <rect x="2.75" y="5" width="18.5" height="14" rx="2.75" />
+      <path d="m3.75 7.25 8.25 5.75 8.25-5.75" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 const SOCIAL_ICONS = {
   instagram: InstagramIcon,
   tiktok: TiktokIcon,
+  email: EmailIcon,
 };
 
 /**
@@ -100,12 +118,15 @@ export function SiteFooter() {
           <ul className={`${LIST_CLASS} justify-center gap-x-4`}>
             {SOCIAL_LINKS.map((link) => {
               const Icon = SOCIAL_ICONS[link.id];
+              // mailto: hands off to the mail client — a new tab would leave a
+              // blank window behind, and there's no opener to sever.
+              const newTab = link.href.startsWith('http');
               return (
                 <li key={link.href}>
                   <a
                     href={link.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    target={newTab ? '_blank' : undefined}
+                    rel={newTab ? 'noopener noreferrer' : undefined}
                     aria-label={link.label}
                     className={ICON_LINK_CLASS}
                   >

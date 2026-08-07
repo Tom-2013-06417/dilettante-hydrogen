@@ -3,7 +3,13 @@ export const SITE_TITLE = 'Dilettante';
 /** Sole storefront collection until multi-collection UX ships. */
 export const DEBUT_COLLECTION_HANDLE = 'debut-collection';
 
-/** Social profiles linked from the footer. Both use the @dilettante.perfumery handle. */
+/** Public contact address. Also quoted in the FAQ copy. */
+export const CONTACT_EMAIL = 'hello@dilettanteperfumery.com';
+
+/**
+ * Contact links in the footer icon row. The socials both use the
+ * @dilettante.perfumery handle; the mail link is the only address on the site.
+ */
 export const SOCIAL_LINKS = [
   {
     id: 'instagram',
@@ -14,6 +20,11 @@ export const SOCIAL_LINKS = [
     id: 'tiktok',
     label: 'Tiktok',
     href: 'https://www.tiktok.com/@dilettante.perfumery',
+  },
+  {
+    id: 'email',
+    label: `Email us at ${CONTACT_EMAIL}`,
+    href: `mailto:${CONTACT_EMAIL}`,
   },
 ] as const;
 

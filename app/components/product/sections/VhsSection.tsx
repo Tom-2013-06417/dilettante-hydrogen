@@ -6,6 +6,7 @@ import {
   useRef,
   useState,
   type MutableRefObject,
+  type PointerEvent as ReactPointerEvent,
   type RefObject,
 } from 'react';
 import {fetchPriorityAttr} from '~/lib/fetchPriority';
@@ -21,6 +22,8 @@ const AUTO_ADVANCE_MS = 4000;
 const GATE_MS = 90;
 /** Empty bloomless beat between exit and enter. */
 const GATE_GAP_MS = 80;
+/** Horizontal swipe distance (px) before a slide change commits. */
+const SWIPE_THRESHOLD_PX = 48;
 
 const BLOOM_OPACITY = 0.22;
 
@@ -217,6 +220,12 @@ export function VhsSection({slides, sectionRef}: VhsSectionProps) {
     [sectionRef],
   );
   const busyRef = useRef(false);
+  const swipeRef = useRef<{
+    pointerId: number;
+    x: number;
+    y: number;
+    locked: boolean | null;
+  } | null>(null);
   const reducedMotion = useReducedMotion();
   /** Latch: mount bloom/plates only when near — avoids decode jank during scent anatomy. */
   const [mediaArmed, setMediaArmed] = useState(false);
@@ -316,11 +325,13 @@ export function VhsSection({slides, sectionRef}: VhsSectionProps) {
     };
   }, [mediaArmed, slideCount, slides]);
 
-  // Keep the upcoming plate warm while the carousel runs.
+  // Keep neighbors warm while the carousel runs (auto + swipe either way).
   useEffect(() => {
     if (!carouselActive || slideCount <= 1) return;
     const next = slides[(index + 1) % slideCount];
+    const prev = slides[(index - 1 + slideCount) % slideCount];
     if (next) prefetchPlate(next.url);
+    if (prev && prev !== next) prefetchPlate(prev.url);
   }, [carouselActive, index, slideCount, slides]);
 
   const advanceTo = useCallback(
@@ -351,6 +362,71 @@ export function VhsSection({slides, sectionRef}: VhsSectionProps) {
       advanceTo(next);
     },
     [advanceTo],
+  );
+
+  const onPlatePointerDown = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>) => {
+      if (slideCount <= 1 || busyRef.current) return;
+      if (event.pointerType === 'mouse' && event.button !== 0) return;
+      swipeRef.current = {
+        pointerId: event.pointerId,
+        x: event.clientX,
+        y: event.clientY,
+        locked: null,
+      };
+    },
+    [slideCount],
+  );
+
+  const onPlatePointerMove = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>) => {
+      const swipe = swipeRef.current;
+      if (!swipe || swipe.pointerId !== event.pointerId) return;
+
+      const dx = event.clientX - swipe.x;
+      const dy = event.clientY - swipe.y;
+
+      // Decide axis once the gesture has clear intent so vertical scroll wins.
+      if (swipe.locked === null) {
+        if (Math.abs(dx) < 10 && Math.abs(dy) < 10) return;
+        swipe.locked = Math.abs(dx) > Math.abs(dy);
+        if (!swipe.locked) {
+          swipeRef.current = null;
+          return;
+        }
+      }
+
+      if (swipe.locked) {
+        event.preventDefault();
+      }
+    },
+    [],
+  );
+
+  const endPlatePointer = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>) => {
+      const swipe = swipeRef.current;
+      if (!swipe || swipe.pointerId !== event.pointerId) return;
+      swipeRef.current = null;
+
+      if (swipe.locked !== true) return;
+
+      const dx = event.clientX - swipe.x;
+      if (Math.abs(dx) < SWIPE_THRESHOLD_PX) return;
+
+      // Swipe left → next; swipe right → previous.
+      goTo(index + (dx < 0 ? 1 : -1));
+    },
+    [goTo, index],
+  );
+
+  const onPlatePointerCancel = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>) => {
+      const swipe = swipeRef.current;
+      if (!swipe || swipe.pointerId !== event.pointerId) return;
+      swipeRef.current = null;
+    },
+    [],
   );
 
   useEffect(() => {
@@ -478,7 +554,22 @@ export function VhsSection({slides, sectionRef}: VhsSectionProps) {
               </div>
 
               <div className="relative min-h-0 w-full flex-1">
-                <div className="relative mx-auto aspect-2/3 h-full max-h-[clamp(42svh,70svh,78svh)] w-full">
+                <div
+                  className="relative mx-auto aspect-2/3 h-full max-h-[clamp(42svh,70svh,78svh)] w-full touch-pan-y select-none [&_img]:[-webkit-user-drag:none]"
+                  onPointerDown={onPlatePointerDown}
+                  onPointerMove={onPlatePointerMove}
+                  onPointerUp={endPlatePointer}
+                  onPointerCancel={onPlatePointerCancel}
+                  role={slideCount > 1 ? 'group' : undefined}
+                  aria-roledescription={
+                    slideCount > 1 ? 'carousel' : undefined
+                  }
+                  aria-label={
+                    slideCount > 1
+                      ? `Scene ${index + 1} of ${slideCount}. Swipe left or right to change.`
+                      : undefined
+                  }
+                >
                   {mediaArmed && outgoingSlide ? (
                     <VhsSlideLayer
                       key={`out-${outgoingSlide.id}`}

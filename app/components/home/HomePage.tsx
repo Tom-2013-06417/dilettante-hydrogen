@@ -1,7 +1,8 @@
 import {motion, useReducedMotion, type Variants} from 'motion/react';
 import {useCallback, useEffect, useRef, useState} from 'react';
 import wordmarkVellum from '~/assets/design/wordmark-vellum.png';
-import heroLandscape from '~/assets/design/hero-landscape.jpg';
+import heroHome from '~/assets/design/hero-home.jpg';
+import {CTA_SHELL} from '~/components/teaser/TeaserPage';
 import {BrandIntro} from './sections/BrandIntro';
 import {ScentFeature} from './sections/ScentFeature';
 import {ScentAnatomy} from './sections/ScentAnatomy';
@@ -14,7 +15,8 @@ const GESTURE_GROWTH_FACTOR = 1.3;
 const GESTURE_TRIGGER_DELTA = 12;
 const GESTURE_DECAY_CUTOFF = 0.7;
 const EASE = [0.32, 0.72, 0, 1] as const;
-const SCROLL_MASK_ID = 'home-scroll-arrow-cutout';
+/** Seconds before the hero CTA appears, after the wordmark has settled. */
+const CTA_DELAY = 1.5;
 
 const heroStagger: Variants = {
   hidden: {},
@@ -32,59 +34,24 @@ const fadeUp: Variants = {
   },
 };
 
-const fadeIn: Variants = {
-  hidden: {opacity: 0},
-  show: (delay = 0) => ({
-    opacity: 1,
-    transition: {duration: 1.2, ease: 'easeOut', delay},
-  }),
-};
-
-const fadeDown: Variants = {
-  hidden: {opacity: 0, y: -10},
-  show: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      delay: 1.7,
-      duration: 0.75,
-      ease: [0.55, 0, 0.35, 1.5],
-    },
-  },
-};
-
 function HomeHero({onScrollDown}: {onScrollDown: () => void}) {
   const reducedMotion = useReducedMotion();
 
   return (
     <section className="relative flex h-svh w-full flex-col items-stretch overflow-hidden bg-inkwell-800">
-      <motion.div
-        className="relative flex h-[20%] w-full items-start bg-inkwell-800 lg:h-[15%]"
-        variants={heroStagger}
-        initial={reducedMotion ? false : 'hidden'}
-        animate="show"
-      >
-        <h1 className="absolute bottom-0 left-1/2 z-10 w-[92%] max-w-160 -translate-x-1/2 translate-y-1/2">
-          <motion.img
-            className="w-full"
-            src={wordmarkVellum}
-            alt="Dilettante"
-            variants={fadeUp}
-          />
-          <motion.span
-            className="absolute left-0 right-0 top-[calc(100%+2rem)] flex flex-col text-center font-['trust-3a'] text-[15px] font-normal leading-5.5 tracking-[0.06em] text-vellum-100"
-            variants={fadeIn}
-            custom={0.35}
-          >
-            <span>Bespoke scents crafted by</span>
-            <span>Paulo Pascua</span>
-          </motion.span>
-        </h1>
-      </motion.div>
-      <div className="relative min-h-0 w-full grow overflow-hidden">
+      {/*
+        Image on top, inkwell below — the teaser's arrangement. The wordmark
+        straddles the seam from the inkwell band, hanging up over the image.
+      */}
+      {/*
+        Height-first: the photo is 3:2, so a short well crops most of its
+        height away. 68svh is the top of the teaser's clamp range — the band
+        takes the remainder. Sides crop instead.
+      */}
+      <div className="relative h-[68svh] min-h-0 w-full shrink-0 overflow-hidden">
         <motion.img
           className="absolute inset-0 h-full w-full object-cover"
-          src={heroLandscape}
+          src={heroHome}
           alt=""
           initial={reducedMotion ? false : {opacity: 0}}
           animate={{opacity: 1}}
@@ -92,113 +59,50 @@ function HomeHero({onScrollDown}: {onScrollDown: () => void}) {
         />
         <div className="absolute inset-0 flex items-start bg-inkwell-900/30" />
       </div>
-      <motion.button
-        type="button"
-        aria-label="Scroll down"
-        onClick={onScrollDown}
-        className="group absolute bottom-32 left-1/2 flex h-14 w-14 flex-none -translate-x-1/2 cursor-pointer items-center justify-center rounded-[4px] transition-transform duration-200 ease-out hover:scale-110 active:scale-105"
-        initial={reducedMotion ? false : {opacity: 0, y: 0}}
-        animate={
-          reducedMotion
-            ? {opacity: 1}
-            : {
-                opacity: 1,
-                y: [0, 16, 4, 0],
-              }
-        }
-        transition={
-          reducedMotion
-            ? {duration: 0.01}
-            : {
-                opacity: {delay: 5.45, duration: 0.01},
-                y: {
-                  delay: 5.45,
-                  duration: 0.9,
-                  ease: 'easeInOut',
-                  times: [0, 0.5, 0.9, 1],
-                },
-              }
-        }
+      <motion.div
+        className="relative flex w-full grow items-start bg-inkwell-800"
+        variants={heroStagger}
+        initial={reducedMotion ? false : 'hidden'}
+        animate="show"
       >
-        <svg
-          className="absolute inset-0 h-full w-full text-vellum-100"
-          viewBox="0 0 56 56"
-          fill="none"
-          aria-hidden="true"
-        >
-          <motion.rect
-            x="0.5"
-            y="0.5"
-            width="55"
-            height="55"
-            rx="3.5"
-            pathLength="1"
-            stroke="currentColor"
-            strokeWidth="1"
-            fill="none"
-            initial={reducedMotion ? false : {pathLength: 0}}
-            animate={{pathLength: 1}}
-            transition={{
-              delay: 1,
-              duration: 0.7,
-              ease: [0.45, 0, 0.55, 1],
-            }}
-          />
-        </svg>
-        <motion.svg
-          className="h-6 w-6 text-vellum-100 group-active:invisible"
-          width="1em"
-          height="1em"
-          viewBox="0 0 24 24"
-          variants={fadeDown}
-          initial={reducedMotion ? false : 'hidden'}
-          animate="show"
-        >
-          <path
-            d="M12 5v14"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <path
-            d="m19 12-7 7-7-7"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </motion.svg>
-        <svg
-          className="absolute inset-0 h-full w-full text-vellum-100 opacity-0 transition-opacity duration-100 group-active:opacity-100"
-          viewBox="0 0 56 56"
-          aria-hidden="true"
-        >
-          <mask id={SCROLL_MASK_ID} maskUnits="userSpaceOnUse">
-            <rect width="56" height="56" fill="white" />
-            <g
-              transform="translate(16 16)"
-              fill="none"
-              stroke="black"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+        {/*
+          Wordmark straddles the seam; the CTA hangs below it, in the slot the
+          tagline used to occupy. Both are absolutely placed so neither adds
+          height to the block that -translate-y-1/2 centres on the seam.
+        */}
+        <div className="absolute top-0 left-1/2 z-10 w-[92%] max-w-160 -translate-x-1/2 -translate-y-1/2">
+          <h1 className="m-0!">
+            <motion.img
+              className="w-full"
+              src={wordmarkVellum}
+              alt="Dilettante"
+              variants={fadeUp}
+            />
+          </h1>
+          <div className="absolute top-[calc(100%+3.5rem)] right-0 left-0 flex justify-center">
+            {/*
+              CTA_SHELL is the teaser's button/input shell — shared so the two
+              pages' CTAs can't drift apart.
+            */}
+            <motion.button
+              type="button"
+              onClick={onScrollDown}
+              // Fill on hover rather than the teaser's opacity dip — `animate`
+              // writes opacity inline, so a hover:opacity-* would never win.
+              className={`${CTA_SHELL} max-w-[14rem] cursor-pointer justify-center transition-colors duration-200 hover:border-vellum-100 hover:bg-vellum-100 hover:text-inkwell-700 sm:max-w-[15rem]`}
+              initial={reducedMotion ? false : {opacity: 0}}
+              animate={{opacity: 1}}
+              transition={
+                reducedMotion
+                  ? {duration: 0.01}
+                  : {delay: CTA_DELAY, duration: 0.01}
+              }
             >
-              <path d="M12 5v14" />
-              <path d="m19 12-7 7-7-7" />
-            </g>
-          </mask>
-          <rect
-            width="56"
-            height="56"
-            rx="4"
-            fill="currentColor"
-            mask={`url(#${SCROLL_MASK_ID})`}
-          />
-        </svg>
-      </motion.button>
+              Explore Scents
+            </motion.button>
+          </div>
+        </div>
+      </motion.div>
     </section>
   );
 }

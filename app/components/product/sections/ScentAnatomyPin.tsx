@@ -19,7 +19,7 @@ import {easeExit, leaveMark, PIN, SCRUB_END} from './scentAnatomyTimeline';
 
 /**
  * Starts at the bottom of the first fold. On scroll it rises and sticks at
- * ~10% from the top. Parent spans through the cube section.
+ * ~20% from the top. Parent spans through the cube section.
  *
  * Leave matches the cube’s transform exit (SCRUB_END runway) — ease-in-out
  * lift in sync with the sticky shell, not native release.
@@ -45,7 +45,13 @@ export function ScentAnatomyCue({
     offset: [`${mark} end`, `${mark} start`],
   });
 
-  const arrowOpacity = useTransform(scrollYProgress, [PIN - 0.02, PIN], [1, 0]);
+  // Rests at 0.75, not 1 — the class below covers the reduced-motion path,
+  // where no inline motion style is applied.
+  const arrowOpacity = useTransform(
+    scrollYProgress,
+    [PIN - 0.02, PIN],
+    [0.75, 0],
+  );
   const arrowPointerEvents = useTransform(arrowOpacity, (v) =>
     v < 0.08 ? 'none' : 'auto',
   );
@@ -57,7 +63,7 @@ export function ScentAnatomyCue({
 
   return (
     <motion.div
-      className="sticky top-[10%] z-20 flex w-full shrink-0 flex-col items-center justify-center gap-1 pt-4 pb-3 text-inkwell-700/45 sm:pt-5 sm:pb-4"
+      className="sticky top-[20%] z-20 flex w-full shrink-0 flex-col items-center justify-center gap-1 pt-4 pb-3 text-inkwell-700/45 sm:pt-5 sm:pb-4"
       style={reducedMotion ? undefined : {y: leaveY}}
       initial={reducedMotion || stackEnter ? false : {opacity: 0}}
       animate={{opacity: 1}}
@@ -69,12 +75,9 @@ export function ScentAnatomyCue({
         ease: 'easeOut',
       }}
     >
-      <span className="pointer-events-none font-['config-mono-vf'] text-[20px] uppercase tracking-[0.14em] sm:text-[22px]">
-        SCENT ANATOMY
-      </span>
       <motion.button
         type="button"
-        className="h-7 w-7 shrink-0 cursor-pointer border-0 bg-transparent p-0 text-inherit transition-opacity hover:opacity-80"
+        className="flex shrink-0 cursor-pointer items-center gap-x-2 rounded-none border border-inkwell-700 bg-transparent px-2.5 py-1.5 font-['config-mono-vf'] text-[14px] tracking-[0.06em] text-inkwell-700 opacity-75 transition-opacity hover:opacity-100 sm:text-[15px]"
         aria-label="Scroll to scent anatomy"
         style={
           reducedMotion
@@ -92,7 +95,7 @@ export function ScentAnatomyCue({
         }}
       >
         <svg
-          className="mx-auto h-5 w-5 animate-bounce"
+          className="h-4 w-4 shrink-0"
           viewBox="0 0 24 24"
           fill="none"
           aria-hidden
@@ -105,6 +108,7 @@ export function ScentAnatomyCue({
             strokeLinejoin="round"
           />
         </svg>
+        Info
       </motion.button>
     </motion.div>
   );

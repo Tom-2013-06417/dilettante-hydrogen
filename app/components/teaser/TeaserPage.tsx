@@ -26,8 +26,11 @@ function isValidEmail(value: string) {
   return EMAIL_PATTERN.test(value.trim());
 }
 
-/** Shared shell so the CTA button and email input match exactly. */
-const CTA_SHELL =
+/**
+ * Shared shell so the CTA button and email input match exactly. Exported so the
+ * home hero's CTA stays identical to this one.
+ */
+export const CTA_SHELL =
   "box-border flex h-10 w-full appearance-none items-center border border-vellum-100/55 bg-transparent px-3 font-['config-mono-vf'] text-[11px] font-medium leading-none tracking-[0.06em] text-vellum-100 sm:h-11";
 
 function CtaArrowIcon({className}: {className?: string}) {

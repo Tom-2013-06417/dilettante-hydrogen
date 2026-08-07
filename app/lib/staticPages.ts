@@ -123,18 +123,17 @@ export const ABOUT_PARAGRAPHS = [
   'My name is Paulo, the founder and perfumer of Dilettante Perfumery.',
   'I’ve been working in corporate/tech for the past decade, and I’m so happy I found perfumery as a creative outlet. I’ve spent the past couple of years pouring all my pent up creative energy into making wearable art. I even got a Level 2 Award at the Asian Perfumery Foundation!',
   'I created Dilettante as a reminder to myself to embrace the joy and hard work of making art—to relish being a dilettante.',
-  'While Dilettante is a very personal project of mine, it would also not be possible without the help of my friends. The best art, really, is one borne out of community. Thank you to these wonderful artistes, and go work with them: they rock!',
+  'While Dilettante is a very personal project of mine, it would also not be possible without the help of my friends. The best art, really, is one borne out of community. Thank you to these wonderful artists, and go work with them: they rock!',
 ];
 
 /** Credits list rendered under the closing paragraph of /about. */
 export const ABOUT_CREDITS = [
-  'Lazir Caluya, brand designer and social media',
+  'Lazir Caluya, brand designer, packaging designer, and social media',
   'Diego Dimaano, website designer, personality hire, everywoman',
-  'Tom Lopez, website developer, shopify god, tagaluto ng pancit canton',
-  'Denise Lopez, copywriter',
-  'Bimpoman and Gerald del Pilar, photographers',
-  'Ansis Sy, operations manager, beta tester, moral support, my partner',
-  'Nico, Gio, Nica, and Wigo, our four cats, welcome distractions',
+  'Tom Lopez, website developer, Shopify god, tagaluto ng pancit canton',
+  'Denise Fernandez-Panopio, writer, cat lady, fragrance fiend',
+  'Bimpoman, photographer, and Gerald del Pilar for connecting us',
+  'And finally: Ansis Sy, operations manager, beta tester, moral support, love of my life; and Nico, Gio, Nica, and Wigo, our four cats, welcome distractions',
 ];
 
 /**

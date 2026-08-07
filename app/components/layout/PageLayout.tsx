@@ -40,8 +40,9 @@ export function PageLayout({
   // Static pages draw their own HeaderBar, so they opt out of the chrome header —
   // but they still animate in like any other routed page.
   const drawsOwnHeader = isImmersive || isStatic;
-  // Home is a single full-viewport hero — no footer.
-  const showFooter = !isHome;
+  // Home is a single full-viewport hero; the product page ends on its own
+  // VHS section. Neither takes a footer.
+  const showFooter = !isHome && !isProduct;
 
   return (
     <Aside.Provider>

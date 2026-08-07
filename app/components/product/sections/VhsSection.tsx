@@ -17,6 +17,7 @@ import {
   VHS_PLATE_WIDTH,
   type VhsSlide,
 } from '~/lib/vhsMetafields';
+import {SCENES_OVERLAY_CLOSE_MS} from './scenesGate';
 import {ProductNumberBadge, ProductTitle} from './ProductTitle';
 
 const AUTO_ADVANCE_MS = 4000;
@@ -328,12 +329,16 @@ export function VhsSection({
     return () => window.clearTimeout(timer);
   }, [plateReady]);
 
-  // Rewind on close so the reveal replays next time — the plate is cached by
-  // then, so the second run is the same beat without the decode wait.
+  // Rewind after the CSS iris finishes collapsing so the plate stays painted
+  // during the close (instant unmount mid-transition was the jank). The plate
+  // is cached by then, so the next open is the same beat without a decode wait.
   useEffect(() => {
     if (open) return;
-    setPlateReady(false);
-    setChromeReady(false);
+    const timer = window.setTimeout(() => {
+      setPlateReady(false);
+      setChromeReady(false);
+    }, SCENES_OVERLAY_CLOSE_MS);
+    return () => window.clearTimeout(timer);
   }, [open]);
 
   // Prefetch after arming, on idle — don't fight the scent-anatomy scroll thread.

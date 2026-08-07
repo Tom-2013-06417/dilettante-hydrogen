@@ -60,6 +60,12 @@ const GESTURE_GAP_MS = 160;
  */
 export type CueOrigin = string;
 
+/**
+ * Must match `.scenes-overlay` close transition in design.css. Kept here so
+ * VhsSection can hold plate paint until the iris finishes collapsing.
+ */
+export const SCENES_OVERLAY_CLOSE_MS = 420;
+
 type ScenesGate = {
   /** 0 → 1 wash across the cue button. */
   fill: MotionValue<number>;
@@ -97,9 +103,16 @@ export function ScenesGateProvider({children}: {children: ReactNode}) {
   const [origin, setOrigin] = useState<CueOrigin | null>(null);
   /** Mirrors `open` for the gesture listeners, which never re-subscribe. */
   const openRef = useRef(false);
+  /**
+   * True between measuring the cue and flipping `open`, so the CSS clip-path
+   * can paint at `--scenes-origin` for a frame before expanding.
+   */
+  const openingRef = useRef(false);
+  /** `performance.now()` until which upward scroll stays swallowed during close. */
+  const closingUntilRef = useRef(0);
 
   const openScenes = useCallback(() => {
-    if (openRef.current) return;
+    if (openRef.current || openingRef.current) return;
     const rect = cueRef.current?.getBoundingClientRect();
     if (rect) {
       const x = rect.left + rect.width / 2;
@@ -110,16 +123,32 @@ export function ScenesGateProvider({children}: {children: ReactNode}) {
         }px ${x}px)`,
       );
     }
-    openRef.current = true;
     fill.set(1);
-    setOpen(true);
+    openingRef.current = true;
+    // Two frames: commit the collapsed clip at the cue, then expand.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (!openingRef.current) return;
+        openingRef.current = false;
+        openRef.current = true;
+        setOpen(true);
+      });
+    });
   }, [fill]);
 
   const closeScenes = useCallback(() => {
-    if (!openRef.current) return;
+    // Cancel a pending open (gesture reversed during the origin paint frame).
+    openingRef.current = false;
+    if (!openRef.current) {
+      fill.set(0);
+      return;
+    }
     openRef.current = false;
     fill.set(0);
     setOpen(false);
+    // Hold the page still while the CSS iris finishes — otherwise the next
+    // wheel ticks scroll scent-anatomy under a half-collapsed panel.
+    closingUntilRef.current = performance.now() + SCENES_OVERLAY_CLOSE_MS;
     cueRef.current?.focus({preventScroll: true});
   }, [fill]);
 
@@ -154,6 +183,11 @@ export function ScenesGateProvider({children}: {children: ReactNode}) {
           return true;
         }
         swallowRestOfGesture = false;
+      }
+      // Prefer performance.now() — wheel timeStamp is not always comparable.
+      if (performance.now() < closingUntilRef.current) {
+        lastEventAt = now;
+        return true;
       }
       lastEventAt = now;
 

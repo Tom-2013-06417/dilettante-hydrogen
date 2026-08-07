@@ -1,5 +1,11 @@
-import {motion, useMotionValueEvent, useScroll} from 'motion/react';
-import {useEffect, useRef, useState, type RefObject} from 'react';
+import {useMotionValueEvent, useScroll} from 'motion/react';
+import {
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type RefObject,
+} from 'react';
 import type {ProductFragment} from 'storefrontapi.generated';
 import {useStackCoverRevealed} from '~/components/layout/PageTransition';
 import {getScentProfile, type ScentProfile} from '~/lib/scentProfile';
@@ -153,12 +159,12 @@ function ScenesOverlay({
   const collapsed = origin ?? 'inset(50% 50% 50% 50%)';
 
   return (
-    <motion.div
+    <div
       ref={overlayRef}
-      className="fixed inset-0 z-40 overflow-hidden bg-inkwell-900"
-      initial={false}
-      animate={{clipPath: open ? 'inset(0px 0px 0px 0px)' : collapsed}}
-      transition={{duration: 0.16, ease: [0.16, 1, 0.3, 1]}}
+      className={`scenes-overlay fixed inset-0 z-40 overflow-hidden bg-inkwell-900${
+        open ? ' scenes-overlay--open' : ''
+      }`}
+      style={{'--scenes-origin': collapsed} as CSSProperties}
       aria-hidden={!open}
     >
       {/*
@@ -185,6 +191,6 @@ function ScenesOverlay({
           selectedVariant={selectedVariant}
         />
       ) : null}
-    </motion.div>
+    </div>
   );
 }

@@ -1,6 +1,4 @@
-import {Image} from '@shopify/hydrogen';
 import type {ProductVariantFragment} from 'storefrontapi.generated';
-import bottleImage from '~/assets/design/bottle_grain.png';
 import wordmarkInkwell from '~/assets/design/wordmark-inkwell.png';
 import {BlueprintRule} from '~/components/product/BlueprintRule';
 import {
@@ -8,8 +6,6 @@ import {
   ProductHeroPhoto,
 } from '~/components/product/ProductHeroPhoto';
 import type {ScentProfile} from '~/lib/scentProfile';
-
-const BOTTLE_IMAGE = bottleImage;
 
 type ProductBottleBandProps = {
   title: string;
@@ -91,19 +87,7 @@ export function ProductBottleBand({
         <div className="min-h-0 flex-1" aria-hidden />
       </div>
 
-      {/* Clip only the bottle overhang — keep the bottom rule outside this box. */}
-      <div className="pointer-events-none absolute inset-0 z-2 overflow-x-clip">
-        <div className="absolute bottom-0 left-0 h-[65%] max-h-60 aspect-1000/1236 -translate-x-[8%] translate-y-[12%]">
-          <Image
-            alt={`${title} bottle`}
-            className="h-full w-full object-contain object-bottom-left"
-            src={BOTTLE_IMAGE}
-            width={1000}
-            height={1236}
-            sizes="50vw"
-          />
-        </div>
-      </div>
+      {/* Bottle overlay hidden for now. */}
 
       <BlueprintRule
         orientation="h"

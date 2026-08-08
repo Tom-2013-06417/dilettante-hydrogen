@@ -62,7 +62,9 @@ export default function AboutRoute() {
               <img
                 src={aboutPortrait}
                 alt="Paulo behind the Dilettante Perfumery stand, the five debut scents laid out in front of the display board."
-                className="h-full w-full rounded-none object-cover object-[50%_35%]"
+                width={800}
+                height={800}
+                className="h-full w-full rounded-none object-cover"
               />
               <BlueprintRule
                 orientation="h"

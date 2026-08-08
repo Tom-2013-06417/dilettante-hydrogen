@@ -129,7 +129,7 @@ export const ABOUT_PARAGRAPHS = [
 export const ABOUT_CREDITS = [
   'Lazir Caluya, brand designer, packaging designer, and social media',
   'Diego Dimaano, website designer, personality hire, everywoman',
-  'Tom Lopez, website developer, Shopify god, tagaluto ng pancit canton',
+  'Tom Lopez, website developer, Shopify savant, tagaluto ng pancit canton',
   'Denise Fernandez-Panopio, writer, cat lady, fragrance fiend',
   'Bimpoman, photographer, and Gerald del Pilar for connecting us',
   'And finally: Ansis Sy, operations manager, beta tester, moral support, love of my life; and Nico, Gio, Nica, and Wigo, our four cats, welcome distractions',

@@ -1,6 +1,7 @@
 {
   "name": "Dilettante Perfumery",
   "short_name": "Dilettante",
+  "description": "Dilettante Perfumery — small-batch fragrance from the Philippines.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -43,6 +44,22 @@
       "type": "image/png",
       "purpose": "any",
       "density": "4.0"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/wide.jpg",
+      "sizes": "1280x720",
+      "type": "image/jpeg",
+      "form_factor": "wide",
+      "label": "Dilettante home"
+    },
+    {
+      "src": "/screenshots/narrow.jpg",
+      "sizes": "720x1280",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "Dilettante home"
     }
   ]
 }

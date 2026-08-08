@@ -1,6 +1,9 @@
 {
   "name": "Dilettante Perfumery",
   "short_name": "Dilettante",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
   "theme_color": "#152015",
   "background_color": "#152015",
   "icons": [
@@ -38,6 +41,7 @@
       "src": "/android-icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
+      "purpose": "any",
       "density": "4.0"
     }
   ]

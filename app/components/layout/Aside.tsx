@@ -16,7 +16,7 @@ import {
   shouldOpenCartFromSearch,
 } from '~/lib/constants';
 
-type AsideType = 'search' | 'cart' | 'mobile' | 'closed';
+type AsideType = 'cart' | 'mobile' | 'closed';
 type AsideContextValue = {
   type: AsideType;
   open: (mode: AsideType) => void;
@@ -83,8 +83,7 @@ function truncateForwardHistory(
  * A side bar component with Overlay
  * @example
  * ```jsx
- * <Aside type="search" heading="SEARCH">
- *  <input type="search" />
+ * <Aside type="cart" heading="CART">
  *  ...
  * </Aside>
  * ```

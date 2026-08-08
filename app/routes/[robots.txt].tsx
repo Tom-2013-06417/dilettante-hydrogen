@@ -26,8 +26,6 @@ User-agent: adsbot-google
 Disallow: /cart
 Disallow: /account
 Disallow: /search
-Allow: /search/
-Disallow: /search/?*
 
 User-agent: Nutch
 Disallow: /
@@ -72,7 +70,5 @@ Disallow: /*/blogs/*%2B*
 Disallow: /*/blogs/*%2b*
 Disallow: /policies/
 Disallow: /search
-Allow: /search/
-Disallow: /search/?*
 ${sitemapUrl ? `Sitemap: ${sitemapUrl}` : ''}`;
 }

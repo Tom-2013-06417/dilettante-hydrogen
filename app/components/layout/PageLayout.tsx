@@ -1,4 +1,4 @@
-import {Await, Link, useLocation} from 'react-router';
+import {Await, useLocation} from 'react-router';
 import {Suspense} from 'react';
 import type {CartApiQueryFragment, HeaderQuery} from 'storefrontapi.generated';
 import {Aside} from './Aside';
@@ -8,11 +8,6 @@ import {SiteFooter} from './SiteFooter';
 import {STATIC_PAGE_PATHS} from '~/lib/staticPages';
 import {CartLineFeedbackProvider, CartMain} from '~/components/cart';
 import {HeaderBar} from '~/components/home/sections/HeaderBar';
-import {
-  SEARCH_ENDPOINT,
-  SearchFormPredictive,
-  SearchResultsPredictive,
-} from '~/components/search';
 
 interface PageLayoutProps {
   cart: Promise<CartApiQueryFragment | null>;
@@ -49,7 +44,6 @@ export function PageLayout({
     <Aside.Provider>
       <CartLineFeedbackProvider>
         <CartAside cart={cart} />
-        <SearchAside />
         <MobileMenuAside
           header={header}
           publicStoreDomain={publicStoreDomain}
@@ -107,88 +101,6 @@ function CartAside({cart}: {cart: PageLayoutProps['cart']}) {
           }}
         </Await>
       </Suspense>
-    </Aside>
-  );
-}
-
-function SearchAside() {
-  const queriesDatalistId = 'predictive-search-queries';
-  return (
-    <Aside type="search" heading="SEARCH">
-      <div className="predictive-search">
-        <br />
-        <SearchFormPredictive>
-          {({fetchResults, goToSearch, inputRef}) => (
-            <>
-              <input
-                name="q"
-                onChange={fetchResults}
-                onFocus={fetchResults}
-                placeholder="Search"
-                ref={inputRef}
-                type="search"
-                list={queriesDatalistId}
-              />
-              &nbsp;
-              <button onClick={goToSearch}>Search</button>
-            </>
-          )}
-        </SearchFormPredictive>
-
-        <SearchResultsPredictive>
-          {({items, total, term, state, closeSearch}) => {
-            const {articles, collections, pages, products, queries} = items;
-
-            if (state === 'loading' && term.current) {
-              return <div>Loading...</div>;
-            }
-
-            if (!total) {
-              return <SearchResultsPredictive.Empty term={term} />;
-            }
-
-            return (
-              <>
-                <SearchResultsPredictive.Queries
-                  queries={queries}
-                  queriesDatalistId={queriesDatalistId}
-                />
-                <SearchResultsPredictive.Products
-                  products={products}
-                  closeSearch={closeSearch}
-                  term={term}
-                />
-                <SearchResultsPredictive.Collections
-                  collections={collections}
-                  closeSearch={closeSearch}
-                  term={term}
-                />
-                <SearchResultsPredictive.Pages
-                  pages={pages}
-                  closeSearch={closeSearch}
-                  term={term}
-                />
-                <SearchResultsPredictive.Articles
-                  articles={articles}
-                  closeSearch={closeSearch}
-                  term={term}
-                />
-                {term.current && total ? (
-                  <Link
-                    onClick={closeSearch}
-                    to={`${SEARCH_ENDPOINT}?q=${term.current}`}
-                  >
-                    <p>
-                      View all results for <q>{term.current}</q>
-                      &nbsp; →
-                    </p>
-                  </Link>
-                ) : null}
-              </>
-            );
-          }}
-        </SearchResultsPredictive>
-      </div>
     </Aside>
   );
 }

@@ -6,7 +6,7 @@ import {CTA_SHELL} from '~/components/teaser/TeaserPage';
 import {fetchPriorityAttr} from '~/lib/fetchPriority';
 
 /** Seconds before the hero CTA appears, after the wordmark has settled. */
-const CTA_DELAY = 1.5;
+const CTA_DELAY = 0.5;
 
 const heroStagger: Variants = {
   hidden: {},

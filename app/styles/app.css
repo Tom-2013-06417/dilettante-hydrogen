@@ -437,9 +437,10 @@ main {
   will-change: transform;
 }
 
-/* Home ↔ collection: cover rises from below instead of from the right. */
+/* Home ↔ collection: cover rises from below; a touch slower than the cart-like X slide. */
 .page-transition-layer--cover.page-transition-layer--axis-y {
   transform: translate3d(0, 100%, 0);
+  transition-duration: 280ms;
 }
 
 .page-transition-layer--cover.page-transition-layer--in {

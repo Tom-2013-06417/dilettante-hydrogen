@@ -18,10 +18,11 @@ const HISTORY_EASE = [0.32, 0.72, 0, 1] as const;
 const HISTORY_DURATION = 0.38;
 
 /**
- * Stack cover — same timing as the cart aside (`200ms ease-in-out` in app.css).
- * Driven with CSS `transition` (not Motion) so the compositor owns the slide.
+ * Stack cover timeout ceiling — X matches the cart aside (`200ms` in app.css);
+ * Y (home ↔ collection) is `280ms`. Driven with CSS `transition` (not Motion)
+ * so the compositor owns the slide.
  */
-const STACK_MS = 200;
+const STACK_MS = 280;
 
 /** Default (non-immersive) history push/pop. */
 const historyVariants = {

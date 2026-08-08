@@ -3,6 +3,7 @@ import {Link} from 'react-router';
 import wordmarkVellum from '~/assets/design/wordmark-vellum.png';
 import heroHome from '~/assets/design/hero-home.jpg';
 import {CTA_SHELL} from '~/components/teaser/TeaserPage';
+import {fetchPriorityAttr} from '~/lib/fetchPriority';
 
 /** Seconds before the hero CTA appears, after the wordmark has settled. */
 const CTA_DELAY = 1.5;
@@ -38,10 +39,19 @@ export function HomePage() {
         takes the remainder. Sides crop instead.
       */}
       <div className="relative h-[68svh] min-h-0 w-full shrink-0 overflow-hidden">
+        {/*
+          LCP slot: single static URL (not a CDN srcset), so the preload
+          scanner + fetchpriority=high is enough — no separate <link preload>
+          (see ProductHeroPhoto).
+        */}
         <motion.img
           className="absolute inset-0 h-full w-full object-cover"
           src={heroHome}
           alt=""
+          width={1920}
+          height={1280}
+          decoding="async"
+          {...fetchPriorityAttr('high')}
           initial={reducedMotion ? false : {opacity: 0}}
           animate={{opacity: 1}}
           transition={{duration: 1.2, ease: 'easeOut'}}

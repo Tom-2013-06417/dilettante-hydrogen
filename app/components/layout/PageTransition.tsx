@@ -2,6 +2,7 @@ import {AnimatePresence, motion, useReducedMotion} from 'motion/react';
 import {
   createContext,
   useContext,
+  useEffect,
   useLayoutEffect,
   useRef,
   useState,
@@ -12,6 +13,10 @@ import {
 import {useLocation, useNavigationType} from 'react-router';
 import {ClientOnly} from '~/components/shared';
 import {storefrontStackAxis, storefrontStackDepth} from '~/lib/constants';
+
+/** useLayoutEffect on the client; useEffect on the server (avoids SSR warnings). */
+const useIsomorphicLayoutEffect =
+  typeof document !== 'undefined' ? useLayoutEffect : useEffect;
 
 /** History (non-stack) transitions. */
 const HISTORY_EASE = [0.32, 0.72, 0, 1] as const;
@@ -174,7 +179,7 @@ function StackPresence({
     playEnter
   );
 
-  useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     onAnimatingChange?.(isAnimating);
   }, [isAnimating, onAnimatingChange]);
 
@@ -202,7 +207,7 @@ function StackPresence({
   };
 
   // Kick the CSS transition after paint (same double-rAF pattern as class toggles).
-  useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (!exitLayer || !playEnter) return;
 
     const sliding = slideRef.current;
@@ -347,7 +352,7 @@ function PageTransitionAnimated({
     if (h != null) setHeight(h);
   };
 
-  useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const element = contentRef.current;
     if (!element) return;
 
@@ -369,7 +374,7 @@ function PageTransitionAnimated({
     return () => observer.disconnect();
   }, [presenceKey, immersive, stackAnimating]);
 
-  useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (!pathMetaRef.current.hasNavigated) return;
 
     if (immersive) {

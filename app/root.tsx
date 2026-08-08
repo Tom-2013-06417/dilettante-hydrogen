@@ -24,9 +24,9 @@ import {loadTeaserSlides} from '~/lib/teaserProducts';
 export type RootLoader = typeof loader;
 
 export const meta: Route.MetaFunction = () => [
-  {name: 'msapplication-TileColor', content: '#ffffff'},
+  {name: 'msapplication-TileColor', content: '#152015'},
   {name: 'msapplication-TileImage', content: '/ms-icon-144x144.png'},
-  {name: 'theme-color', content: '#ffffff'},
+  {name: 'theme-color', content: '#152015'},
 ];
 
 /**

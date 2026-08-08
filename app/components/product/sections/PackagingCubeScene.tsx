@@ -216,8 +216,13 @@ type PackagingCubeSceneProps = {
   showSolid: boolean;
   /** Halves + bottle (replaces solid when splitting) */
   showLayers: boolean;
-  /** Y rotation in radians (read in useFrame) */
+  /** Y rotation in radians from scroll scrub (read in useFrame, 1:1). */
   scrollRotationYRef: MutableRefObject<number>;
+  /**
+   * Extra Y from the scenes-cue fill. Eased in useFrame so "???" load spin
+   * stays smooth without lagging the scrub.
+   */
+  fillRotationYRef: MutableRefObject<number>;
   /**
    * Element that owns the SVG/label overlay. Anchor coords are reported
    * relative to this element's bounding box.
@@ -504,6 +509,7 @@ export function PackagingCubeScene({
   showSolid,
   showLayers,
   scrollRotationYRef,
+  fillRotationYRef,
   stageElement,
   onAnchorsChange,
 }: PackagingCubeSceneProps) {
@@ -512,15 +518,23 @@ export function PackagingCubeScene({
     Partial<Record<ScentTierId, THREE.Object3D | null>>
   >({});
   const projected = useRef(new THREE.Vector3());
+  /** Smoothed fill spin — chase target, never overshoot. */
+  const fillSmoothRef = useRef(0);
   const {camera, size, gl} = useThree();
 
-  useFrame(() => {
+  useFrame((_, delta) => {
     if (!rootRef.current) return;
 
-    const targetY = scrollRotationYRef.current;
+    const scrollY = scrollRotationYRef.current;
+    const fillTarget = fillRotationYRef.current;
+    // ~14/s — softens wheel ticks on ??? load without feeling floaty.
+    const alpha = 1 - Math.exp(-14 * Math.min(delta, 0.064));
+    fillSmoothRef.current += (fillTarget - fillSmoothRef.current) * alpha;
+
+    const targetY = scrollY + fillSmoothRef.current;
     const targetX = 0.22 + targetY * 0.15;
 
-    // 1:1 with scroll — lerp lagged and popped when explode re-renders caught up
+    // Scroll stays 1:1; only the fill share is eased above.
     rootRef.current.rotation.set(targetX, targetY, 0);
   }, -2);
 

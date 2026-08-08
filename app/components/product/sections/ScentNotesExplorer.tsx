@@ -23,8 +23,16 @@ import {
   loadProductHalfCanvases,
   type ProductHalfCanvases,
 } from './productHalfCrops';
-import {DEG_150, PIN, SCRUB_END, TOTAL_VH} from './scentAnatomyTimeline';
+import {
+  DEG_150,
+  FILL_SPIN,
+  PIN,
+  SCRUB_END,
+  SCRUB_SPIN,
+  TOTAL_VH,
+} from './scentAnatomyTimeline';
 import {ScenesCue} from './ScentAnatomyPin';
+import {useScenesGate} from './scenesGate';
 
 function clamp01(n: number) {
   return Math.min(1, Math.max(0, n));
@@ -72,6 +80,7 @@ export function ScentNotesExplorer({
   sectionRef?: Ref<HTMLElement | null>;
 }) {
   const reducedMotion = useReducedMotion();
+  const {fill} = useScenesGate();
   const localRef = useRef<HTMLElement | null>(null);
   const anchorsRef = useRef(EMPTY_CUBE_ANCHORS);
   const [stageElement, setStageElement] = useState<HTMLElement | null>(null);
@@ -108,6 +117,8 @@ export function ScentNotesExplorer({
   const showSolid = false;
   const showLayers = true;
   const scrollRotationYRef = useRef(reducedMotion ? DEG_150 * 0.35 : 0);
+  /** Target fill spin; PackagingCubeScene eases toward this (scroll stays 1:1). */
+  const fillRotationYRef = useRef(0);
   const explodeAmountRef = useRef(reducedMotion ? 1 : 0);
   const annotationDrawRef = useRef(0);
 
@@ -116,12 +127,23 @@ export function ScentNotesExplorer({
     offset: ['start end', `${SCRUB_END} start`],
   });
 
-  const scrollRotateY = useTransform(scrollYProgress, [0, 1], [0, DEG_150]);
+  const scrollRotateY = useTransform(scrollYProgress, [0, 1], [0, SCRUB_SPIN]);
+  const fillRotateY = useTransform(fill, [0, 1], [0, FILL_SPIN]);
+
+  const applyRotation = useCallback(() => {
+    if (reducedMotion) {
+      scrollRotationYRef.current = DEG_150 * 0.4;
+      fillRotationYRef.current = 0;
+      return;
+    }
+    scrollRotationYRef.current = scrollRotateY.get();
+    fillRotationYRef.current = fillRotateY.get();
+  }, [fillRotateY, reducedMotion, scrollRotateY]);
 
   const applyProgress = useCallback(
     (p: number) => {
       if (reducedMotion) {
-        scrollRotationYRef.current = DEG_150 * 0.4;
+        applyRotation();
         explodeAmountRef.current = 1;
         if (annotationDrawRef.current !== 1) {
           annotationDrawRef.current = 1;
@@ -130,7 +152,7 @@ export function ScentNotesExplorer({
         return;
       }
 
-      scrollRotationYRef.current = scrollRotateY.get();
+      applyRotation();
 
       const explodeT = mapRange(
         p,
@@ -148,10 +170,12 @@ export function ScentNotesExplorer({
         setAnnotationDraw(draw);
       }
     },
-    [reducedMotion, scrollRotateY],
+    [applyRotation, reducedMotion],
   );
 
   useMotionValueEvent(scrollYProgress, 'change', applyProgress);
+  // Overscroll fill does not move scrollYProgress — keep the cube turning.
+  useMotionValueEvent(fill, 'change', applyRotation);
 
   useEffect(() => {
     applyProgress(scrollYProgress.get());
@@ -227,6 +251,7 @@ export function ScentNotesExplorer({
                       showSolid={showSolid}
                       showLayers={showLayers}
                       scrollRotationYRef={scrollRotationYRef}
+                      fillRotationYRef={fillRotationYRef}
                       stageElement={stageElement}
                       onAnchorsChange={onAnchorsChange}
                     />

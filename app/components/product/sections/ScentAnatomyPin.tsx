@@ -15,7 +15,7 @@ import {useScenesGate} from './scenesGate';
  * --radius-button corner.
  */
 const CUE_BUTTON_CLASS =
-  "flex shrink-0 cursor-pointer items-center gap-x-2 rounded-none border border-inkwell-700 bg-transparent px-2.5 py-1.5 font-['config-mono-vf'] text-[14px] tracking-[0.06em] text-inkwell-700 sm:text-[15px]";
+  "flex shrink-0 cursor-pointer items-center gap-x-2 rounded-none border border-inkwell-700 bg-transparent px-2.5 py-1.5 font-['config-mono-vf'] text-[14px] tracking-[0.06em] text-inkwell-700 outline-none [-webkit-tap-highlight-color:transparent] focus:outline-none focus-visible:outline-none sm:text-[15px]";
 
 function CueArrow() {
   return (

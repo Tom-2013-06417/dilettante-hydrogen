@@ -13,8 +13,10 @@ export type PackagingCubeCanvasProps = {
   explodeAmountRef: MutableRefObject<number>;
   showSolid: boolean;
   showLayers: boolean;
-  /** Scroll-scrubbed Y rotation (rad); read from the ref inside useFrame. */
+  /** Scroll-scrubbed Y rotation (rad); applied 1:1 in useFrame. */
   scrollRotationYRef: MutableRefObject<number>;
+  /** Cue-fill Y rotation target; eased in useFrame. */
+  fillRotationYRef: MutableRefObject<number>;
   stageElement: HTMLElement | null;
   onAnchorsChange: (anchors: CubeAnchorsMap) => void;
 };
@@ -57,6 +59,7 @@ export default function PackagingCubeCanvas({
   showSolid,
   showLayers,
   scrollRotationYRef,
+  fillRotationYRef,
   stageElement,
   onAnchorsChange,
 }: PackagingCubeCanvasProps) {
@@ -85,6 +88,7 @@ export default function PackagingCubeCanvas({
         showSolid={showSolid}
         showLayers={showLayers}
         scrollRotationYRef={scrollRotationYRef}
+        fillRotationYRef={fillRotationYRef}
         stageElement={stageElement}
         onAnchorsChange={onAnchorsChange}
       />

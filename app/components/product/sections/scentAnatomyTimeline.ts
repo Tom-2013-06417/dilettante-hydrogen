@@ -2,11 +2,12 @@
  * Shared scroll timeline for the scent-anatomy sticky stage.
  *
  * The section is the last thing in the document: it scrubs rotate / explode /
- * annotations while pinned, and simply stops. There is no exit runway any more
- * — the scenes panel is a gesture-gated overlay (see scenesGate), not a block
- * below, so the page ends with the cube and the scenes cue still on screen.
+ * annotations while pinned. There is no exit runway — the scenes panel is a
+ * gesture-gated overlay (see scenesGate), so the page ends with the cube and
+ * the scenes cue still on screen. Cube Y-spin is split across scrub + cue fill
+ * so the turn continues while the "???" wash loads.
  */
-export const SECTION_VH = 170;
+export const SECTION_VH = 200;
 
 export const TOTAL_VH = SECTION_VH;
 
@@ -31,4 +32,15 @@ export const VIEWPORT_VH = 100;
 
 export const PIN = ENTER_VH / (ENTER_VH + SECTION_VH);
 
+/** Full assembled turn once scrub + scenes-cue fill have both completed. */
 export const DEG_150 = (150 * Math.PI) / 180;
+
+/**
+ * Extra Y-spin driven by scenesGate `fill` (bottom overscroll). Keeps the
+ * cube turning for the whole "???" wash rather than parking at scrub end.
+ * Kept modest — the scene lerps this portion so wheel ticks stay smooth.
+ */
+export const FILL_SPIN = (36 * Math.PI) / 180;
+
+/** Scroll-scrub share of DEG_150; FILL_SPIN finishes the turn. */
+export const SCRUB_SPIN = DEG_150 - FILL_SPIN;

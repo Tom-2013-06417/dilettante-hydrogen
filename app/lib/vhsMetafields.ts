@@ -51,8 +51,9 @@ export function parseVhsSlides(
 }
 
 /**
- * Shopify CDN resize. Plate max display ≈ 42rem @2x → ~1344px; bloom is
- * heavily blurred so a tiny source is enough.
+ * Shopify CDN resize. Plate column is max-w-lg (32rem); sizes hint is a
+ * touch generous for retina desktops. Bloom is heavily blurred so a tiny
+ * source is enough.
  */
 export function shopifyImageUrl(
   url: string,
@@ -73,7 +74,7 @@ export function shopifyImageUrl(
   }
 }
 
-/** Sharp plate — caps retina quality without pulling 4k masters. */
-export const VHS_PLATE_WIDTH = 1200;
+/** Sharp plate — covers ~32–42rem @2–3x without pulling 4k masters. */
+export const VHS_PLATE_WIDTH = 1800;
 /** Soft bloom — tiny; blur hides any detail. */
 export const VHS_BLOOM_WIDTH = 160;

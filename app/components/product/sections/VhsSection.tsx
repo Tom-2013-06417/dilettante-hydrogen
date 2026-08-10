@@ -30,9 +30,9 @@ const SWIPE_THRESHOLD_PX = 48;
 
 const BLOOM_OPACITY = 0.22;
 
-/** Cap srcset so mobile never races 3–4k masters (400…1400). */
+/** Cap srcset so mobile never races 3–4k masters (400…1800). */
 const PLATE_SRCSET = {
-  intervals: 6,
+  intervals: 8,
   startingWidth: 400,
   incrementSize: 200,
   placeholderWidth: 200,
@@ -50,7 +50,7 @@ function bloomUrl(url: string) {
 function prefetchPlate(url: string) {
   if (typeof window === 'undefined') return;
   // Warm the sizes mobile + retina typically pick from our capped srcset.
-  for (const width of [800, VHS_PLATE_WIDTH] as const) {
+  for (const width of [1000, VHS_PLATE_WIDTH] as const) {
     const img = new window.Image();
     img.decoding = 'async';
     img.src = plateUrl(url, width);

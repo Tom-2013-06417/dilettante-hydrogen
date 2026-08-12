@@ -1,11 +1,44 @@
 import {PlusIcon} from '@heroicons/react/24/outline';
 import {AnimatePresence, motion, useReducedMotion} from 'motion/react';
 import {useId, useState} from 'react';
+import {Link} from 'react-router';
 import {BlueprintRule} from '~/components/product/BlueprintRule';
-import type {FaqItem} from '~/lib/staticPages';
+import type {FaqAnswerParagraph, FaqItem} from '~/lib/staticPages';
 import {ClientOnly} from './ClientOnly';
 
 export type {FaqItem};
+
+/**
+ * `!` on underline offset/color beats reset.css's unlayered `a` rules so the
+ * link still reads as body copy with a clear affordance.
+ */
+const INLINE_LINK_CLASS =
+  'font-bold text-inkwell-700/90! underline underline-offset-2 transition-opacity hover:opacity-70';
+
+function FaqAnswerParagraph({paragraph}: {paragraph: FaqAnswerParagraph}) {
+  if (typeof paragraph === 'string') {
+    return <p>{paragraph}</p>;
+  }
+
+  return (
+    <p>
+      {paragraph.map((part, partIndex) =>
+        typeof part === 'string' ? (
+          <span key={partIndex}>{part}</span>
+        ) : (
+          <Link
+            key={partIndex}
+            to={part.to}
+            prefetch="intent"
+            className={INLINE_LINK_CLASS}
+          >
+            {part.text}
+          </Link>
+        ),
+      )}
+    </p>
+  );
+}
 
 /** Matches the easing used by PageTransition and the home deck. */
 const EASE = [0.32, 0.72, 0, 1] as const;
@@ -48,8 +81,8 @@ function FaqAccordionStatic({items}: {items: FaqItem[]}) {
               />
             </summary>
             <div className={ANSWER_CLASS}>
-              {item.answer.map((paragraph) => (
-                <p key={paragraph}>{paragraph}</p>
+              {item.answer.map((paragraph, index) => (
+                <FaqAnswerParagraph key={index} paragraph={paragraph} />
               ))}
             </div>
           </details>
@@ -119,8 +152,11 @@ function FaqAccordionAnimated({items}: {items: FaqItem[]}) {
                   transition={transition}
                 >
                   <div className={ANSWER_CLASS}>
-                    {item.answer.map((paragraph) => (
-                      <p key={paragraph}>{paragraph}</p>
+                    {item.answer.map((paragraph, index) => (
+                      <FaqAnswerParagraph
+                        key={index}
+                        paragraph={paragraph}
+                      />
                     ))}
                   </div>
                 </motion.div>

@@ -35,8 +35,8 @@ export function StaticPageShell({
       {/* `div`, not `section` — reset.css adds bottom padding to every section. */}
       <div className="grow">
         <PageContainer>
-          <div className="pb-12 pl-2 pr-8 pt-6 sm:pb-16 sm:pt-10">
-            <h1 className="mb-4! mt-6! font-['config-mono-vf'] text-[20px] font-bold uppercase tracking-[0.14em] sm:text-[24px]">
+          <div className="py-8 sm:py-10">
+            <h1 className="mb-4! mt-0! font-['config-mono-vf'] text-[20px] font-bold uppercase tracking-[0.14em] sm:text-[24px]">
               {title}
             </h1>
             <div className={BODY_CLASS[body]}>{children}</div>

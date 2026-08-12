@@ -1,11 +1,24 @@
 /**
- * Hand-authored static pages linked from SiteFooter. These are plain routes, not
- * Shopify-managed content — see the note in SiteFooter about the policy links.
+ * Hand-authored static pages. Most are plain routes with local copy — see the
+ * note in SiteFooter about the policy links. Refund Policy is the exception:
+ * its body is loaded from Shopify Admin → Settings → Policies.
  */
+/** Inline link inside an FAQ answer paragraph. */
+export type FaqAnswerLink = {
+  text: string;
+  to: string;
+};
+
+/**
+ * One FAQ answer paragraph: plain text, or an ordered mix of strings and
+ * links (rendered inline).
+ */
+export type FaqAnswerParagraph = string | Array<string | FaqAnswerLink>;
+
 export type FaqItem = {
   question: string;
-  /** One string per paragraph. */
-  answer: string[];
+  /** One entry per paragraph. */
+  answer: FaqAnswerParagraph[];
 };
 
 export type StaticPage = {
@@ -35,10 +48,11 @@ export const STATIC_PAGES: StaticPage[] = [
     paragraphs: [PLACEHOLDER],
   },
   {
-    path: '/refund-policy',
+    // Body comes from Shopify Admin → Settings → Policies → Refund policy.
+    path: '/returns-and-exchanges',
     title: 'Refund Policy',
     navLabel: 'Refund Policy',
-    paragraphs: [PLACEHOLDER],
+    paragraphs: [],
   },
   {
     path: '/terms-of-service',
@@ -107,6 +121,16 @@ export const FAQ_ITEMS: FaqItem[] = [
     question: 'Do you accept returns?',
     answer: [
       'Unfortunately, we do not offer returns, unless there is a problem with the bottle or the box.',
+    ],
+  },
+  {
+    question: 'What is your policy on refunds, returns, and exchanges',
+    answer: [
+      [
+        'Please refer to our ',
+        {text: 'Refund Policy', to: '/returns-and-exchanges'},
+        ' for more information.',
+      ],
     ],
   },
   {

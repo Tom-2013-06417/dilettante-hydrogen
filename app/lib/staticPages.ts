@@ -118,12 +118,6 @@ export const FAQ_ITEMS: FaqItem[] = [
     ],
   },
   {
-    question: 'Do you accept returns?',
-    answer: [
-      'Unfortunately, we do not offer returns, unless there is a problem with the bottle or the box.',
-    ],
-  },
-  {
     question: 'What is your policy on refunds, returns, and exchanges',
     answer: [
       [

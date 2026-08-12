@@ -124,7 +124,7 @@ export const FAQ_ITEMS: FaqItem[] = [
     ],
   },
   {
-    question: 'What is your policy on refunds, returns, and exchanges',
+    question: 'What is your policy on refunds, returns, and exchanges?',
     answer: [
       [
         'Please refer to our ',

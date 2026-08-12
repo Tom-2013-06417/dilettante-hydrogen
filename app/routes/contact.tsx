@@ -12,7 +12,7 @@ const page = getStaticPage('/contact');
  * list markers are restated here because reset.css collapses them.
  */
 const POLICY_HTML_CLASS =
-  'flex w-full flex-col gap-y-4 text-[14px] tracking-[0.02em] text-inkwell-700/85 [&_a]:font-bold [&_a]:text-inkwell-700! [&_a]:underline [&_a]:underline-offset-2 [&_li]:mb-1! [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:leading-6! [&_ul]:list-disc [&_ul]:pl-5 sm:text-[15px]';
+  'flex flex-col gap-y-5 [&_a]:font-bold [&_a]:underline [&_a]:underline-offset-2 [&_li]:mb-1! [&_ol]:list-decimal [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:pl-5';
 
 export const meta: Route.MetaFunction = ({data}) => {
   return [{title: pageTitle(data?.policy.title ?? page.title)}];
@@ -34,9 +34,8 @@ export async function loader({context}: Route.LoaderArgs) {
 }
 
 /**
- * Centered contact sheet — intentionally not the left-aligned prose / full-bleed
- * shells used by About and Refund Policy. Title and admin copy sit in one
- * measured column in the middle of the page.
+ * Matches /about's body column: left-aligned to the container gutter (`pl-2`),
+ * measured at 85svw, same type scale and bottom padding.
  */
 export default function ContactRoute() {
   const {policy} = useLoaderData<typeof loader>();
@@ -44,10 +43,11 @@ export default function ContactRoute() {
   return (
     <div className="static-page flex min-h-full w-full flex-col bg-vellum-paper font-['trust-3a'] text-inkwell-700">
       <HeaderBar />
-      <div className="flex grow items-center justify-center">
+      {/* `div`, not `section` — reset.css adds bottom padding to every section. */}
+      <div className="grow text-[14px] tracking-[0.02em] [&_p]:leading-6! sm:text-[15px]">
         <PageContainer>
-          <div className="mx-auto flex w-full max-w-[42ch] flex-col items-start px-8 py-16 text-left sm:py-20">
-            <h1 className="mb-6! mt-0! font-['config-mono-vf'] text-[20px] font-bold uppercase tracking-[0.14em] sm:text-[24px]">
+          <div className="flex max-w-[85svw] flex-col gap-y-5 pt-20 pb-12 pl-2 pr-8 sm:pb-16">
+            <h1 className="mb-0! mt-0! font-['config-mono-vf'] text-[20px] font-bold uppercase tracking-[0.14em] sm:text-[24px]">
               {page.title}
             </h1>
             <div

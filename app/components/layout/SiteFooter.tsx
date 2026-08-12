@@ -21,6 +21,7 @@ const LIST_CLASS = 'm-0 flex list-none items-center p-0 [&_li]:mb-0!';
 const PAGE_LINKS = [
   {label: 'About', to: '/about'},
   {label: 'FAQs', to: '/faq'},
+  {label: 'Contact', to: '/contact'},
 ];
 
 /** Drawn from primitives to match the thin-stroke icon language. */

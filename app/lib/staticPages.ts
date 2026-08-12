@@ -1,7 +1,6 @@
 /**
- * Hand-authored static pages. Most are plain routes with local copy — see the
- * note in SiteFooter about the policy links. Refund Policy is the exception:
- * its body is loaded from Shopify Admin → Settings → Policies.
+ * Hand-authored static pages. Most are plain routes with local copy. Contact
+ * and Refund Policy load their bodies from Shopify Admin → Settings → Policies.
  */
 /** Inline link inside an FAQ answer paragraph. */
 export type FaqAnswerLink = {
@@ -39,6 +38,13 @@ export const STATIC_PAGES: StaticPage[] = [
     path: '/faq',
     title: 'FAQ',
     navLabel: 'FAQ',
+    paragraphs: [],
+  },
+  {
+    // Body comes from Shopify Admin → Settings → Policies → Contact information.
+    path: '/contact',
+    title: 'Contact',
+    navLabel: 'Contact',
     paragraphs: [],
   },
   {

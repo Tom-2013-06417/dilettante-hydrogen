@@ -1,15 +1,17 @@
-import type {ProductVariantFragment} from 'storefrontapi.generated';
 import wordmarkInkwell from '~/assets/design/wordmark-inkwell.png';
 import {BlueprintRule} from '~/components/product/BlueprintRule';
 import {
   HERO_STRIP_IMAGE_SIZES,
+  HERO_STRIP_IMAGE_SRCSET,
   ProductHeroPhoto,
+  type ProductHeroPhotoImage,
 } from '~/components/product/ProductHeroPhoto';
 import type {ScentProfile} from '~/lib/scentProfile';
 
 type ProductBottleBandProps = {
   title: string;
-  image: ProductVariantFragment['image'];
+  /** custom.secondary_image — beside the short description. */
+  image: ProductHeroPhotoImage | null;
   scentProfile: ScentProfile;
 };
 
@@ -25,13 +27,14 @@ export function ProductBottleBand({
     >
       {/* Key image covers the tagline row and continues through the body. */}
       <div className="relative row-span-2 row-start-1 self-stretch overflow-hidden bg-vellum-100">
-        {image ? (
+        {image?.url ? (
           <ProductHeroPhoto
             image={image}
             alt={image.altText || title}
             className="absolute inset-0 h-full w-full object-cover"
             sizes={HERO_STRIP_IMAGE_SIZES}
-            fetchPriority="low"
+            srcSetOptions={HERO_STRIP_IMAGE_SRCSET}
+            fetchPriority="high"
           />
         ) : (
           <div className="absolute inset-0 bg-inkwell-700/10" />

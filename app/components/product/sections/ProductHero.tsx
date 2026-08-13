@@ -19,6 +19,7 @@ import {ScentFormatLine} from '~/components/shared/ScentFormatLine';
 import {isStackEnterState} from '~/lib/constants';
 import type {ScentProfile} from '~/lib/scentProfile';
 import {shopifyCdnUrl, CART_LINE_IMAGE_SIZE} from '~/lib/cartLineImage';
+import type {SecondaryImage} from '~/lib/secondaryImageMetafield';
 import {ProductBottleBand} from './ProductBottleBand';
 import {ProductTitle} from './ProductTitle';
 
@@ -27,6 +28,8 @@ type ProductHeroProps = {
   /** Optional parenthetical under the title (Forever only today). */
   titleSubtitle?: string;
   image: ProductVariantFragment['image'];
+  /** custom.secondary_image for the strip beside the short description. */
+  secondaryImage?: SecondaryImage | null;
   price?: ProductVariantFragment['price'];
   compareAtPrice: ProductVariantFragment['compareAtPrice'];
   selectedVariant: ProductFragment['selectedOrFirstAvailableVariant'];
@@ -37,6 +40,7 @@ export function ProductHero({
   title,
   titleSubtitle,
   image,
+  secondaryImage = null,
   price,
   compareAtPrice,
   selectedVariant,
@@ -173,7 +177,7 @@ export function ProductHero({
       >
         <ProductBottleBand
           title={title}
-          image={image}
+          image={secondaryImage}
           scentProfile={scentProfile}
         />
       </IntroFade>

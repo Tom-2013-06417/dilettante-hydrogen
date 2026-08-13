@@ -7,18 +7,41 @@ import {
   getAdjacentAndFirstAvailableVariants,
   useSelectedOptionInUrlParam,
 } from '@shopify/hydrogen';
+import {HERO_STRIP_IMAGE_SRCSET} from '~/components/product/ProductHeroPhoto';
 import {ProductPage} from '~/components/product/sections';
-import {redirectIfHandleIsLocalized} from '~/lib/redirect';
+import {shopifyCdnUrl} from '~/lib/cartLineImage';
 import {pageTitle} from '~/lib/constants';
+import {redirectIfHandleIsLocalized} from '~/lib/redirect';
+import {parseSecondaryImage} from '~/lib/secondaryImageMetafield';
 
 export const meta: Route.MetaFunction = ({data}) => {
-  return [
+  const tags: Route.MetaDescriptors = [
     {title: pageTitle(data?.product.title)},
     {
       rel: 'canonical',
       href: `/products/${data?.product.handle}`,
     },
   ];
+
+  // Same strategy as the hero band (`eager` + `fetchpriority=high`). The strip
+  // sits later in the HTML, so preload it in `<head>` at high too — `links()`
+  // has no loader data in RR7. href matches Hydrogen `<Image>` `src`.
+  const secondaryUrl = parseSecondaryImage(
+    data?.product?.secondaryImage,
+  )?.url;
+  if (secondaryUrl) {
+    tags.push({
+      tagName: 'link',
+      rel: 'preload',
+      as: 'image',
+      href: shopifyCdnUrl(secondaryUrl, {
+        width: HERO_STRIP_IMAGE_SRCSET.placeholderWidth,
+      }),
+      fetchpriority: 'high',
+    });
+  }
+
+  return tags;
 };
 
 export async function loader(args: Route.LoaderArgs) {

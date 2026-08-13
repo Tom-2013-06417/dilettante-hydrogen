@@ -1,6 +1,5 @@
 import {Image} from '@shopify/hydrogen';
 import {useLayoutEffect, useRef, useState} from 'react';
-import type {ProductVariantFragment} from 'storefrontapi.generated';
 import {ProductHeroImageVeil} from '~/components/product/ProductHeroImageVeil';
 import {fetchPriorityAttr} from '~/lib/fetchPriority';
 
@@ -21,23 +20,44 @@ export const HERO_IMAGE_SRCSET = {
   placeholderWidth: 200,
 };
 
+/**
+ * Narrow description strip: `src` is already ~display size (200px @2x) so the
+ * first paint is the real image — no tiny placeholder then pop-in.
+ */
+export const HERO_STRIP_IMAGE_SRCSET = {
+  intervals: 2,
+  startingWidth: 400,
+  incrementSize: 200,
+  placeholderWidth: 400,
+};
+
+/** Variant featured image or custom.secondary_image — Hydrogen `<Image>` data. */
+export type ProductHeroPhotoImage = {
+  url: string;
+  altText?: string | null;
+  width?: number | null;
+  height?: number | null;
+  id?: string | null;
+};
+
 type ProductHeroPhotoProps = {
-  image: NonNullable<ProductVariantFragment['image']>;
+  image: ProductHeroPhotoImage;
   alt: string;
   className: string;
   sizes: string;
-  /** LCP slot should be high; the secondary strip can stay auto/low. */
+  /** Hero band and description strip both use `high` so they start together. */
   fetchPriority?: 'high' | 'low' | 'auto';
+  srcSetOptions?: typeof HERO_IMAGE_SRCSET;
 };
 
 /**
  * Above-the-fold product photo: eager load, capped srcset, veil only after
  * decode so empty cache doesn’t flash vignette on blank space.
  *
- * No `<link rel="preload">` — the image is in SSR HTML, so the preload
- * scanner already finds it. A separate responsive preload often picks a
- * different srcset candidate than the `<img>` and trips Chrome’s unused-
- * preload warning.
+ * Hero band: `fetchpriority=high` only — it’s early in the HTML, so the
+ * preload scanner finds it. Description strip: same `high` on the `<img>`,
+ * plus a matching `placeholderWidth` preload in product `meta` (it sits
+ * later in the document).
  */
 export function ProductHeroPhoto({
   image,
@@ -45,6 +65,7 @@ export function ProductHeroPhoto({
   className,
   sizes,
   fetchPriority = 'auto',
+  srcSetOptions = HERO_IMAGE_SRCSET,
 }: ProductHeroPhotoProps) {
   const imgRef = useRef<HTMLImageElement>(null);
   const [ready, setReady] = useState(false);
@@ -66,7 +87,7 @@ export function ProductHeroPhoto({
         loading="eager"
         {...fetchPriorityAttr(fetchPriority)}
         decoding="async"
-        srcSetOptions={HERO_IMAGE_SRCSET}
+        srcSetOptions={srcSetOptions}
         onLoad={() => setReady(true)}
       />
       {ready ? <ProductHeroImageVeil /> : null}

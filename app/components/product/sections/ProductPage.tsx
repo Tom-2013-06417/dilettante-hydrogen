@@ -8,6 +8,7 @@ import {
 } from 'react';
 import type {ProductFragment} from 'storefrontapi.generated';
 import {useStackCoverRevealed} from '~/components/layout/PageTransition';
+import {parseSecondaryImage} from '~/lib/secondaryImageMetafield';
 import {getScentProfile, type ScentProfile} from '~/lib/scentProfile';
 import {parseVhsSlides, type VhsSlide} from '~/lib/vhsMetafields';
 import {ProductHero} from './ProductHero';
@@ -32,6 +33,7 @@ export function ProductPage({
 }: Omit<ProductPageProps, 'productOptions'>) {
   const scentProfile = getScentProfile(product);
   const vhsSlides = parseVhsSlides(product.vhsImages);
+  const secondaryImage = parseSecondaryImage(product.secondaryImage);
   const isForever =
     product.handle === 'forever' || product.id === FOREVER_PRODUCT_ID;
   const title = isForever ? FOREVER_DISPLAY_TITLE : product.title;
@@ -60,6 +62,7 @@ export function ProductPage({
               title={title}
               titleSubtitle={titleSubtitle}
               image={selectedVariant?.image}
+              secondaryImage={secondaryImage}
               price={selectedVariant?.price}
               compareAtPrice={selectedVariant?.compareAtPrice}
               selectedVariant={selectedVariant}

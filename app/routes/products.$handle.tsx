@@ -276,6 +276,20 @@ const PRODUCT_FRAGMENT = `#graphql
         }
       }
     }
+    secondaryImage: metafield(namespace: "custom", key: "secondary_image") {
+      type
+      reference {
+        ... on MediaImage {
+          id
+          image {
+            url
+            altText
+            width
+            height
+          }
+        }
+      }
+    }
   }
   ${TAXONOMY_METAOBJECT_FRAGMENT}
   ${PRODUCT_VARIANT_FRAGMENT}

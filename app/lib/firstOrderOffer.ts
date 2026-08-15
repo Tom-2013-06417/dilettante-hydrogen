@@ -1,6 +1,6 @@
 /**
- * When `false`, dismiss is session-only (not written/read from localStorage) so
- * you can re-test the strip with a refresh. Flip to `true` for production.
+ * When `false`, dismiss is session-only (refresh brings the strip back).
+ * Flip to `true` when shipping to production.
  */
 export const FIRST_ORDER_OFFER_PERSIST_DISMISS = false;
 
@@ -41,7 +41,6 @@ export const FIRST_ORDER_OFFER_COPY = {
   modalTitle: '10% off your first order.',
   modalBody:
     'Join the list and we’ll send a code for your first purchase — plus early word on new releases.',
-  inviteLine: 'First order? Join for 10% off.',
   inviteCta: 'Join',
   toastLine: 'First order — 10% off when you join the list.',
 } as const;
@@ -82,11 +81,6 @@ export function markFirstOrderOfferSubscribed(): void {
   if (FIRST_ORDER_OFFER_PERSIST_DISMISS) {
     writeFlag(FIRST_ORDER_OFFER_TOAST_DISMISS_KEY);
   }
-}
-
-/** Cart / inline invite — only hide after a successful signup. */
-export function shouldHideFirstOrderInvite(): boolean {
-  return hasSubscribedFirstOrderOffer();
 }
 
 /** Delayed toast — hide after dismiss or signup. */

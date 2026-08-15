@@ -4,7 +4,6 @@ export * from './StaticPageShell';
 export * from './FaqAccordion';
 export * from './SubscribeForm';
 export * from './SubscribeModal';
-export * from './FirstOrderOfferInvite';
 export * from './FirstOrderOfferToast';
 export * from './PaginatedResourceSection';
 export * from './MockShopNotice';

@@ -175,7 +175,7 @@ function ScenesOverlay({
   const overlay = (
     <div
       ref={overlayRef}
-      className={`scenes-overlay fixed inset-0 z-[60] overflow-hidden bg-inkwell-900${
+      className={`scenes-overlay fixed inset-0 z-60 overflow-hidden bg-inkwell-900${
         open ? ' scenes-overlay--open' : ' pointer-events-none'
       }`}
       style={{'--scenes-origin': collapsed} as CSSProperties}

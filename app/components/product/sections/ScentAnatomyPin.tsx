@@ -68,7 +68,7 @@ export function ScentAnatomyCue({
 
   return (
     <motion.div
-      className="sticky top-[20%] z-20 flex w-full shrink-0 flex-col items-center pt-[var(--scent-anatomy-cue-pad-top,8px)] pb-[var(--scent-anatomy-cue-pad-bottom,40px)] text-inkwell-700/45"
+      className="sticky top-[20%] z-20 flex w-full shrink-0 flex-col items-center pt-(--scent-anatomy-cue-pad-top,8px) pb-(--scent-anatomy-cue-pad-bottom,40px) text-inkwell-700/45"
       initial={reducedMotion || stackEnter ? false : {opacity: 0}}
       animate={{opacity: 1}}
       transition={{
@@ -81,7 +81,7 @@ export function ScentAnatomyCue({
     >
       <motion.button
         type="button"
-        className={`${CUE_BUTTON_CLASS} h-[var(--scent-anatomy-cue-btn-h,32px)] opacity-75 transition-opacity hover:opacity-100`}
+        className={`${CUE_BUTTON_CLASS} h-(--scent-anatomy-cue-btn-h,32px) opacity-75 transition-opacity hover:opacity-100`}
         aria-label="Scroll to scent anatomy"
         style={
           reducedMotion
@@ -150,7 +150,7 @@ export function ScenesCue({
 
   return (
     <motion.div
-      className="flex w-full shrink-0 flex-col items-center pt-[var(--scent-anatomy-cue-pad-top,8px)] pb-[var(--scent-anatomy-cue-pad-bottom,40px)]"
+      className="flex w-full shrink-0 flex-col items-center pt-(--scent-anatomy-cue-pad-top,8px) pb-(--scent-anatomy-cue-pad-bottom,40px)"
       style={reducedMotion ? {opacity: 1} : {opacity}}
     >
       {/*
@@ -160,7 +160,7 @@ export function ScenesCue({
       <button
         ref={cueRef}
         type="button"
-        className={`${CUE_BUTTON_CLASS} relative h-[var(--scent-anatomy-cue-btn-h,32px)] touch-manipulation overflow-hidden opacity-75 transition-opacity hover:opacity-100`}
+        className={`${CUE_BUTTON_CLASS} relative h-(--scent-anatomy-cue-btn-h,32px) touch-manipulation overflow-hidden opacity-75 transition-opacity hover:opacity-100`}
         aria-label="Open scenes"
         onClick={openScenes}
       >

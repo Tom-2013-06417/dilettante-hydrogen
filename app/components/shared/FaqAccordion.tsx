@@ -153,10 +153,7 @@ function FaqAccordionAnimated({items}: {items: FaqItem[]}) {
                 >
                   <div className={ANSWER_CLASS}>
                     {item.answer.map((paragraph, index) => (
-                      <FaqAnswerParagraph
-                        key={index}
-                        paragraph={paragraph}
-                      />
+                      <FaqAnswerParagraph key={index} paragraph={paragraph} />
                     ))}
                   </div>
                 </motion.div>

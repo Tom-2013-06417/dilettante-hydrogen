@@ -26,9 +26,7 @@ export const meta: Route.MetaFunction = ({data}) => {
   // Same strategy as the hero band (`eager` + `fetchpriority=high`). The strip
   // sits later in the HTML, so preload it in `<head>` at high too — `links()`
   // has no loader data in RR7. href matches Hydrogen `<Image>` `src`.
-  const secondaryUrl = parseSecondaryImage(
-    data?.product?.secondaryImage,
-  )?.url;
+  const secondaryUrl = parseSecondaryImage(data?.product?.secondaryImage)?.url;
   if (secondaryUrl) {
     tags.push({
       tagName: 'link',

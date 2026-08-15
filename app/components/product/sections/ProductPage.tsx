@@ -6,6 +6,7 @@ import {
   type CSSProperties,
   type RefObject,
 } from 'react';
+import {createPortal} from 'react-dom';
 import type {ProductFragment} from 'storefrontapi.generated';
 import {useStackCoverRevealed} from '~/components/layout/PageTransition';
 import {parseSecondaryImage} from '~/lib/secondaryImageMetafield';
@@ -57,7 +58,12 @@ export function ProductPage({
         <div className="relative z-10 bg-vellum-paper">
           {/* Full-width clip so 100vw hero rule bleeds don't spawn a scrollbar;
               keep this off the sticky parent above (WebKit + clip jitter). */}
-          <div className="flex min-h-[calc(100svh-5rem-var(--stack-header-h,3rem))] flex-col overflow-x-clip">
+          {/*
+            First fold = header + this band + Anatomy cue = 100svh.
+            Cue height is defined (--scent-anatomy-cue-h) so dismissing the
+            offer strip leaves padding, not a peek of SCENT ANATOMY.
+          */}
+          <div className="flex min-h-[calc(100svh-var(--stack-header-h,3rem)-var(--scent-anatomy-cue-h,80px))] flex-col overflow-x-clip">
             <ProductHero
               title={title}
               titleSubtitle={titleSubtitle}
@@ -106,9 +112,9 @@ const MOUNT_AT_PROGRESS = 0.45;
  * expands out of the scenes cue once that cue has been filled (or pressed) and
  * collapses back into it, so the document itself still ends at scent anatomy.
  *
- * Safe to use position:fixed here: PageTransition's settled stack layer
- * explicitly drops transform / contain / will-change (see app.css), and this
- * only mounts once the cover slide is done.
+ * Portaled to document.body so its z-index can sit between the cart aside
+ * (100) and the first-order offer strip. PageTransition's `isolation: isolate`
+ * would otherwise trap a local z-40 under the body-portaled strip.
  */
 function ScenesOverlay({
   slides,
@@ -128,11 +134,16 @@ function ScenesOverlay({
   const {open, origin, closeScenes} = useScenesGate();
   const overlayRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
+  const [portalReady, setPortalReady] = useState(false);
   /**
    * Latched, never un-latched: mounting early lets the plates prefetch during
    * the cube scrub, and unmounting on close would throw that away.
    */
   const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setPortalReady(true);
+  }, []);
 
   const {scrollYProgress} = useScroll({
     target: scentSectionRef,
@@ -156,16 +167,16 @@ function ScenesOverlay({
   useEffect(() => {
     overlayRef.current?.toggleAttribute('inert', !open);
     if (open) closeRef.current?.focus({preventScroll: true});
-  }, [open]);
+  }, [open, portalReady]);
 
   // Falls back to the viewport centre until the cue has been measured.
   const collapsed = origin ?? 'inset(50% 50% 50% 50%)';
 
-  return (
+  const overlay = (
     <div
       ref={overlayRef}
-      className={`scenes-overlay fixed inset-0 z-40 overflow-hidden bg-inkwell-900${
-        open ? ' scenes-overlay--open' : ''
+      className={`scenes-overlay fixed inset-0 z-[60] overflow-hidden bg-inkwell-900${
+        open ? ' scenes-overlay--open' : ' pointer-events-none'
       }`}
       style={{'--scenes-origin': collapsed} as CSSProperties}
       aria-hidden={!open}
@@ -196,4 +207,7 @@ function ScenesOverlay({
       ) : null}
     </div>
   );
+
+  if (!portalReady) return null;
+  return createPortal(overlay, document.body);
 }

@@ -8,6 +8,7 @@ import {SiteFooter} from './SiteFooter';
 import {STATIC_PAGE_PATHS} from '~/lib/staticPages';
 import {CartLineFeedbackProvider, CartMain} from '~/components/cart';
 import {HeaderBar} from '~/components/home/sections/HeaderBar';
+import {ClientOnly, FirstOrderOfferToast} from '~/components/shared';
 
 interface PageLayoutProps {
   cart: Promise<CartApiQueryFragment | null>;
@@ -86,6 +87,9 @@ export function PageLayout({
           )}
         </main>
         {showFooter ? <SiteFooter /> : null}
+        <ClientOnly>
+          <FirstOrderOfferToast />
+        </ClientOnly>
       </CartLineFeedbackProvider>
     </Aside.Provider>
   );

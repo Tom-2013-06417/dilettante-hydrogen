@@ -91,6 +91,8 @@ export function SiteFooter() {
 
   return (
     <footer className="site-footer w-full bg-inkwell-800 font-['trust-3a'] text-vellum-100">
+      {/* In-flow offer strip portals here so rubber-band scroll stays attached. */}
+      <div data-first-order-offer-slot="" />
       <PageContainer>
         <div className="flex flex-col items-center gap-y-3 pt-4.5 pb-3">
           <nav aria-label="Footer">

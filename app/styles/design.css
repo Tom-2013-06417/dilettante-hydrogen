@@ -58,6 +58,52 @@
   }
 }
 
+@keyframes first-order-offer-slide-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes first-order-offer-slide-down {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(100%);
+  }
+}
+
+/**
+ * Shared by the floating strip and the footer-attached duplicate.
+ * Duration must match FIRST_ORDER_OFFER_MOTION_MS in firstOrderOffer.ts.
+ */
+:root {
+  --first-order-offer-motion-ms: 350ms;
+  --first-order-offer-motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  /* py-2 + 13px type + top border. Anatomy cue includes this so the strip covers padding, not the next section. */
+  --first-order-offer-banner-h: 2rem;
+}
+
+.first-order-offer-enter {
+  animation: first-order-offer-slide-up var(--first-order-offer-motion-ms)
+    var(--first-order-offer-motion-ease) both;
+}
+
+.first-order-offer-exit {
+  animation: first-order-offer-slide-down var(--first-order-offer-motion-ms)
+    var(--first-order-offer-motion-ease) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .first-order-offer-enter,
+  .first-order-offer-exit {
+    animation: none;
+  }
+}
+
 .animate-fade-up {
   animation: fade-up var(--fade-duration, 0.8s) cubic-bezier(0.22, 1, 0.36, 1)
     var(--fade-delay, 0s) both;
@@ -349,10 +395,30 @@ body:has(.teaser-page) {
   --stack-header-h: 3rem;
 }
 
+.main--product {
+  /* Pin box = padding + button only. Shared by first-fold Anatomy and ???. */
+  --scent-anatomy-cue-pad-top: 8px;
+  --scent-anatomy-cue-pad-bottom: calc(
+    8px + var(--first-order-offer-banner-h, 2rem)
+  );
+  /* py-1.5 + 14px at body 1.25lh + 1px border. */
+  --scent-anatomy-cue-btn-h: 32px;
+  --scent-anatomy-cue-h: calc(
+    var(--scent-anatomy-cue-pad-top) + var(--scent-anatomy-cue-btn-h) +
+      var(--scent-anatomy-cue-pad-bottom)
+  );
+}
+
 @media (min-width: 640px) {
   .main--product,
   .main--collection {
     --stack-header-h: 5.5rem;
+  }
+
+  .main--product {
+    --scent-anatomy-cue-pad-top: 12px;
+    --scent-anatomy-cue-pad-bottom: 46px;
+    --scent-anatomy-cue-btn-h: 34px;
   }
 }
 

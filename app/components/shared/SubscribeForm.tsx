@@ -107,6 +107,8 @@ type SubscribeFormProps = {
   focusOnMount?: boolean;
   /** Extra busy state from the caller (e.g. the teaser's unlock fetcher). */
   disabled?: boolean;
+  /** Fires once after a successful subscribe response. */
+  onSuccess?: () => void;
 };
 
 /**
@@ -120,12 +122,15 @@ export function SubscribeForm({
   startOpen = false,
   focusOnMount = false,
   disabled = false,
+  onSuccess,
 }: SubscribeFormProps) {
   const [signupOpen, setSignupOpen] = useState(startOpen);
   const [emailValue, setEmailValue] = useState('');
   const [emailError, setEmailError] = useState<string | null>(null);
   const [subscribeKey, setSubscribeKey] = useState(0);
   const emailRef = useRef<HTMLInputElement>(null);
+  const onSuccessRef = useRef(onSuccess);
+  onSuccessRef.current = onSuccess;
   const inputId = useId();
   const subscribe = useFetcher<SubscribeData>({
     key: `subscribe-${inputId}-${subscribeKey}`,
@@ -171,6 +176,10 @@ export function SubscribeForm({
     if (subscribe.data.ok === false && subscribe.data.error) {
       console.error('subscribe error', subscribe.data.error);
       setEmailError(subscribe.data.error);
+      return;
+    }
+    if (subscribe.data.ok === true) {
+      onSuccessRef.current?.();
     }
   }, [subscribe.state, subscribe.data]);
 

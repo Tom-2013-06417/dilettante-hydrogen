@@ -193,23 +193,20 @@ export function ScentNotesExplorer({
       style={{height: `${TOTAL_VH}svh`}}
     >
       {/*
-        This is the last section in the document — the shell pins for the whole
-        scrub and then the page simply ends on it, cue and all.
-
-        dvh, not lvh: the scenes cue sits at the shell bottom and must stay
-        above Chrome’s collapsing bottom bar. dvh tracks the visual viewport so
-        the cue is never covered; expect mild layout shift when the bar
-        shows/hides. min-h-svh avoids a too-short first paint.
+        Last section in the document: this shell pins for the whole scrub.
+        Title + cube stage + ??? cue stack to fill the viewport (same cue
+        padding as the first-fold Anatomy pin, so the offer strip covers
+        padding not the button). dvh tracks Chrome’s collapsing bottom bar.
       */}
       <div className="sticky top-0 z-10 h-dvh min-h-svh overflow-hidden">
         <div className="relative z-10 flex h-full flex-col">
           <PageContainer className="flex h-full flex-col">
-            <div className="relative mx-auto h-full w-full max-w-4xl">
+            <div className="relative mx-auto flex h-full w-full max-w-4xl flex-col">
               {/*
                 pointer-events-none so it never steals a drag from the cube;
                 `!` clears app.css/reset.css's unlayered h2 rules.
               */}
-              <header className="pointer-events-none absolute inset-x-0 top-0 z-30 flex justify-center px-4 pt-6 sm:pt-8">
+              <header className="pointer-events-none relative z-30 flex shrink-0 justify-center px-4 pt-6 sm:pt-8">
                 <h2 className="relative m-0 inline-block font-['config-mono-vf']! text-[13px] font-medium! uppercase leading-tight! tracking-[0.18em]! text-inkwell-700! sm:text-[15px]">
                   <BlueprintRule
                     orientation="h"
@@ -225,7 +222,7 @@ export function ScentNotesExplorer({
 
               <div
                 ref={setStageElement}
-                className="pointer-events-none absolute inset-0"
+                className="pointer-events-none relative z-10 min-h-0 w-full flex-1"
               >
                 <CubeBlueprintAnnotations
                   tiers={scentProfile.tiers}
@@ -259,7 +256,7 @@ export function ScentNotesExplorer({
                 </div>
               </div>
 
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex flex-col items-center px-4 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] sm:pb-[max(2rem,env(safe-area-inset-bottom,0px))]">
+              <div className="pointer-events-none relative z-30 flex shrink-0 justify-center">
                 <div className="pointer-events-auto">
                   <ScenesCue scentSectionRef={localRef} />
                 </div>

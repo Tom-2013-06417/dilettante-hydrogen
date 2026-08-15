@@ -1,6 +1,10 @@
 import {AnimatePresence, motion} from 'motion/react';
 import {useCallback, useEffect, useId, useRef} from 'react';
 import {createPortal} from 'react-dom';
+import {
+  FIRST_ORDER_OFFER_COPY,
+  markFirstOrderOfferSubscribed,
+} from '~/lib/firstOrderOffer';
 import {SubscribeForm} from './SubscribeForm';
 
 function CloseIcon({className}: {className?: string}) {
@@ -22,6 +26,10 @@ function CloseIcon({className}: {className?: string}) {
 type SubscribeModalProps = {
   open: boolean;
   onClose: () => void;
+  /** Override the default first-order offer title. */
+  title?: string;
+  /** Override the default first-order offer body. */
+  body?: string;
 };
 
 /**
@@ -29,7 +37,12 @@ type SubscribeModalProps = {
  * validation as the teaser) with the input shown straight away, since the
  * footer's Subscribe button already served as the collapsed CTA.
  */
-export function SubscribeModal({open, onClose}: SubscribeModalProps) {
+export function SubscribeModal({
+  open,
+  onClose,
+  title = FIRST_ORDER_OFFER_COPY.modalTitle,
+  body = FIRST_ORDER_OFFER_COPY.modalBody,
+}: SubscribeModalProps) {
   const titleId = useId();
   /** Where focus came from, so closing returns it to the footer button. */
   const restoreFocusRef = useRef<HTMLElement | null>(null);
@@ -125,14 +138,18 @@ export function SubscribeModal({open, onClose}: SubscribeModalProps) {
                 id={titleId}
                 className="mb-3! pr-8 font-['trust-3a']! text-[20px] font-normal! tracking-[0.02em]! text-vellum-100! sm:text-[22px]"
               >
-                Join our mailing list.
+                {title}
               </h2>
               <p className="mb-7! max-w-[42ch] text-[14px] leading-6! tracking-[0.02em] text-vellum-100/70 sm:text-[15px]">
-                Be the first to know when we launch, with early access to new
-                releases and everything we make along the way.
+                {body}
               </p>
 
-              <SubscribeForm className="w-full" startOpen focusOnMount />
+              <SubscribeForm
+                className="w-full"
+                startOpen
+                focusOnMount
+                onSuccess={markFirstOrderOfferSubscribed}
+              />
             </motion.div>
           </div>
         </motion.div>

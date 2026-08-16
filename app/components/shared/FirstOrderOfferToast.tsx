@@ -220,7 +220,7 @@ function OfferStrip({
 
   return (
     <div
-      className={`pointer-events-none fixed inset-x-0 bottom-0 z-30 pb-[env(safe-area-inset-bottom)] ${motionClass}`}
+      className={`pointer-events-none fixed inset-x-0 bottom-0 z-30 bg-inkwell-800 pb-[env(safe-area-inset-bottom)] ${motionClass}`}
     >
       <div
         ref={stripRef}

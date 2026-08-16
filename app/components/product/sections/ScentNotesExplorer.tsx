@@ -194,11 +194,12 @@ export function ScentNotesExplorer({
     >
       {/*
         Last section in the document: this shell pins for the whole scrub.
-        Title + cube stage + ??? cue stack to fill the viewport (same cue
-        padding as the first-fold Anatomy pin, so the offer strip covers
-        padding not the button). dvh tracks Chrome’s collapsing bottom bar.
+        Height is svh (not dvh / visualViewport): Chrome's top address bar
+        show/hide must not reflow this box or the inkwell footer flashes
+        through. ??? clearance vs the offer strip is the cue's safe-area
+        padding, not a live viewport height.
       */}
-      <div className="sticky top-0 z-10 h-dvh min-h-svh overflow-hidden">
+      <div className="sticky top-0 z-10 h-svh overflow-hidden">
         <div className="relative z-10 flex h-full flex-col">
           <PageContainer className="flex h-full flex-col">
             <div className="relative mx-auto flex h-full w-full max-w-4xl flex-col">

@@ -1,8 +1,8 @@
 /**
- * When `false`, dismiss is session-only (refresh brings the strip back).
- * Flip to `true` when shipping to production.
+ * When `true`, dismiss and signup are written to localStorage so the strip
+ * stays gone across refreshes. `false` is session-only (useful for preview).
  */
-export const FIRST_ORDER_OFFER_PERSIST_DISMISS = false;
+export const FIRST_ORDER_OFFER_PERSIST_DISMISS = true;
 
 /** Portal target on `SiteFooter` for the in-flow (seamless) strip. */
 export const FIRST_ORDER_OFFER_FOOTER_SLOT = 'data-first-order-offer-slot';
@@ -34,7 +34,7 @@ export const FIRST_ORDER_OFFER_TOAST_DISMISS_KEY =
 export const FIRST_ORDER_OFFER_SUBSCRIBED_KEY =
   'dilettante:first-order-offer:subscribed';
 
-/** Preview delay. Production would sit closer to 30–45s. */
+/** Delay before the strip appears. */
 export const FIRST_ORDER_OFFER_TOAST_DELAY_MS = 6_000;
 
 export const FIRST_ORDER_OFFER_COPY = {

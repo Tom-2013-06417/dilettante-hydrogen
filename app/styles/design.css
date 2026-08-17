@@ -52,12 +52,6 @@
   }
 }
 
-@keyframes teaser-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 @keyframes first-order-offer-slide-up {
   from {
     transform: translateY(100%);

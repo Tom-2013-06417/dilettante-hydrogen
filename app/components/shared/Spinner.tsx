@@ -1,6 +1,6 @@
-/** Indeterminate progress ring. Spins via the `teaser-spin` keyframe in design.css. */
+/** Indeterminate progress ring. */
 export function Spinner({
-  className = 'motion-safe:animate-[teaser-spin_0.7s_linear_infinite]',
+  className = 'motion-safe:animate-spin',
   size = 14,
 }: {
   className?: string;

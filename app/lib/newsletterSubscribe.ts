@@ -1,5 +1,5 @@
 /**
- * Teaser mailing-list subscribe via Admin API.
+ * Mailing-list subscribe via Admin API.
  *
  * Online Store `/contact` is blocked from Oxygen by Cloudflare (403).
  * Dev Dashboard apps authenticate with Client ID + Secret (client_credentials),
@@ -133,7 +133,7 @@ type ConsentUpdateData = {
 
 // Plain strings (not `#graphql`) — Admin API, not Storefront codegen.
 const CUSTOMER_CREATE = `
-  mutation TeaserCustomerCreate($input: CustomerInput!) {
+  mutation NewsletterCustomerCreate($input: CustomerInput!) {
     customerCreate(input: $input) {
       customer {
         id
@@ -147,7 +147,7 @@ const CUSTOMER_CREATE = `
 `;
 
 const CUSTOMER_SEARCH = `
-  query TeaserCustomerSearch($query: String!) {
+  query NewsletterCustomerSearch($query: String!) {
     customers(first: 1, query: $query) {
       nodes {
         id
@@ -157,7 +157,7 @@ const CUSTOMER_SEARCH = `
 `;
 
 const CONSENT_UPDATE = `
-  mutation TeaserConsentUpdate($input: CustomerEmailMarketingConsentUpdateInput!) {
+  mutation NewsletterConsentUpdate($input: CustomerEmailMarketingConsentUpdateInput!) {
     customerEmailMarketingConsentUpdate(input: $input) {
       customer {
         id
@@ -215,13 +215,13 @@ async function setMarketingConsent(
 /**
  * Create-or-update a Shopify customer and mark them subscribed to email marketing.
  */
-export async function subscribeTeaserEmail(
+export async function subscribeEmail(
   env: Env,
   email: string,
 ): Promise<SubscribeResult> {
   const shopDomain = env.PUBLIC_STORE_DOMAIN?.trim();
   if (!shopDomain) {
-    console.error('teaser subscribe: PUBLIC_STORE_DOMAIN is not set');
+    console.error('subscribe: PUBLIC_STORE_DOMAIN is not set');
     return {ok: false, error: 'Signup unavailable', status: 503};
   }
 
@@ -234,11 +234,11 @@ export async function subscribeTeaserEmail(
       error.message === 'MISSING_ADMIN_CREDENTIALS'
     ) {
       console.error(
-        'teaser subscribe: missing SHOPIFY_APP_CLIENT_ID / SHOPIFY_APP_CLIENT_SECRET',
+        'subscribe: missing SHOPIFY_APP_CLIENT_ID / SHOPIFY_APP_CLIENT_SECRET',
       );
       return {ok: false, error: 'Signup unavailable', status: 503};
     }
-    console.error('teaser subscribe: admin auth failed', error);
+    console.error('subscribe: admin auth failed', error);
     return {ok: false, error: "Couldn't subscribe", status: 502};
   }
 
@@ -253,14 +253,14 @@ export async function subscribeTeaserEmail(
         // twice (duplicate welcome emails).
         input: {
           email,
-          tags: ['newsletter', 'teaser'],
+          tags: ['newsletter'],
         },
       },
     );
 
     if (create.errors?.length) {
       console.error(
-        'teaser subscribe: GraphQL errors',
+        'subscribe: GraphQL errors',
         create.errors.map((e) => e.message).join('; '),
       );
       return {ok: false, error: "Couldn't subscribe", status: 502};
@@ -282,7 +282,7 @@ export async function subscribeTeaserEmail(
 
     if (!alreadyExists) {
       console.error(
-        'teaser subscribe: customerCreate userErrors',
+        'subscribe: customerCreate userErrors',
         createErrors.map((e) => e.message).join('; ') || 'unknown',
       );
       return {ok: false, error: "Couldn't subscribe", status: 400};
@@ -298,7 +298,7 @@ export async function subscribeTeaserEmail(
     const existingId = search.data?.customers.nodes[0]?.id;
     if (!existingId) {
       console.error(
-        'teaser subscribe: existing customer email not found after conflict',
+        'subscribe: existing customer email not found after conflict',
         email,
       );
       return {ok: false, error: "Couldn't subscribe", status: 502};
@@ -307,7 +307,7 @@ export async function subscribeTeaserEmail(
     await setMarketingConsent(shopDomain, token, existingId);
     return {ok: true, message: 'Subscribed'};
   } catch (error) {
-    console.error('teaser subscribe failed', error);
+    console.error('subscribe failed', error);
     return {ok: false, error: "Couldn't subscribe", status: 502};
   }
 }

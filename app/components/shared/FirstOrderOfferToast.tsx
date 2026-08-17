@@ -21,22 +21,7 @@ import {
 } from '~/lib/firstOrderOffer';
 import {PageContainer} from './PageContainer';
 import {SubscribeModal} from './SubscribeModal';
-
-function CloseIcon({className}: {className?: string}) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="square"
-      aria-hidden
-    >
-      <path d="M5.5 5.5 18.5 18.5M18.5 5.5 5.5 18.5" />
-    </svg>
-  );
-}
+import {CloseIcon} from './CloseIcon';
 
 function isDockedToFooter(node: HTMLElement) {
   const rect = node.getBoundingClientRect();
@@ -189,7 +174,7 @@ function OfferStrip({
             tabIndex={inactive ? -1 : undefined}
             className="cursor-pointer border-0 bg-transparent p-0 font-inherit text-[13px] tracking-[0.02em] text-vellum-100 underline underline-offset-4 transition-opacity hover:opacity-80 sm:text-[14px]"
           >
-            {FIRST_ORDER_OFFER_COPY.inviteCta}
+            {FIRST_ORDER_OFFER_COPY.cta}
           </button>
         </p>
         <button

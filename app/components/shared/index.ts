@@ -5,6 +5,7 @@ export * from './FaqAccordion';
 export * from './SubscribeForm';
 export * from './SubscribeModal';
 export * from './FirstOrderOfferToast';
+export * from './CloseIcon';
 export * from './PaginatedResourceSection';
 export * from './MockShopNotice';
 export * from './ScentFormatLine';

@@ -29,7 +29,7 @@ export type CartLine = OptimisticCartLine<CartApiQueryFragment>;
  */
 const UNIT_PRICE_ANIMATION_MS = 240;
 
-/** Matches the teaser email error motion. */
+/** Matches the subscribe email error motion. */
 const QTY_ERROR_MOTION = {
   initial: {opacity: 0, y: -6},
   animate: {opacity: 1, y: 0},

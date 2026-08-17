@@ -28,20 +28,20 @@ export function firstOrderOfferMotionClass({
   return '';
 }
 
-/** localStorage keys for the first-order signup offer prototype. */
+/** localStorage keys for the first-order signup offer. */
 export const FIRST_ORDER_OFFER_TOAST_DISMISS_KEY =
   'dilettante:first-order-offer:toast-dismissed';
 export const FIRST_ORDER_OFFER_SUBSCRIBED_KEY =
   'dilettante:first-order-offer:subscribed';
 
-/** Shortened for the prototype — production would sit closer to 30–45s. */
+/** Preview delay. Production would sit closer to 30–45s. */
 export const FIRST_ORDER_OFFER_TOAST_DELAY_MS = 6_000;
 
 export const FIRST_ORDER_OFFER_COPY = {
   modalTitle: '10% off your first order.',
   modalBody:
     'Join the list and we’ll send a code for your first purchase — plus early word on new releases.',
-  inviteCta: 'Join',
+  cta: 'Join',
   toastLine: 'First order — 10% off when you join the list.',
 } as const;
 

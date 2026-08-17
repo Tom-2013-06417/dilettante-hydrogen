@@ -11,7 +11,7 @@ export function isSiteLaunched(env: Env): boolean {
   return value === 'true' || value === '1' || value === 'yes';
 }
 
-/** Preview unlock via session cookie (after posting the preview token). */
+/** Preview unlock via session (set by `unlockSite`). */
 export function isSiteUnlocked(session: HydrogenSession): boolean {
   return session.get(SITE_UNLOCK_SESSION_KEY) === 'true';
 }
@@ -72,9 +72,4 @@ export function verifyPreviewToken(env: Env, value: string): boolean {
   const expected = getPreviewToken(env);
   if (!expected) return false;
   return value === expected;
-}
-
-/** @deprecated Use verifyPreviewToken */
-export function verifyPreviewPassword(env: Env, password: string): boolean {
-  return verifyPreviewToken(env, password);
 }

@@ -6,22 +6,7 @@ import {
   markFirstOrderOfferSubscribed,
 } from '~/lib/firstOrderOffer';
 import {SubscribeForm} from './SubscribeForm';
-
-function CloseIcon({className}: {className?: string}) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="square"
-      aria-hidden
-    >
-      <path d="M5.5 5.5 18.5 18.5M18.5 5.5 5.5 18.5" />
-    </svg>
-  );
-}
+import {CloseIcon} from './CloseIcon';
 
 type SubscribeModalProps = {
   open: boolean;
@@ -33,9 +18,9 @@ type SubscribeModalProps = {
 };
 
 /**
- * Centred signup dialog over a scrim. Reuses SubscribeForm (same action and
- * validation as the teaser) with the input shown straight away, since the
- * footer's Subscribe button already served as the collapsed CTA.
+ * Centred signup dialog over a scrim. Reuses SubscribeForm with the input
+ * shown straight away, since the footer's Subscribe button already served as
+ * the collapsed CTA.
  */
 export function SubscribeModal({
   open,

@@ -8,6 +8,7 @@ import {
   type FormEvent,
 } from 'react';
 import {useFetcher} from 'react-router';
+import {Spinner} from './Spinner';
 
 /** Practical email check: local@domain.tld (not full RFC). */
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -36,34 +37,6 @@ function CtaArrowIcon({className}: {className?: string}) {
         strokeWidth="1.25"
         strokeLinecap="square"
         strokeLinejoin="miter"
-      />
-    </svg>
-  );
-}
-
-function CtaSpinnerIcon({className}: {className?: string}) {
-  return (
-    <svg
-      className={className}
-      width="14"
-      height="14"
-      viewBox="0 0 14 14"
-      fill="none"
-      aria-hidden
-    >
-      <circle
-        cx="7"
-        cy="7"
-        r="5.25"
-        stroke="currentColor"
-        strokeOpacity="0.25"
-        strokeWidth="1.25"
-      />
-      <path
-        d="M12.25 7a5.25 5.25 0 0 0-5.25-5.25"
-        stroke="currentColor"
-        strokeWidth="1.25"
-        strokeLinecap="square"
       />
     </svg>
   );
@@ -105,23 +78,20 @@ type SubscribeFormProps = {
   startOpen?: boolean;
   /** Focus the input on mount. Only meaningful alongside `startOpen`. */
   focusOnMount?: boolean;
-  /** Extra busy state from the caller (e.g. the teaser's unlock fetcher). */
-  disabled?: boolean;
   /** Fires once after a successful subscribe response. */
   onSuccess?: () => void;
 };
 
 /**
- * Mailing-list signup. POSTs `intent=subscribe` to the /teaser resource route,
- * which is always available so this works from any page. Styled for inkwell
- * backgrounds; the autofill overrides live in design.css under `.subscribe-email`.
+ * Mailing-list signup. POSTs to `/subscribe`, which is always available so
+ * this works from any page. Styled for inkwell backgrounds; the autofill
+ * overrides live in design.css under `.subscribe-email`.
  */
 export function SubscribeForm({
   className = '',
   ctaLabel = 'Join our mailing list',
   startOpen = false,
   focusOnMount = false,
-  disabled = false,
   onSuccess,
 }: SubscribeFormProps) {
   const [signupOpen, setSignupOpen] = useState(startOpen);
@@ -138,7 +108,6 @@ export function SubscribeForm({
 
   const subscribed = subscribe.data?.ok === true;
   const subscribing = subscribe.state !== 'idle';
-  const busy = subscribing || disabled;
 
   const clearEmailErrors = useCallback(() => {
     setEmailError(null);
@@ -225,11 +194,10 @@ export function SubscribeForm({
     <div className={className}>
       <subscribe.Form
         method="post"
-        action="/teaser"
+        action="/subscribe"
         onSubmit={onSubscribeSubmit}
         className="relative w-full transition-opacity duration-200"
       >
-        <input type="hidden" name="intent" value="subscribe" />
         <label className="sr-only" htmlFor={inputId}>
           Email
         </label>
@@ -246,7 +214,7 @@ export function SubscribeForm({
             autoCapitalize="off"
             spellCheck={false}
             placeholder="Email address"
-            disabled={busy}
+            disabled={subscribing}
             value={emailValue}
             onChange={(e) => {
               const next = e.target.value;
@@ -270,12 +238,12 @@ export function SubscribeForm({
           />
           <button
             type="submit"
-            disabled={busy}
+            disabled={subscribing}
             aria-label={subscribing ? 'Submitting' : 'Subscribe'}
             className="subscribe-submit absolute top-1/2 right-2.5 flex h-5 w-5 -translate-y-1/2 cursor-pointer items-center justify-center border-0 p-0 text-vellum-100 disabled:opacity-70"
           >
             {subscribing ? (
-              <CtaSpinnerIcon className="motion-safe:animate-[teaser-spin_0.7s_linear_infinite]" />
+              <Spinner />
             ) : (
               <CtaArrowIcon />
             )}

@@ -2,7 +2,7 @@ import {motion, useReducedMotion, type Variants} from 'motion/react';
 import {Link} from 'react-router';
 import wordmarkVellum from '~/assets/design/wordmark-vellum.png';
 import heroHome from '~/assets/design/hero-home.jpg';
-import {CTA_SHELL} from '~/components/teaser/TeaserPage';
+import {CTA_SHELL} from '~/components/shared/SubscribeForm';
 import {fetchPriorityAttr} from '~/lib/fetchPriority';
 
 /** Seconds before the hero CTA appears, after the wordmark has settled. */
@@ -80,8 +80,7 @@ export function HomePage() {
           </h1>
           <div className="absolute top-[calc(100%+3.5rem)] right-0 left-0 flex justify-center">
             {/*
-              CTA_SHELL is the teaser's button/input shell — shared so the two
-              pages' CTAs can't drift apart.
+              CTA_SHELL is the shared mailing-list button/input shell.
             */}
             <motion.div
               className="w-full max-w-56 sm:max-w-60"

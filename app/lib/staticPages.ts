@@ -149,13 +149,15 @@ export const ABOUT_PARAGRAPHS = [
   'While Dilettante is a very personal project of mine, it would also not be possible without the help of my friends. The best art, really, is born of community. Thank you to these wonderful artists, and go work with them: they rock!',
 ];
 
-/** One credit on /about. The name is linked when `instagram` (and optionally `github`) is set. */
+/** One credit on /about. The name is linked when `instagram` or `linkedin` is set. */
 export type AboutCredit = {
   /** Text before the name, e.g. "And finally: ". */
   prefix?: string;
   name: string;
   /** Instagram handle without @. The name links here when present. */
   instagram?: string;
+  /** LinkedIn profile URL. Used for the name when `instagram` is absent. */
+  linkedin?: string;
   /** GitHub username. Rendered as a second link after the name. */
   github?: string;
   /** Remainder after the name, including the leading comma. */
@@ -171,6 +173,7 @@ export const ABOUT_CREDITS: AboutCredit[] = [
   },
   {
     name: 'Diego Dimaano',
+    linkedin: 'https://www.linkedin.com/in/ddimaano/',
     rest: ', website designer, personality hire, everywoman',
   },
   {

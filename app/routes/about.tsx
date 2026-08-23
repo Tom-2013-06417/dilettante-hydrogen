@@ -28,10 +28,17 @@ function instagramHref(handle: string) {
   return `https://www.instagram.com/${handle}/`;
 }
 
+function nameHref(credit: AboutCredit) {
+  if (credit.instagram) return instagramHref(credit.instagram);
+  if (credit.linkedin) return credit.linkedin;
+  return null;
+}
+
 function CreditLine({credit}: {credit: AboutCredit}) {
-  const name = credit.instagram ? (
+  const href = nameHref(credit);
+  const name = href ? (
     <a
-      href={instagramHref(credit.instagram)}
+      href={href}
       target="_blank"
       rel="noreferrer"
       className={CREDIT_LINK_CLASS}

@@ -149,14 +149,52 @@ export const ABOUT_PARAGRAPHS = [
   'While Dilettante is a very personal project of mine, it would also not be possible without the help of my friends. The best art, really, is born of community. Thank you to these wonderful artists, and go work with them: they rock!',
 ];
 
+/** One credit on /about. The name is linked when `instagram` (and optionally `github`) is set. */
+export type AboutCredit = {
+  /** Text before the name, e.g. "And finally: ". */
+  prefix?: string;
+  name: string;
+  /** Instagram handle without @. The name links here when present. */
+  instagram?: string;
+  /** GitHub username. Rendered as a second link after the name. */
+  github?: string;
+  /** Remainder after the name, including the leading comma. */
+  rest: string;
+};
+
 /** Credits list rendered under the closing paragraph of /about. */
-export const ABOUT_CREDITS = [
-  'Lazir Caluya, brand designer, packaging designer, and social media',
-  'Diego Dimaano, website designer, personality hire, everywoman',
-  'Tom Lopez, website developer, Shopify savant, tagaluto ng pancit canton',
-  'Denise Fernandez-Panopio, writer, cat lady, fragrance fiend',
-  'Bimpoman, photographer, and Gerald del Pilar for connecting us',
-  'And finally: Ansis Sy, operations manager, beta tester, moral support, love of my life; and Nico, Gio, Nica, and Wigo, our four cats, welcome distractions',
+export const ABOUT_CREDITS: AboutCredit[] = [
+  {
+    name: 'Lazir Caluya',
+    instagram: 'lazirvision',
+    rest: ', brand designer, packaging designer, and social media',
+  },
+  {
+    name: 'Diego Dimaano',
+    rest: ', website designer, personality hire, everywoman',
+  },
+  {
+    name: 'Tom Lopez',
+    instagram: 'tommmperson',
+    github: 'Tom-2013-06417',
+    rest: ', website developer, Shopify savant, tagaluto ng pancit canton',
+  },
+  {
+    name: 'Denise Fernandez-Panopio',
+    instagram: 'denibeans',
+    rest: ', writer, cat lady, fragrance fiend',
+  },
+  {
+    name: 'Bimpoman',
+    instagram: 'bimpoman',
+    rest: ', photographer, and Gerald del Pilar for connecting us',
+  },
+  {
+    prefix: 'And finally: ',
+    name: 'Ansis Sy',
+    instagram: 'ansissydatwalk',
+    rest: ', operations manager, beta tester, moral support, love of my life; and Nico, Gio, Nica, and Wigo, our four cats, welcome distractions',
+  },
 ];
 
 /**

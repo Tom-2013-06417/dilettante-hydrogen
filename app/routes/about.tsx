@@ -4,7 +4,11 @@ import {BlueprintRule} from '~/components/product/BlueprintRule';
 import {PageContainer} from '~/components/shared';
 import aboutPortrait from '~/assets/design/about-portrait.jpg';
 import {pageTitle} from '~/lib/constants';
-import {ABOUT_CREDITS, ABOUT_PARAGRAPHS} from '~/lib/staticPages';
+import {
+  ABOUT_CREDITS,
+  ABOUT_PARAGRAPHS,
+  type AboutCredit,
+} from '~/lib/staticPages';
 
 export const meta: Route.MetaFunction = () => {
   return [{title: pageTitle('About')}];
@@ -12,6 +16,55 @@ export const meta: Route.MetaFunction = () => {
 
 /** The lead sets beside the portrait; the rest runs full measure below it. */
 const [ABOUT_LEAD, ...ABOUT_BODY] = ABOUT_PARAGRAPHS;
+
+/**
+ * Same affordance as FAQ inline links. `!` on colour and underline beats
+ * reset.css's unlayered `a { text-decoration: none }` / `a { color: #000 }`.
+ */
+const CREDIT_LINK_CLASS =
+  'font-bold text-inkwell-700/90! underline! underline-offset-2 transition-opacity hover:opacity-70 hover:underline!';
+
+function instagramHref(handle: string) {
+  return `https://www.instagram.com/${handle}/`;
+}
+
+function CreditLine({credit}: {credit: AboutCredit}) {
+  const name = credit.instagram ? (
+    <a
+      href={instagramHref(credit.instagram)}
+      target="_blank"
+      rel="noreferrer"
+      className={CREDIT_LINK_CLASS}
+    >
+      {credit.name}
+    </a>
+  ) : (
+    credit.name
+  );
+
+  return (
+    <>
+      {credit.prefix}
+      {name}
+      {credit.github ? (
+        <>
+          {' ('}
+          <a
+            href={`https://github.com/${credit.github}`}
+            target="_blank"
+            rel="noreferrer"
+            className={CREDIT_LINK_CLASS}
+            aria-label={`${credit.name} on GitHub`}
+          >
+            GitHub
+          </a>
+          {')'}
+        </>
+      ) : null}
+      {credit.rest}
+    </>
+  );
+}
 
 /**
  * /about has its own layout rather than StaticPageShell: the portrait sits
@@ -83,7 +136,9 @@ export default function AboutRoute() {
             {/* `!` on both: reset.css sets an unlayered `ul { list-style: none; padding: 0 }`. */}
             <ul className="list-disc! pl-5!">
               {ABOUT_CREDITS.map((credit) => (
-                <li key={credit}>{credit}</li>
+                <li key={credit.name}>
+                  <CreditLine credit={credit} />
+                </li>
               ))}
             </ul>
           </div>

@@ -19,6 +19,7 @@ import {PageLayout, TypekitFonts} from '~/components/layout';
 import {ClientOnly} from '~/components/shared';
 import {TeaserPage} from '~/components/teaser';
 import {isSiteGated} from '~/lib/siteGate';
+import {isPreordersEnabled} from '~/lib/preordersEnabled';
 import {loadTeaserSlides} from '~/lib/teaserProducts';
 
 export type RootLoader = typeof loader;
@@ -180,6 +181,7 @@ export async function loader(args: Route.LoaderArgs) {
 
     return {
       siteGated: true as const,
+      preordersEnabled: false as const,
       teaserSlides,
       publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
       cart: Promise.resolve(null),
@@ -204,6 +206,10 @@ export async function loader(args: Route.LoaderArgs) {
 
   return {
     siteGated: false as const,
+    preordersEnabled: isPreordersEnabled(
+      criticalData.header?.shop?.preordersEnabled ?? null,
+      env,
+    ),
     ...deferredData,
     ...criticalData,
     publicStoreDomain: env.PUBLIC_STORE_DOMAIN,

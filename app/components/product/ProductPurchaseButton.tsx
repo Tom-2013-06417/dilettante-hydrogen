@@ -1,6 +1,12 @@
 import type {ProductFragment} from 'storefrontapi.generated';
 import {AddToCartButton} from '~/components/cart';
 import {useAside} from '~/components/layout';
+import {
+  isVariantPurchasable,
+  preordersEnabledFromRootData,
+} from '~/lib/preordersEnabled';
+import {useRouteLoaderData} from 'react-router';
+import type {loader as rootLoader} from '~/root';
 
 /**
  * Merge the product-page scent number onto the variant so optimistic cart
@@ -51,11 +57,17 @@ export function ProductPurchaseButton({
   className = '',
 }: ProductPurchaseButtonProps) {
   const {open} = useAside();
+  const rootData = useRouteLoaderData<typeof rootLoader>('root');
+  const preordersEnabled = preordersEnabledFromRootData(rootData);
+  const purchasable = isVariantPurchasable(
+    selectedVariant ?? null,
+    preordersEnabled,
+  );
 
   return (
     <AddToCartButton
       className={`${BUTTON_CLASS} ${TONE_CLASS[tone]} ${className}`}
-      disabled={!selectedVariant?.availableForSale}
+      disabled={!purchasable}
       onClick={() => open('cart')}
       lines={
         selectedVariant
@@ -72,7 +84,7 @@ export function ProductPurchaseButton({
           : []
       }
     >
-      {selectedVariant?.availableForSale ? 'Purchase' : 'Sold out'}
+      {purchasable ? 'Purchase' : 'Sold out'}
     </AddToCartButton>
   );
 }

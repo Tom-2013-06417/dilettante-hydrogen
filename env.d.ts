@@ -14,6 +14,19 @@ declare global {
      */
     PUBLIC_SITE_LAUNCHED?: string;
     /**
+     * Which Oxygen deployment is running. Set per environment in Shopify admin:
+     * `preview` on the preview/staging storefront, `production` on the live one.
+     * Used with the shop pre-order metafield to keep preview testable without
+     * exposing pre-orders on production until PUBLIC_PREORDERS_LIVE is set.
+     */
+    PUBLIC_DEPLOYMENT?: string;
+    /**
+     * On production deployments only (`PUBLIC_DEPLOYMENT=production`): must be
+     * "true" before the shop pre-order toggle affects the live storefront.
+     * Leave unset/false on production until launch; not needed on preview.
+     */
+    PUBLIC_PREORDERS_LIVE?: string;
+    /**
      * Shared secret that unlocks the full site while PUBLIC_SITE_LAUNCHED is false.
      * Match via cookie `site_preview=<token>`.
      * Not Shopify storefront password protection.

@@ -218,6 +218,10 @@ export const HEADER_QUERY = `#graphql
         }
       }
     }
+    preordersEnabled: metafield(namespace: "custom", key: "preorders_enabled") {
+      type
+      value
+    }
   }
   query Header(
     $country: CountryCode

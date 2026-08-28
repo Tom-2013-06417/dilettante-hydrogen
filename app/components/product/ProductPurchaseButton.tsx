@@ -2,6 +2,11 @@ import type {ProductFragment} from 'storefrontapi.generated';
 import {AddToCartButton} from '~/components/cart';
 import {useAside} from '~/components/layout';
 import {
+  isPreorderVariant,
+  parsePreorderEta,
+  preorderEtaIso,
+} from '~/lib/preorder';
+import {
   isVariantPurchasable,
   preordersEnabledFromRootData,
 } from '~/lib/preordersEnabled';
@@ -12,17 +17,18 @@ import type {loader as rootLoader} from '~/root';
  * Merge the product-page scent number onto the variant so optimistic cart
  * lines match the shape the cart query eventually returns.
  */
-function withCartLineScentNumber<T extends {product?: object | null}>(
-  variant: T,
-  scentNumber: string,
-): T {
-  const value = scentNumber.trim();
-  if (!value) return variant;
+function withCartLineProductMetafields<
+  T extends {product?: object | null},
+>(variant: T, scentNumber: string, preorderEtaValue?: string | null): T {
+  const number = scentNumber.trim();
+  const eta = preorderEtaValue?.trim();
+  if (!number && !eta) return variant;
   return {
     ...variant,
     product: {
       ...variant.product,
-      scentNumber: {value},
+      ...(number ? {scentNumber: {value: number}} : {}),
+      ...(eta ? {preorderEta: {type: 'date', value: eta}} : {}),
     },
   };
 }
@@ -44,21 +50,36 @@ type ProductPurchaseButtonProps = {
   selectedVariant: ProductFragment['selectedOrFirstAvailableVariant'];
   /** Stitched into the optimistic cart line so "No." paints immediately. */
   scentNumber: string;
+  /** custom.preorder_eta — stamped onto cart lines for fulfillment. */
+  preorderEta?: ProductFragment['preorderEta'];
   /** 'inkwell' on the vellum hero; 'vellum' on the inkwell scenes panel. */
   tone?: keyof typeof TONE_CLASS;
   className?: string;
 };
 
+function purchaseButtonLabel(
+  variant: ProductFragment['selectedOrFirstAvailableVariant'],
+  preordersEnabled: boolean,
+): string {
+  if (!isVariantPurchasable(variant ?? null, preordersEnabled)) return 'Sold out';
+  if (isPreorderVariant(variant ?? null, preordersEnabled)) return 'Pre-order';
+  return 'Purchase';
+}
+
 /** Shared Purchase control — the hero band and the scenes panel both use it. */
 export function ProductPurchaseButton({
   selectedVariant,
   scentNumber,
+  preorderEta,
   tone = 'inkwell',
   className = '',
 }: ProductPurchaseButtonProps) {
   const {open} = useAside();
   const rootData = useRouteLoaderData<typeof rootLoader>('root');
   const preordersEnabled = preordersEnabledFromRootData(rootData);
+  const parsedEta = parsePreorderEta(preorderEta ?? null);
+  const etaIso =
+    parsedEta && preordersEnabled ? preorderEtaIso(parsedEta) : null;
   const purchasable = isVariantPurchasable(
     selectedVariant ?? null,
     preordersEnabled,
@@ -75,16 +96,20 @@ export function ProductPurchaseButton({
               {
                 merchandiseId: selectedVariant.id,
                 quantity: 1,
-                selectedVariant: withCartLineScentNumber(
+                ...(etaIso
+                  ? {attributes: [{key: '_preorder_eta', value: etaIso}]}
+                  : {}),
+                selectedVariant: withCartLineProductMetafields(
                   selectedVariant,
                   scentNumber,
+                  etaIso,
                 ),
               },
             ]
           : []
       }
     >
-      {purchasable ? 'Purchase' : 'Sold out'}
+      {purchaseButtonLabel(selectedVariant, preordersEnabled)}
     </AddToCartButton>
   );
 }

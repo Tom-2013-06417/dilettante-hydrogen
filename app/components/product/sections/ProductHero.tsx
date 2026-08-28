@@ -15,11 +15,16 @@ import {
   ProductHeroPhoto,
 } from '~/components/product/ProductHeroPhoto';
 import {ProductPrice} from '~/components/product/ProductPrice';
+import {PreorderCallout} from '~/components/shared';
 import {ScentFormatLine} from '~/components/shared/ScentFormatLine';
 import {isStackEnterState} from '~/lib/constants';
-import type {ScentProfile} from '~/lib/scentProfile';
 import {shopifyCdnUrl, CART_LINE_IMAGE_SIZE} from '~/lib/cartLineImage';
+import {getPreorderBandMessage, parsePreorderEta} from '~/lib/preorder';
+import {preordersEnabledFromRootData} from '~/lib/preordersEnabled';
+import type {ScentProfile} from '~/lib/scentProfile';
 import type {SecondaryImage} from '~/lib/secondaryImageMetafield';
+import {useRouteLoaderData} from 'react-router';
+import type {loader as rootLoader} from '~/root';
 import {ProductBottleBand} from './ProductBottleBand';
 import {ProductTitle} from './ProductTitle';
 
@@ -34,6 +39,7 @@ type ProductHeroProps = {
   compareAtPrice: ProductVariantFragment['compareAtPrice'];
   selectedVariant: ProductFragment['selectedOrFirstAvailableVariant'];
   scentProfile: ScentProfile;
+  preorderEta?: ProductFragment['preorderEta'];
 };
 
 export function ProductHero({
@@ -45,9 +51,17 @@ export function ProductHero({
   compareAtPrice,
   selectedVariant,
   scentProfile,
+  preorderEta,
 }: ProductHeroProps) {
   const reducedMotion = useReducedMotion();
   const {state} = useLocation();
+  const rootData = useRouteLoaderData<typeof rootLoader>('root');
+  const preordersEnabled = preordersEnabledFromRootData(rootData);
+  const preorderMessage = getPreorderBandMessage(
+    selectedVariant ?? null,
+    parsePreorderEta(preorderEta ?? null),
+    preordersEnabled,
+  );
   // Stack push already animates the page in — skip nested hero intros.
   const instantIntro = isStackEnterState(state);
   const [titleNoise, setTitleNoise] = useState(
@@ -136,7 +150,7 @@ export function ProductHero({
       </div>
 
       <IntroFade instant={instantIntro}>
-        <div className="relative flex min-h-20 w-full shrink-0">
+        <div className="relative flex min-h-20 w-full shrink-0 overflow-visible">
           {/* Starts at the left V rule (continued from the navbar), not the shell edge. */}
           <BlueprintRule
             orientation="h"
@@ -144,7 +158,7 @@ export function ProductHero({
           />
           <BlueprintRule
             orientation="h"
-            className="absolute inset-x-0 bottom-0 text-inkwell-700/35"
+            className="absolute bottom-0 left-4 right-[40%] text-inkwell-700/35 sm:left-8"
           />
 
           <div className="relative flex w-[60%] flex-col items-start justify-center gap-[0.3rem] px-6 sm:px-10">
@@ -162,19 +176,25 @@ export function ProductHero({
             />
           </div>
 
-          <div className="relative flex w-[40%] items-center justify-center">
+          <div className="relative flex w-[40%] flex-col items-center justify-center overflow-visible">
             <ProductPurchaseButton
               selectedVariant={selectedVariant}
               scentNumber={scentProfile.number}
+              preorderEta={preorderEta}
             />
+            {preorderMessage ? (
+              <PreorderCallout content={preorderMessage} />
+            ) : (
+              <BlueprintRule
+                orientation="h"
+                className="absolute inset-x-0 bottom-0 text-inkwell-700/35"
+              />
+            )}
           </div>
         </div>
       </IntroFade>
 
-      <IntroFade
-        instant={instantIntro}
-        className="flex min-h-0 flex-1 flex-col"
-      >
+      <IntroFade instant={instantIntro} className="flex min-h-0 flex-1 flex-col">
         <ProductBottleBand
           title={title}
           image={secondaryImage}

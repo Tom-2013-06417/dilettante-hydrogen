@@ -13,6 +13,10 @@ import {
   type CubeAnchorsMap,
 } from './cubeAnchors';
 
+/** useLayoutEffect on the client; useEffect on the server (avoids SSR warnings). */
+const useIsomorphicLayoutEffect =
+  typeof document !== 'undefined' ? useLayoutEffect : useEffect;
+
 /** Space between the label's marker dot and where the line starts */
 const GAP = 0;
 /** Length of the horizontal run leaving the label before the elbow */
@@ -205,7 +209,7 @@ export function CubeBlueprintAnnotations({
     }
   }, [anchorsRef, stageElement, tiers]);
 
-  useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     syncLines();
   }, [syncLines, drawProgress]);
 

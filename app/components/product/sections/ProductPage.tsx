@@ -73,6 +73,7 @@ export function ProductPage({
               compareAtPrice={selectedVariant?.compareAtPrice}
               selectedVariant={selectedVariant}
               scentProfile={scentProfile}
+              preorderEta={product.preorderEta}
             />
           </div>
 
@@ -97,6 +98,7 @@ export function ProductPage({
             titleSubtitle={titleSubtitle}
             scentProfile={scentProfile}
             selectedVariant={selectedVariant}
+            preorderEta={product.preorderEta}
           />
         ) : null}
       </article>
@@ -123,6 +125,7 @@ function ScenesOverlay({
   titleSubtitle,
   scentProfile,
   selectedVariant,
+  preorderEta,
 }: {
   slides: VhsSlide[];
   scentSectionRef: RefObject<HTMLElement | null>;
@@ -130,6 +133,7 @@ function ScenesOverlay({
   titleSubtitle?: string;
   scentProfile: ScentProfile;
   selectedVariant: ProductFragment['selectedOrFirstAvailableVariant'];
+  preorderEta?: ProductFragment['preorderEta'];
 }) {
   const {open, origin, closeScenes} = useScenesGate();
   const overlayRef = useRef<HTMLDivElement>(null);
@@ -203,6 +207,7 @@ function ScenesOverlay({
           titleSubtitle={titleSubtitle}
           scentProfile={scentProfile}
           selectedVariant={selectedVariant}
+          preorderEta={preorderEta}
         />
       ) : null}
     </div>

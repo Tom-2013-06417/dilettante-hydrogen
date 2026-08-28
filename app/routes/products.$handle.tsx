@@ -158,6 +158,9 @@ const PRODUCT_VARIANT_FRAGMENT = `#graphql
       scentNumber: metafield(namespace: "custom", key: "scent_number") {
         value
       }
+      preorderEta: metafield(namespace: "custom", key: "preorder_eta") {
+        value
+      }
     }
     selectedOptions {
       name
@@ -311,6 +314,10 @@ const PRODUCT_FRAGMENT = `#graphql
           }
         }
       }
+    }
+    preorderEta: metafield(namespace: "custom", key: "preorder_eta") {
+      type
+      value
     }
   }
   ${TAXONOMY_METAOBJECT_FRAGMENT}

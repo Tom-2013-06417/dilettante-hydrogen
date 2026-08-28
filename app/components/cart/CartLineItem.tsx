@@ -14,8 +14,11 @@ import {useEffect, useState} from 'react';
 import {useVariantUrl} from '~/lib/variants';
 import {CART_LINE_IMAGE_SIZE} from '~/lib/cartLineImage';
 import {fetchPriorityAttr} from '~/lib/fetchPriority';
-import {Link} from 'react-router';
+import {getPreorderCartMessage} from '~/lib/preorder';
+import {preordersEnabledFromRootData} from '~/lib/preordersEnabled';
+import {Link, useRouteLoaderData} from 'react-router';
 import {useAside} from '~/components/layout';
+import type {loader as rootLoader} from '~/root';
 import type {
   CartApiQueryFragment,
   CartLineFragment,
@@ -82,6 +85,14 @@ export function CartLineItem({
   const lineItemChildren = childrenMap[id];
   const childrenLabelId = `cart-line-children-${id}`;
   const scentNumber = product.scentNumber?.value?.trim();
+  const rootData = useRouteLoaderData<typeof rootLoader>('root');
+  const preordersEnabled = preordersEnabledFromRootData(rootData);
+  const preorderMessage = getPreorderCartMessage(
+    merchandise,
+    line.attributes,
+    product.preorderEta ?? null,
+    preordersEnabled,
+  );
   const {getDraftQuantity, getLineError} = useCartLineUpdates();
   // A queued quantity has not reached the server yet, so it wins over the
   // server value for both the stepper and the subtotal below.
@@ -159,6 +170,11 @@ export function CartLineItem({
             ) : null}
             {title}
           </span>
+          {preorderMessage ? (
+            <span className="mt-1.5 block font-['trust-3a'] text-[11px] leading-snug tracking-[0.04em] text-vellum-100/75">
+              {preorderMessage}
+            </span>
+          ) : null}
         </div>
       </div>
 

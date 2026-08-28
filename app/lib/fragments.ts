@@ -26,6 +26,7 @@ export const CART_QUERY_FRAGMENT = `#graphql
       ... on ProductVariant {
         id
         availableForSale
+        currentlyNotInStock
         compareAtPrice {
           ...Money
         }
@@ -48,6 +49,10 @@ export const CART_QUERY_FRAGMENT = `#graphql
           id
           vendor
           scentNumber: metafield(namespace: "custom", key: "scent_number") {
+            value
+          }
+          preorderEta: metafield(namespace: "custom", key: "preorder_eta") {
+            type
             value
           }
         }
@@ -85,6 +90,7 @@ export const CART_QUERY_FRAGMENT = `#graphql
       ... on ProductVariant {
         id
         availableForSale
+        currentlyNotInStock
         compareAtPrice {
           ...Money
         }
@@ -106,6 +112,10 @@ export const CART_QUERY_FRAGMENT = `#graphql
           id
           vendor
           scentNumber: metafield(namespace: "custom", key: "scent_number") {
+            value
+          }
+          preorderEta: metafield(namespace: "custom", key: "preorder_eta") {
+            type
             value
           }
         }

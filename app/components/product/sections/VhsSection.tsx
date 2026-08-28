@@ -98,6 +98,7 @@ type VhsSectionProps = {
   titleSubtitle?: string;
   scentProfile: ScentProfile;
   selectedVariant: ProductFragment['selectedOrFirstAvailableVariant'];
+  preorderEta?: ProductFragment['preorderEta'];
 };
 
 /** Beat between the first plate landing and the rest of the panel arriving. */
@@ -236,6 +237,7 @@ export function VhsSection({
   titleSubtitle,
   scentProfile,
   selectedVariant,
+  preorderEta,
 }: VhsSectionProps) {
   const localSectionRef = useRef<HTMLElement | null>(null);
   const setSectionRef = useCallback((node: HTMLDivElement | null) => {
@@ -689,6 +691,7 @@ export function VhsSection({
                   tone="vellum"
                   selectedVariant={selectedVariant}
                   scentNumber={scentProfile.number}
+                  preorderEta={preorderEta}
                 />
               </motion.div>
             </div>

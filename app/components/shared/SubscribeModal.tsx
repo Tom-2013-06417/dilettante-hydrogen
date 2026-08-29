@@ -11,10 +11,10 @@ import {CloseIcon} from './CloseIcon';
 type SubscribeModalProps = {
   open: boolean;
   onClose: () => void;
-  /** Override the default first-order offer line. */
-  line?: string;
-  /** Override the underlined trailing CTA word. */
-  cta?: string;
+  /** Override the default first-order offer title. */
+  title?: string;
+  /** Override the default first-order offer body. */
+  body?: string;
 };
 
 /**
@@ -25,10 +25,10 @@ type SubscribeModalProps = {
 export function SubscribeModal({
   open,
   onClose,
-  line = FIRST_ORDER_OFFER_COPY.modalLine,
-  cta = FIRST_ORDER_OFFER_COPY.modalCta,
+  title = FIRST_ORDER_OFFER_COPY.modalTitle,
+  body = FIRST_ORDER_OFFER_COPY.modalBody,
 }: SubscribeModalProps) {
-  const labelId = useId();
+  const titleId = useId();
   /** Where focus came from, so closing returns it to the footer button. */
   const restoreFocusRef = useRef<HTMLElement | null>(null);
   /** Kept in a ref so an inline `onClose` prop can't re-run the open effect. */
@@ -97,7 +97,7 @@ export function SubscribeModal({
             <motion.div
               role="dialog"
               aria-modal
-              aria-labelledby={labelId}
+              aria-labelledby={titleId}
               tabIndex={-1}
               className="relative w-full border border-vellum-100/15 bg-inkwell-800 px-6 pt-8 pb-9 font-['trust-3a'] text-vellum-100 outline-none sm:px-10 sm:pt-10 sm:pb-11"
               initial={{opacity: 0, y: 12, scale: 0.98}}
@@ -114,12 +114,19 @@ export function SubscribeModal({
                 <CloseIcon className="h-4 w-4" />
               </button>
 
-              <p
-                id={labelId}
-                className="mb-7! max-w-[42ch] pr-8 font-['trust-3a']! text-[20px] leading-snug! tracking-[0.02em]! text-vellum-100! sm:text-[22px]"
+              {/*
+              Heavy `!` use: app.css and reset.css both set unlayered `h1..h6`
+              rules (family, weight, colour, letter-spacing, margin) that
+              outrank Tailwind's layered utilities.
+            */}
+              <h2
+                id={titleId}
+                className="mb-3! pr-8 font-['trust-3a']! text-[20px] font-normal! tracking-[0.02em]! text-vellum-100! sm:text-[22px]"
               >
-                {line}{' '}
-                <span className="underline underline-offset-4">{cta}</span>
+                {title}
+              </h2>
+              <p className="mb-7! max-w-[42ch] text-[14px] leading-6! tracking-[0.02em] text-vellum-100/70 sm:text-[15px]">
+                {body}
               </p>
 
               <SubscribeForm

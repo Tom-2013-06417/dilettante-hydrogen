@@ -38,8 +38,9 @@ export const FIRST_ORDER_OFFER_SUBSCRIBED_KEY =
 export const FIRST_ORDER_OFFER_TOAST_DELAY_MS = 6_000;
 
 export const FIRST_ORDER_OFFER_COPY = {
-  modalLine: 'Join our mailing list and get 10% off your first order.',
-  modalCta: 'Sign up.',
+  modalTitle: 'Sign up and get 10% off your first order',
+  modalBody:
+    'Subscribe to receive a discount code you could use on your first purchase and to get early word on new releases.',
   cta: 'Join',
   toastLine: 'First order — 10% off when you join the list.',
 } as const;

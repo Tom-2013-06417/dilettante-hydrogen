@@ -80,7 +80,7 @@ export function ProductBottleBand({
             {scentProfile.shortDescription}
           </span>
           {scentProfile.heroNotes.length ? (
-            <span className="max-w-[36ch] font-['trust-3a'] text-[11px] lowercase leading-[1.4] tracking-[0.08em] text-inkwell-700/65 sm:text-[10px] lg:text-[13px]">
+            <span className="font-['trust-3a'] text-[11px] lowercase leading-[1.4] tracking-[0.08em] text-inkwell-700/65 sm:text-[10px] lg:text-[13px]">
               {scentProfile.heroNotes.join(' · ')}
             </span>
           ) : null}

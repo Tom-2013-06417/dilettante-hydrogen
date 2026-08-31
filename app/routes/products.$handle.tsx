@@ -5,7 +5,6 @@ import {
   Analytics,
   useOptimisticVariant,
   getAdjacentAndFirstAvailableVariants,
-  useSelectedOptionInUrlParam,
 } from '@shopify/hydrogen';
 import {HERO_STRIP_IMAGE_SRCSET} from '~/components/product/ProductHeroPhoto';
 import {ProductPage} from '~/components/product/sections';
@@ -103,10 +102,6 @@ export default function Product() {
     product.selectedOrFirstAvailableVariant,
     getAdjacentAndFirstAvailableVariants(product),
   );
-
-  // Sets the search param to the selected variant without navigation
-  // only when no search params are set in the url
-  useSelectedOptionInUrlParam(selectedVariant.selectedOptions);
 
   return (
     <>

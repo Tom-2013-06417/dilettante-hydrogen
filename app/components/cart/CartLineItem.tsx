@@ -170,48 +170,55 @@ export function CartLineItem({
             ) : null}
             {title}
           </span>
-          {preorderMessage ? (
-            <span className="mt-1.5 block font-['trust-3a'] text-[11px] leading-snug tracking-[0.04em] text-vellum-100/75">
-              {preorderMessage}
-            </span>
-          ) : null}
         </div>
       </div>
 
-      {/* Prices stack on the left, stepper on the right. Error slot is always
-          reserved below so enter/exit never shifts following content. */}
-      <div className="mt-3 mb-3 flex items-end justify-between gap-3">
-        {unitPrice ? (
-          <div className="min-w-0 font-['config-mono-vf'] tracking-[0.04em]">
-            <span className="block text-[10px] uppercase tracking-[0.08em] text-vellum-100/60">
-              Subtotal
-            </span>
-            <Money
-              as="span"
-              className="mt-px block text-[16px]"
-              data={lineSubtotal(unitPrice, quantity)}
-            />
-          </div>
-        ) : null}
-        <CartLineQuantity line={line} quantity={quantity} />
-      </div>
-      <div className="relative h-3 overflow-hidden">
-        <AnimatePresence>
-          {quantityError ? (
-            <motion.p
-              key="cart-line-qty-error"
-              {...QTY_ERROR_MOTION}
-              className="absolute inset-x-0 top-0 m-0 flex h-3 items-center justify-end gap-1.5 font-['trust-3a'] text-[11px] leading-none tracking-[0.02em] text-vellum-100/80"
-              role="alert"
-            >
-              <ExclamationTriangleIcon
-                aria-hidden="true"
-                className="size-3 shrink-0"
+      {/* Subtotal + stepper; preorder ETA and qty errors share the row below. */}
+      <div className="mt-3 mb-3">
+        <div className="grid grid-cols-[1fr_var(--cart-line-stepper-width)] items-end gap-x-3">
+          {unitPrice ? (
+            <div className="min-w-0 font-['config-mono-vf'] tracking-[0.04em]">
+              <span className="block text-[10px] uppercase tracking-[0.08em] text-vellum-100/60">
+                Subtotal
+              </span>
+              <Money
+                as="span"
+                className="mt-px block text-[16px]"
+                data={lineSubtotal(unitPrice, quantity)}
               />
-              <span className="min-w-0 truncate">{quantityError}</span>
-            </motion.p>
-          ) : null}
-        </AnimatePresence>
+            </div>
+          ) : (
+            <span aria-hidden />
+          )}
+          <CartLineQuantity line={line} quantity={quantity} />
+        </div>
+        {/* Footer row: preorder (left); qty error spans full width, right-aligned. */}
+        <div className="relative mt-1.5 min-h-3 grid grid-cols-[1fr_var(--cart-line-stepper-width)] gap-x-3">
+          <div className="relative z-0 min-w-0">
+            {preorderMessage ? (
+              <p className="m-0 font-['trust-3a'] text-[11px] leading-snug tracking-[0.04em] text-vellum-100/75">
+                {preorderMessage}
+              </p>
+            ) : null}
+          </div>
+          <span aria-hidden className="block h-3" />
+          <AnimatePresence>
+            {quantityError ? (
+              <motion.p
+                key="cart-line-qty-error"
+                {...QTY_ERROR_MOTION}
+                className="absolute inset-x-0 top-0 z-10 m-0 flex h-3 items-center justify-end gap-1.5 font-['trust-3a'] text-[11px] leading-none tracking-[0.02em] text-vellum-100/80"
+                role="alert"
+              >
+                <ExclamationTriangleIcon
+                  aria-hidden="true"
+                  className="size-3 shrink-0"
+                />
+                <span className="whitespace-nowrap">{quantityError}</span>
+              </motion.p>
+            ) : null}
+          </AnimatePresence>
+        </div>
       </div>
 
       {lineItemChildren ? (

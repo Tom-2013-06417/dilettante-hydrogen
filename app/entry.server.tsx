@@ -36,6 +36,7 @@ export default async function handleRequest(
       'https://p.typekit.net',
       'https://cdn.shopify.com',
       'https://www.facebook.com',
+      'https://graph.facebook.com',
       'https://connect.facebook.net',
       'https://*.myshopify.dev',
     ],
@@ -44,6 +45,12 @@ export default async function handleRequest(
       "'self'",
       'https://cdn.shopify.com',
       'https://connect.facebook.net',
+      // Meta Events Setup Tool (iwl.js)
+      'https://www.facebook.com',
+    ],
+    frameSrc: [
+      "'self'",
+      'https://www.facebook.com',
     ],
     imgSrc: [
       "'self'",

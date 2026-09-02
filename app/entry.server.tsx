@@ -29,18 +29,29 @@ export default async function handleRequest(
       'https://use.typekit.net',
       'https://p.typekit.net',
     ],
+    // Merged with Hydrogen defaults ('self', monorail, checkout, store domain).
     connectSrc: [
+      "'self'",
       'https://use.typekit.net',
       'https://p.typekit.net',
       'https://cdn.shopify.com',
       'https://www.facebook.com',
       'https://connect.facebook.net',
+      'https://*.myshopify.dev',
     ],
-    // scriptSrc is not merged with defaultSrc — include storefront sources explicitly.
+    // Directives Hydrogen does not default — must list every allowed origin.
     scriptSrc: [
       "'self'",
       'https://cdn.shopify.com',
       'https://connect.facebook.net',
+    ],
+    imgSrc: [
+      "'self'",
+      'https://cdn.shopify.com',
+      'https://shopify.com',
+      'https://www.facebook.com',
+      'data:',
+      'blob:',
     ],
   });
 

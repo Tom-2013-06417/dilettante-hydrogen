@@ -53,6 +53,7 @@ export default async function handleRequest(
       'data:',
       'blob:',
     ],
+    manifestSrc: ["'self'"],
   });
 
   const body = await renderToReadableStream(

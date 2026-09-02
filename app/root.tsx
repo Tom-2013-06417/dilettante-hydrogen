@@ -23,6 +23,11 @@ import {isSiteGated} from '~/lib/siteGate';
 import {isPreordersEnabled} from '~/lib/preordersEnabled';
 import {loadTeaserSlides} from '~/lib/teaserProducts';
 
+/** Oxygen preview URLs sit behind Shopify login; /manifest.json redirects to OAuth. */
+function isOxygenPreviewHost(request: Request): boolean {
+  return new URL(request.url).hostname.endsWith('.myshopify.dev');
+}
+
 export type RootLoader = typeof loader;
 
 export const meta: Route.MetaFunction = () => [
@@ -169,13 +174,13 @@ export function links() {
       href: '/favicon-16x16.png',
     },
     {rel: 'shortcut icon', href: '/favicon.ico'},
-    {rel: 'manifest', href: '/manifest.json'},
   ];
 }
 
 export async function loader(args: Route.LoaderArgs) {
   const {storefront, env, session} = args.context;
   const gated = isSiteGated(env, session, args.request);
+  const webManifest = !isOxygenPreviewHost(args.request);
 
   if (gated) {
     const teaserSlides = await loadTeaserSlides(storefront);
@@ -186,6 +191,7 @@ export async function loader(args: Route.LoaderArgs) {
       teaserSlides,
       publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
       metaPixelId: null,
+      webManifest,
       cart: Promise.resolve(null),
       isLoggedIn: Promise.resolve(false),
       header: {shop: null, menu: null},
@@ -216,6 +222,7 @@ export async function loader(args: Route.LoaderArgs) {
     ...criticalData,
     publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
     metaPixelId: env.PUBLIC_META_PIXEL_ID?.trim() || null,
+    webManifest,
     shop: getShopAnalytics({
       storefront,
       publicStorefrontId: env.PUBLIC_STOREFRONT_ID,
@@ -267,6 +274,7 @@ function loadDeferredData({context}: Route.LoaderArgs) {
 
 export function Layout({children}: {children?: React.ReactNode}) {
   const nonce = useNonce();
+  const data = useRouteLoaderData<RootLoader>('root');
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -280,6 +288,9 @@ export function Layout({children}: {children?: React.ReactNode}) {
         <link rel="stylesheet" href={tailwindCss}></link>
         <link rel="stylesheet" href={resetStyles}></link>
         <link rel="stylesheet" href={appStyles}></link>
+        {data?.webManifest ? (
+          <link rel="manifest" href="/manifest.json" />
+        ) : null}
         <Meta />
         <Links />
       </head>

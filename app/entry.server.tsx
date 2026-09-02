@@ -36,8 +36,12 @@ export default async function handleRequest(
       'https://www.facebook.com',
       'https://connect.facebook.net',
     ],
-    scriptSrc: ['https://connect.facebook.net'],
-    imgSrc: ['https://www.facebook.com'],
+    // scriptSrc is not merged with defaultSrc — include storefront sources explicitly.
+    scriptSrc: [
+      "'self'",
+      'https://cdn.shopify.com',
+      'https://connect.facebook.net',
+    ],
   });
 
   const body = await renderToReadableStream(

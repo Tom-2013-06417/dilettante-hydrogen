@@ -1,9 +1,11 @@
 import type {CartApiQueryFragment} from 'storefrontapi.generated';
 import type {CartLayout} from './CartMain';
-import {CartForm, Money, type OptimisticCart} from '@shopify/hydrogen';
+import {CartForm, Money, type OptimisticCart, useAnalytics} from '@shopify/hydrogen';
 import {useEffect, useId, useRef, useState} from 'react';
-import {useFetcher} from 'react-router';
+import {useFetcher, useRouteLoaderData} from 'react-router';
 import {Spinner} from '~/components/shared';
+import {gidToMetaContentId, trackMetaInitiateCheckout} from '~/lib/metaPixel';
+import type {loader as rootLoader} from '~/root';
 import {useCartLineUpdates} from './CartLineUpdates';
 
 type CartSummaryProps = {
@@ -34,7 +36,7 @@ export function CartSummary({cart, layout}: CartSummaryProps) {
           />
         </div>
       ) : null}
-      <CartCheckoutActions checkoutUrl={cart?.checkoutUrl} />
+      <CartCheckoutActions cart={cart} checkoutUrl={cart?.checkoutUrl} />
       <p className="text-center font-['config-mono-vf'] text-[11px] leading-snug text-vellum-100/60">
         Taxes, discounts, and shipping fees are calculated at checkout.
       </p>
@@ -42,8 +44,18 @@ export function CartSummary({cart, layout}: CartSummaryProps) {
   );
 }
 
-function CartCheckoutActions({checkoutUrl}: {checkoutUrl?: string}) {
+function CartCheckoutActions({
+  cart,
+  checkoutUrl,
+}: {
+  cart: OptimisticCart<CartApiQueryFragment | null>;
+  checkoutUrl?: string;
+}) {
   const {isCartBusy} = useCartLineUpdates();
+  const {canTrack} = useAnalytics();
+  const rootData = useRouteLoaderData<typeof rootLoader>('root');
+  const metaPixelId = rootData?.metaPixelId ?? null;
+
   if (!checkoutUrl) return null;
 
   // Stays an anchor: checkout is a cross-origin navigation, so keeping the href
@@ -61,7 +73,28 @@ function CartCheckoutActions({checkoutUrl}: {checkoutUrl?: string}) {
       }`}
       href={checkoutUrl}
       onClick={(event) => {
-        if (isCartBusy) event.preventDefault();
+        if (isCartBusy) {
+          event.preventDefault();
+          return;
+        }
+
+        if (!metaPixelId || !canTrack()) return;
+
+        const lines = cart?.lines?.nodes ?? [];
+        const contentIds = lines
+          .map((line) => gidToMetaContentId(line.merchandise?.id))
+          .filter((id): id is string => Boolean(id));
+        const numItems = lines.reduce((sum, line) => sum + line.quantity, 0);
+        const value =
+          Number.parseFloat(cart?.cost?.totalAmount?.amount ?? '0') || 0;
+        const currency = cart?.cost?.totalAmount?.currencyCode ?? 'USD';
+
+        void trackMetaInitiateCheckout(metaPixelId, {
+          value,
+          currency,
+          contentIds,
+          numItems,
+        });
       }}
       tabIndex={isCartBusy ? -1 : undefined}
       target="_self"

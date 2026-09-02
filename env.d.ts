@@ -47,5 +47,7 @@ declare global {
      */
     SHOPIFY_ADMIN_API_ACCESS_TOKEN?: string;
     PRIVATE_ADMIN_API_ACCESS_TOKEN?: string;
+    /** Meta (Facebook) Pixel ID for storefront event tracking. */
+    PUBLIC_META_PIXEL_ID?: string;
   }
 }

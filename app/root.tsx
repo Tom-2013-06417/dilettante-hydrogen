@@ -16,6 +16,7 @@ import resetStyles from '~/styles/reset.css?url';
 import appStyles from '~/styles/app.css?url';
 import tailwindCss from './styles/tailwind.css?url';
 import {PageLayout, TypekitFonts} from '~/components/layout';
+import {MetaPixel} from '~/components/analytics';
 import {ClientOnly} from '~/components/shared';
 import {TeaserPage} from '~/components/teaser';
 import {isSiteGated} from '~/lib/siteGate';
@@ -184,6 +185,7 @@ export async function loader(args: Route.LoaderArgs) {
       preordersEnabled: false as const,
       teaserSlides,
       publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
+      metaPixelId: null,
       cart: Promise.resolve(null),
       isLoggedIn: Promise.resolve(false),
       header: {shop: null, menu: null},
@@ -213,6 +215,7 @@ export async function loader(args: Route.LoaderArgs) {
     ...deferredData,
     ...criticalData,
     publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
+    metaPixelId: env.PUBLIC_META_PIXEL_ID?.trim() || null,
     shop: getShopAnalytics({
       storefront,
       publicStorefrontId: env.PUBLIC_STOREFRONT_ID,
@@ -309,6 +312,7 @@ export default function App() {
       shop={data.shop}
       consent={data.consent}
     >
+      {data.metaPixelId ? <MetaPixel pixelId={data.metaPixelId} /> : null}
       <PageLayout {...data}>
         <Outlet />
       </PageLayout>

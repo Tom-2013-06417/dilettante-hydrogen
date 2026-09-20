@@ -181,7 +181,7 @@ export function ProductHero({
             className="absolute bottom-0 left-4 right-[40%] text-inkwell-700/35 sm:left-8"
           />
 
-          <div className="relative flex w-[60%] flex-col items-start justify-center gap-[0.3rem] px-6 sm:px-10">
+          <div className="relative flex w-[60%] flex-col items-start justify-center px-6 sm:px-10">
             <BlueprintRule
               orientation="v"
               className="absolute inset-y-0 right-0 text-inkwell-700/35"
@@ -215,7 +215,10 @@ export function ProductHero({
         </div>
       </IntroFade>
 
-      <IntroFade instant={instantIntro} className="flex min-h-0 flex-1 flex-col">
+      <IntroFade
+        instant={instantIntro}
+        className="flex min-h-0 flex-1 flex-col"
+      >
         <ProductBottleBand
           title={title}
           image={secondaryImage}

@@ -144,7 +144,7 @@ function VolumeSelect({
             role="listbox"
             aria-label={optionName}
             style={{top: menuPos.top, left: menuPos.left}}
-            className="fixed z-70 min-w-[8rem] border border-inkwell-700/20 bg-vellum-paper py-1 font-['trust-3a'] text-[11px] leading-none tracking-[0.02em] text-inkwell-700 shadow-[0_8px_24px_rgb(0_0_0_/0.08)] lg:text-[13px]"
+            className="fixed z-70 min-w-[8rem] border border-inkwell-700/20 bg-vellum-paper font-['trust-3a'] text-[11px] leading-none tracking-[0.02em] text-inkwell-700 shadow-[0_8px_24px_rgb(0_0_0_/0.08)] lg:text-[13px]"
           >
             {optionValues.map((value) => {
               const {
@@ -157,7 +157,7 @@ function VolumeSelect({
                 isDifferentProduct,
               } = value;
               const itemLabel = optionLabel(name);
-              const itemClass = `block w-full whitespace-nowrap px-2.5 py-1.5 text-left transition-opacity ${
+              const itemClass = `block w-full whitespace-nowrap px-3.5 py-2.5 text-left transition-opacity ${
                 selected ? 'font-bold' : 'font-normal'
               } ${exists && available ? 'opacity-100' : 'opacity-40'} ${
                 exists && !selected
@@ -171,6 +171,7 @@ function VolumeSelect({
                     key={optionName + name}
                     role="option"
                     aria-selected={selected}
+                    className="first:mt-1 last:mb-1"
                   >
                     <Link
                       className={itemClass}
@@ -191,10 +192,11 @@ function VolumeSelect({
                   key={optionName + name}
                   role="option"
                   aria-selected={selected}
+                  className="first:mt-1 last:mb-1"
                 >
                   <button
                     type="button"
-                    className={`${itemClass} border-0 bg-transparent font-[inherit] tracking-[inherit]`}
+                    className={`${itemClass} rounded-none border-0 bg-transparent font-[inherit] tracking-[inherit]`}
                     disabled={!exists}
                     onClick={() => {
                       if (!selected && exists) {
@@ -217,11 +219,11 @@ function VolumeSelect({
       : null;
 
   return (
-    <span className="inline-flex items-baseline gap-0.5">
+    <span className="inline-flex items-baseline gap-1.5">
       <button
         ref={triggerRef}
         type="button"
-        className="inline-flex cursor-pointer items-baseline gap-0.5 border-0 bg-transparent p-0 font-[inherit] text-inherit tracking-[inherit]"
+        className="inline-flex cursor-pointer items-baseline gap-0.5 rounded-none border-0 border-b border-inkwell-700/45 bg-transparent p-0 pb-[5px] font-[inherit] text-inherit tracking-[inherit]"
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-controls={listId}
@@ -237,11 +239,9 @@ function VolumeSelect({
           });
         }}
       >
-        <span className="underline decoration-inkwell-700/45 underline-offset-[3px]">
-          {label}
-        </span>
+        <span>{label}</span>
         <ChevronDownIcon
-          className={`relative top-[0.05em] h-3 w-3 shrink-0 text-inkwell-700/55 transition-transform duration-150 ${
+          className={`relative top-[4px] h-4 w-4 shrink-0 text-inkwell-700/55 transition-transform duration-150 ${
             open ? 'rotate-180' : ''
           }`}
           aria-hidden

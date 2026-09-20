@@ -1,7 +1,7 @@
 import {ChevronDownIcon} from '@heroicons/react/16/solid';
 import type {MappedProductOptions} from '@shopify/hydrogen';
 import {AnimatePresence, motion, useReducedMotion} from 'motion/react';
-import {useEffect, useId, useRef, useState} from 'react';
+import {useEffect, useId, useRef, useState, type ReactNode} from 'react';
 import {createPortal} from 'react-dom';
 import {Link, useLocation, useSearchParams} from 'react-router';
 import {formatVolumeSuffix} from '~/lib/scentVolume';
@@ -14,15 +14,13 @@ type ScentFormatLineProps = {
   variantTitle?: string | null;
   className?: string;
   /**
-   * Size (or other) option with 2+ values. When set, the volume suffix becomes
-   * an underlined selector with a chevron; omitted / single-value stays plain.
+   * Multi-value size option. When set, the volume suffix becomes a selector;
+   * omitted / single-value stays plain text.
    */
   variantOption?: MappedProductOptions | null;
 };
 
-const MENU_EASE = 'easeOut' as const;
 const MENU_DURATION = 0.15;
-const MENU_DURATION_REDUCED = 0.01;
 
 function optionLabel(name: string): string {
   return formatVolumeSuffix(name) ?? name;
@@ -37,11 +35,8 @@ function menuPositionFromTrigger(
 }
 
 /**
- * Concentration (bold) + volume line under price / scent titles:
+ * Concentration (bold) + volume under price:
  * `Eau de Toilette — ℮ 30 mL · 1.01 fl oz`
- *
- * With multiple variants, the volume is underlined with a chevron and opens a
- * compact list that updates the selected option via the URL.
  */
 export function ScentFormatLine({
   concentration,
@@ -96,7 +91,6 @@ function VolumeSelect({
   const reducedMotion = useReducedMotion();
   const listId = useId();
   const triggerRef = useRef<HTMLButtonElement>(null);
-  const menuRef = useRef<HTMLUListElement>(null);
   const [open, setOpen] = useState(false);
   const [menuPos, setMenuPos] = useState<{top: number; left: number} | null>(
     null,
@@ -121,10 +115,14 @@ function VolumeSelect({
     if (!open) return;
 
     const onPointerDown = (event: PointerEvent) => {
-      const target = event.target as Node;
+      const target = event.target;
+      if (!(target instanceof Element)) {
+        setOpen(false);
+        return;
+      }
       if (
         triggerRef.current?.contains(target) ||
-        menuRef.current?.contains(target)
+        target.closest('[data-volume-menu]')
       ) {
         return;
       }
@@ -150,10 +148,12 @@ function VolumeSelect({
     });
   };
 
-  const menuTransition = {
-    duration: reducedMotion ? MENU_DURATION_REDUCED : MENU_DURATION,
-    ease: MENU_EASE,
-  };
+  const menuMotion = reducedMotion
+    ? {opacity: 0}
+    : {opacity: 0, y: -4};
+  const menuMotionOpen = reducedMotion
+    ? {opacity: 1}
+    : {opacity: 1, y: 0};
 
   const menu =
     typeof document !== 'undefined' && menuPos
@@ -161,84 +161,30 @@ function VolumeSelect({
           <AnimatePresence onExitComplete={() => setMenuPos(null)}>
             {open ? (
               <motion.ul
-                ref={menuRef}
+                key="volume-menu"
+                data-volume-menu=""
                 id={listId}
                 role="listbox"
                 aria-label={optionName}
                 style={{top: menuPos.top, left: menuPos.left}}
-                className="fixed z-70 min-w-[8rem] origin-top border border-inkwell-700/20 bg-vellum-paper font-['trust-3a'] text-[11px] leading-none tracking-[0.02em] text-inkwell-700 shadow-[0_8px_24px_rgb(0_0_0_/0.08)] lg:text-[13px]"
-                initial={
-                  reducedMotion ? {opacity: 0} : {opacity: 0, y: -4}
-                }
-                animate={reducedMotion ? {opacity: 1} : {opacity: 1, y: 0}}
-                exit={reducedMotion ? {opacity: 0} : {opacity: 0, y: -4}}
-                transition={menuTransition}
+                className="fixed z-70 min-w-[8rem] border border-inkwell-700/20 bg-vellum-paper font-['trust-3a'] text-[11px] leading-none tracking-[0.02em] text-inkwell-700 shadow-[0_8px_24px_rgb(0_0_0_/0.08)] lg:text-[13px]"
+                initial={menuMotion}
+                animate={menuMotionOpen}
+                exit={menuMotion}
+                transition={{
+                  duration: reducedMotion ? 0 : MENU_DURATION,
+                  ease: 'easeOut',
+                }}
               >
-                {optionValues.map((value) => {
-                  const {
-                    name,
-                    handle,
-                    variantUriQuery,
-                    selected,
-                    available,
-                    exists,
-                    isDifferentProduct,
-                  } = value;
-                  const itemLabel = optionLabel(name);
-                  const itemClass = `block w-full whitespace-nowrap px-3.5 py-2.5 text-left transition-opacity ${
-                    selected ? 'font-bold' : 'font-normal'
-                  } ${exists && available ? 'opacity-100' : 'opacity-40'} ${
-                    exists && !selected
-                      ? 'cursor-pointer hover:bg-inkwell-700/5'
-                      : 'cursor-default'
-                  }`;
-
-                  if (isDifferentProduct) {
-                    return (
-                      <li
-                        key={optionName + name}
-                        role="option"
-                        aria-selected={selected}
-                        className="first:mt-1 last:mb-1"
-                      >
-                        <Link
-                          className={itemClass}
-                          prefetch="intent"
-                          preventScrollReset
-                          replace
-                          state={state}
-                          to={`/products/${handle}?${variantUriQuery}`}
-                          onClick={() => setOpen(false)}
-                        >
-                          {itemLabel}
-                        </Link>
-                      </li>
-                    );
-                  }
-
-                  return (
-                    <li
-                      key={optionName + name}
-                      role="option"
-                      aria-selected={selected}
-                      className="first:mt-1 last:mb-1"
-                    >
-                      <button
-                        type="button"
-                        className={`${itemClass} rounded-none border-0 bg-transparent font-[inherit] tracking-[inherit]`}
-                        disabled={!exists}
-                        onClick={() => {
-                          if (!selected && exists) {
-                            selectVariantQuery(variantUriQuery);
-                          }
-                          setOpen(false);
-                        }}
-                      >
-                        {itemLabel}
-                      </button>
-                    </li>
-                  );
-                })}
+                {optionValues.map((value) => (
+                  <VolumeOption
+                    key={optionName + value.name}
+                    value={value}
+                    state={state}
+                    onSelect={selectVariantQuery}
+                    onClose={() => setOpen(false)}
+                  />
+                ))}
               </motion.ul>
             ) : null}
           </AnimatePresence>,
@@ -274,5 +220,76 @@ function VolumeSelect({
       </button>
       {menu}
     </>
+  );
+}
+
+function VolumeOption({
+  value,
+  state,
+  onSelect,
+  onClose,
+}: {
+  value: OptionValue;
+  state: unknown;
+  onSelect: (variantUriQuery: string) => void;
+  onClose: () => void;
+}) {
+  const {
+    name,
+    handle,
+    variantUriQuery,
+    selected,
+    available,
+    exists,
+    isDifferentProduct,
+  } = value;
+
+  const className = `block w-full whitespace-nowrap px-3.5 py-2.5 text-left transition-opacity ${
+    selected ? 'font-bold' : 'font-normal'
+  } ${exists && available ? 'opacity-100' : 'opacity-40'} ${
+    exists && !selected
+      ? 'cursor-pointer hover:bg-inkwell-700/5'
+      : 'cursor-default'
+  }`;
+
+  let control: ReactNode;
+  if (isDifferentProduct) {
+    control = (
+      <Link
+        className={className}
+        prefetch="intent"
+        preventScrollReset
+        replace
+        state={state}
+        to={`/products/${handle}?${variantUriQuery}`}
+        onClick={onClose}
+      >
+        {optionLabel(name)}
+      </Link>
+    );
+  } else {
+    control = (
+      <button
+        type="button"
+        className={`${className} rounded-none border-0 bg-transparent font-[inherit] tracking-[inherit]`}
+        disabled={!exists}
+        onClick={() => {
+          if (!selected && exists) onSelect(variantUriQuery);
+          onClose();
+        }}
+      >
+        {optionLabel(name)}
+      </button>
+    );
+  }
+
+  return (
+    <li
+      role="option"
+      aria-selected={selected}
+      className="first:mt-1 last:mb-1"
+    >
+      {control}
+    </li>
   );
 }

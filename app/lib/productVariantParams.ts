@@ -6,10 +6,7 @@ import type {ProductFragment} from 'storefrontapi.generated';
 type SelectedOption = {name: string; value: string};
 type ProductVariant = ProductFragment['selectedOrFirstAvailableVariant'];
 
-/**
- * Seed option search params through React Router when the URL has none yet.
- * Preserves location.state so stackEnter (and product intros) stay intact.
- */
+/** Seed option search params when the URL has none. Preserves location.state. */
 export function useSeedVariantSearchParams(
   selectedOptions: SelectedOption[] | undefined | null,
 ) {
@@ -41,10 +38,7 @@ export function useSeedVariantSearchParams(
   }, [selectedOptions, searchParams, setSearchParams, state]);
 }
 
-/**
- * Resolve the active variant from the URL against adjacent / option variants
- * so selection can update without a product loader refetch.
- */
+/** Active variant from URL params + adjacent / option variants (no loader wait). */
 export function useVariantFromSearchParams(
   product: ProductFragment,
   loaderVariant: ProductVariant,
@@ -54,14 +48,15 @@ export function useVariantFromSearchParams(
   return useMemo(() => {
     if (!searchParams.toString()) return loaderVariant;
 
-    const variants = getAdjacentAndFirstAvailableVariants(product);
-    const matched = variants.find((variant) => {
-      const options = variant.selectedOptions;
-      if (!options?.length) return false;
-      return options.every(
-        (option) => searchParams.get(option.name) === option.value,
-      );
-    });
+    const matched = getAdjacentAndFirstAvailableVariants(product).find(
+      (variant) => {
+        const options = variant.selectedOptions;
+        if (!options?.length) return false;
+        return options.every(
+          (option) => searchParams.get(option.name) === option.value,
+        );
+      },
+    );
 
     return (matched as ProductVariant) ?? loaderVariant;
   }, [searchParams, product, loaderVariant]);

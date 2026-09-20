@@ -1,5 +1,4 @@
 import type {MappedProductOptions} from '@shopify/hydrogen';
-import {useReducedMotion} from 'motion/react';
 import {useState} from 'react';
 import {useLocation, useRouteLoaderData} from 'react-router';
 import type {
@@ -72,7 +71,6 @@ export function ProductHero({
   scentProfile,
   preorderEta,
 }: ProductHeroProps) {
-  const reducedMotion = useReducedMotion();
   const {state} = useLocation();
   const rootData = useRouteLoaderData<typeof rootLoader>('root');
   const preordersEnabled = preordersEnabledFromRootData(rootData);
@@ -83,9 +81,8 @@ export function ProductHero({
   );
   // Stack push already animates the page in — skip nested hero intros.
   const instantIntro = isStackEnterState(state);
-  const [titleNoise, setTitleNoise] = useState(
-    Boolean(reducedMotion) || instantIntro,
-  );
+  // Noise SVG enabled after title intro (keeps SSR/hydrate markup aligned).
+  const [titleNoise, setTitleNoise] = useState(false);
   const volumeOption = findVolumeOption(productOptions);
 
   return (

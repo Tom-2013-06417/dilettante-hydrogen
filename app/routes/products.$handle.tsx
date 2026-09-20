@@ -45,9 +45,8 @@ export const meta: Route.MetaFunction = ({data}) => {
 };
 
 /**
- * Variant option changes only update search params. Skip the product loader so
- * switching size doesn't refetch / remount the page. Selection is resolved
- * client-side from adjacentVariants + option firstSelectableVariant.
+ * Same-path search updates are variant switches — skip the product loader.
+ * Selection is resolved client-side from adjacent / option variants.
  */
 export function shouldRevalidate({
   currentUrl,
@@ -116,14 +115,10 @@ function loadDeferredData({context, params}: Route.LoaderArgs) {
 export default function Product() {
   const {product} = useLoaderData<typeof loader>();
 
-  // Prefer the URL-matched variant from adjacent / option variants so the UI
-  // updates without a loader round-trip (see shouldRevalidate above).
   const selectedVariant = useVariantFromSearchParams(
     product,
     product.selectedOrFirstAvailableVariant,
   );
-
-  // Seed option params via React Router when the URL has none yet.
   useSeedVariantSearchParams(selectedVariant?.selectedOptions);
 
   const productOptions = getProductOptions({

@@ -15,14 +15,8 @@ type IntroTitleSlideProps = {
 };
 
 /**
- * Title slides in from the left.
- *
- * Waits for `document.fonts.ready` (and Wayfinder if available) before
- * starting — otherwise the first frames use a fallback face, then the
- * Typekit swap causes a one-frame layout hitch at the start of the slide.
- *
- * Avoids Tailwind `opacity-0` on the motion node (it fights Motion’s inline
- * opacity). Animation is armed after mount so hard refresh still plays it.
+ * Title slides in from the left after fonts are ready (avoids a Typekit swap
+ * hitch). Pre-mount shell matches SSR when `instant` differs on hydrate.
  */
 export function IntroTitleSlide({
   className = '',
@@ -30,12 +24,19 @@ export function IntroTitleSlide({
   onAnimationComplete,
   instant = false,
 }: IntroTitleSlideProps) {
-  const reducedMotion = useReducedMotion();
+  const prefersReducedMotion = useReducedMotion();
+  const [mounted, setMounted] = useState(false);
   const [fontsReady, setFontsReady] = useState(false);
   const [play, setPlay] = useState(false);
 
   useEffect(() => {
-    if (reducedMotion || instant) {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+
+    if (prefersReducedMotion || instant) {
       onAnimationComplete?.();
       return;
     }
@@ -47,7 +48,7 @@ export function IntroTitleSlide({
         await document.fonts.ready;
         await document.fonts.load('300 60px wayfinder-cf');
       } catch {
-        // If the face isn’t registered yet, still proceed after fonts.ready.
+        // Proceed even if the face isn’t registered yet.
       }
       if (!cancelled) setFontsReady(true);
     }
@@ -58,25 +59,24 @@ export function IntroTitleSlide({
     };
     // Intentionally omit onAnimationComplete — parent often passes an inline fn.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [reducedMotion, instant]);
+  }, [mounted, prefersReducedMotion, instant]);
 
   useEffect(() => {
-    if (!fontsReady || instant || reducedMotion) return;
+    if (!fontsReady || instant || prefersReducedMotion) return;
     const id = requestAnimationFrame(() => setPlay(true));
     return () => cancelAnimationFrame(id);
-  }, [fontsReady, instant, reducedMotion]);
+  }, [fontsReady, instant, prefersReducedMotion]);
 
-  if (reducedMotion || instant) {
-    return <div className={className}>{children}</div>;
-  }
-
-  // Keep the title out of visible paint until fonts + motion start.
-  if (!fontsReady) {
+  if (!mounted || (!fontsReady && !instant && !prefersReducedMotion)) {
     return (
-      <div className={className} style={{opacity: 0}} aria-hidden>
+      <div className={`${className} opacity-0`.trim()} aria-hidden>
         {children}
       </div>
     );
+  }
+
+  if (prefersReducedMotion || instant) {
+    return <div className={className}>{children}</div>;
   }
 
   return (

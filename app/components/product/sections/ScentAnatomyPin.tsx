@@ -1,5 +1,5 @@
 import {motion, useReducedMotion, useScroll, useTransform} from 'motion/react';
-import {type RefObject} from 'react';
+import {useEffect, useState, type RefObject} from 'react';
 import {useLocation} from 'react-router';
 import {
   PRODUCT_FADE_DELAY,
@@ -48,6 +48,11 @@ export function ScentAnatomyCue({
   const reducedMotion = useReducedMotion();
   const {state} = useLocation();
   const stackEnter = isStackEnterState(state);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const {scrollYProgress} = useScroll({
     target: scentSectionRef,
@@ -55,8 +60,7 @@ export function ScentAnatomyCue({
     offset: ['start end', `${SCRUB_END} start`],
   });
 
-  // Rests at 0.75, not 1 — the class below covers the reduced-motion path,
-  // where no inline motion style is applied.
+  // Rests at 0.75 until the cube pins, then fades out.
   const arrowOpacity = useTransform(
     scrollYProgress,
     [PIN - 0.02, PIN],
@@ -66,16 +70,19 @@ export function ScentAnatomyCue({
     v < 0.08 ? 'none' : 'auto',
   );
 
+  // Same initial opacity on SSR and hydrate; reduced-motion snaps via duration 0.
+  const introDelay = stackEnter
+    ? 0.12
+    : PRODUCT_FADE_DELAY + PRODUCT_FADE_DURATION * 0.55;
+
   return (
     <motion.div
       className="sticky top-[20%] z-20 flex w-full shrink-0 flex-col items-center pt-(--scent-anatomy-cue-pad-top,8px) pb-(--scent-anatomy-cue-pad-bottom,40px) text-inkwell-700/45"
-      initial={reducedMotion || stackEnter ? false : {opacity: 0}}
+      initial={{opacity: 0}}
       animate={{opacity: 1}}
       transition={{
-        delay: stackEnter
-          ? 0.12
-          : PRODUCT_FADE_DELAY + PRODUCT_FADE_DURATION * 0.55,
-        duration: 0.45,
+        delay: reducedMotion ? 0 : introDelay,
+        duration: reducedMotion ? 0 : 0.45,
         ease: 'easeOut',
       }}
     >
@@ -84,12 +91,12 @@ export function ScentAnatomyCue({
         className={`${CUE_BUTTON_CLASS} h-(--scent-anatomy-cue-btn-h,32px) opacity-75 transition-opacity hover:opacity-100`}
         aria-label="Scroll to scent anatomy"
         style={
-          reducedMotion
-            ? undefined
-            : {
+          mounted && !reducedMotion
+            ? {
                 opacity: arrowOpacity,
                 pointerEvents: arrowPointerEvents,
               }
+            : undefined
         }
         onClick={() => {
           scentSectionRef.current?.scrollIntoView({
@@ -121,6 +128,11 @@ export function ScenesCue({
 }) {
   const reducedMotion = useReducedMotion();
   const {fill, cueRef, openScenes} = useScenesGate();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const {scrollYProgress} = useScroll({
     target: scentSectionRef,
@@ -151,7 +163,13 @@ export function ScenesCue({
   return (
     <motion.div
       className="flex w-full shrink-0 flex-col items-center pt-(--scent-anatomy-cue-pad-top,8px) pb-(--scent-anatomy-cue-pad-bottom,40px)"
-      style={reducedMotion ? {opacity: 1} : {opacity}}
+      style={
+        mounted
+          ? reducedMotion
+            ? {opacity: 1}
+            : {opacity}
+          : undefined
+      }
     >
       {/*
         Opacity is driven inline on the wrapper above, so the button keeps a

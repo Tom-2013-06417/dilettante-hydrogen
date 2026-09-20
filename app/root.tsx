@@ -21,6 +21,7 @@ import {ClientOnly} from '~/components/shared';
 import {TeaserPage} from '~/components/teaser';
 import {isSiteGated} from '~/lib/siteGate';
 import {isPreordersEnabled} from '~/lib/preordersEnabled';
+import {shopPreordersEnabledMetafield} from '~/lib/shopMetafields';
 import {loadTeaserSlides} from '~/lib/teaserProducts';
 
 /** Oxygen preview URLs sit behind Shopify login; /manifest.json redirects to OAuth. */
@@ -215,7 +216,7 @@ export async function loader(args: Route.LoaderArgs) {
   return {
     siteGated: false as const,
     preordersEnabled: isPreordersEnabled(
-      criticalData.header?.shop?.preordersEnabled ?? null,
+      shopPreordersEnabledMetafield(criticalData.header?.shop?.metafields),
       env,
     ),
     ...deferredData,

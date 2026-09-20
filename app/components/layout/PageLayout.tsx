@@ -6,9 +6,9 @@ import {PageTransition} from './PageTransition';
 import {Header, HeaderMenu} from './Header';
 import {SiteFooter} from './SiteFooter';
 import {STATIC_PAGE_PATHS} from '~/lib/staticPages';
+import {shopBrandOneLiner} from '~/lib/shopMetafields';
 import {CartLineFeedbackProvider, CartMain} from '~/components/cart';
 import {HeaderBar} from '~/components/home/sections/HeaderBar';
-import {ClientOnly, FirstOrderOfferToast} from '~/components/shared';
 
 interface PageLayoutProps {
   cart: Promise<CartApiQueryFragment | null>;
@@ -86,10 +86,11 @@ export function PageLayout({
             <PageTransition>{children}</PageTransition>
           )}
         </main>
-        {showFooter ? <SiteFooter /> : null}
-        <ClientOnly>
-          <FirstOrderOfferToast />
-        </ClientOnly>
+        {showFooter ? (
+          <SiteFooter
+            brandOneLiner={shopBrandOneLiner(header?.shop?.metafields)}
+          />
+        ) : null}
       </CartLineFeedbackProvider>
     </Aside.Provider>
   );

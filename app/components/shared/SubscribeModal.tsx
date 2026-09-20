@@ -125,7 +125,7 @@ export function SubscribeModal({
               >
                 {title}
               </h2>
-              <p className="mb-7! max-w-[42ch] text-[14px] leading-6! tracking-[0.02em] text-vellum-100/70 sm:text-[15px]">
+              <p className="mb-7! max-w-[42ch] text-[14px] leading-6! tracking-[0.02em] text-vellum-100/70! sm:text-[15px]">
                 {body}
               </p>
 

@@ -1,19 +1,17 @@
-import {useState} from 'react';
 import {Link} from 'react-router';
-import {PageContainer, SubscribeModal} from '~/components/shared';
+import {NewsletterSignup, PageContainer} from '~/components/shared';
 import {SOCIAL_LINKS} from '~/lib/constants';
+import wordmarkVellum from '~/assets/design/wordmark-vellum.svg';
 
 /**
- * `!` on the colours: app.css sets an unlayered `a { color: inherit }` that
- * outranks Tailwind's layered text-* utilities. `hover:underline` is stated
- * rather than left to reset.css's global `a:hover` so the Subscribe button —
- * not an anchor — behaves like its neighbours.
+ * Anchors inherit `text-vellum-100` from the footer via app.css `a { color: inherit }`.
+ * Avoid per-element opacity so nav, icons, copy, and newsletter share one cream.
  */
 const LINK_CLASS =
-  "font-['config-mono-vf'] text-[11px] uppercase tracking-[0.08em] text-vellum-100/80! transition-colors hover:text-vellum-100! hover:underline";
+  "font-['config-mono-vf'] text-[11px] uppercase tracking-[0.08em] transition-opacity hover:underline hover:opacity-70";
 
 const ICON_LINK_CLASS =
-  'flex items-center text-vellum-100/80! transition-colors hover:text-vellum-100!';
+  'flex items-center transition-opacity hover:opacity-70';
 
 /** `[&_li]:mb-0!` clears reset.css's unlayered `li { margin-bottom: 0.5rem }`. */
 const LIST_CLASS = 'm-0 flex list-none items-center p-0 [&_li]:mb-0!';
@@ -83,75 +81,132 @@ const SOCIAL_ICONS = {
   email: EmailIcon,
 };
 
-/**
- * Site footer: page links opposite the social icons, then the credits.
- */
-export function SiteFooter() {
-  const [subscribeOpen, setSubscribeOpen] = useState(false);
+function FooterNav({orientation}: {orientation: 'horizontal' | 'vertical'}) {
+  const listClass =
+    orientation === 'vertical'
+      ? `${LIST_CLASS} flex-col items-start gap-y-4`
+      : `${LIST_CLASS} justify-center gap-x-6`;
 
   return (
-    <footer className="site-footer w-full bg-inkwell-800 font-['trust-3a'] text-vellum-100">
-      {/* In-flow offer strip portals here so rubber-band scroll stays attached. */}
-      <div data-first-order-offer-slot="" />
-      <PageContainer>
-        <div className="flex flex-col items-center gap-y-3 pt-4.5 pb-3">
-          <nav aria-label="Footer">
-            <ul className={`${LIST_CLASS} justify-center gap-x-6`}>
-              {PAGE_LINKS.map((link) => (
-                <li key={link.to}>
-                  <Link to={link.to} prefetch="intent" className={LINK_CLASS}>
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-              <li>
-                <button
-                  type="button"
-                  onClick={() => setSubscribeOpen(true)}
-                  aria-haspopup="dialog"
-                  aria-expanded={subscribeOpen}
-                  className={`${LINK_CLASS} cursor-pointer border-0 bg-transparent p-0`}
-                >
-                  Subscribe
-                </button>
-              </li>
-            </ul>
-          </nav>
+    <nav aria-label="Footer">
+      <ul className={listClass}>
+        {PAGE_LINKS.map((link) => (
+          <li key={link.to}>
+            <Link to={link.to} prefetch="intent" className={LINK_CLASS}>
+              {link.label}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  );
+}
 
-          <ul className={`${LIST_CLASS} justify-center gap-x-4`}>
-            {SOCIAL_LINKS.map((link) => {
-              const Icon = SOCIAL_ICONS[link.id];
-              // mailto: hands off to the mail client — a new tab would leave a
-              // blank window behind, and there's no opener to sever.
-              const newTab = link.href.startsWith('http');
-              return (
-                <li key={link.href}>
-                  <a
-                    href={link.href}
-                    target={newTab ? '_blank' : undefined}
-                    rel={newTab ? 'noopener noreferrer' : undefined}
-                    aria-label={link.label}
-                    className={ICON_LINK_CLASS}
-                  >
-                    <Icon className="h-5 w-5" />
-                  </a>
-                </li>
-              );
-            })}
-          </ul>
+function SocialIcons({justify}: {justify: 'center' | 'start'}) {
+  return (
+    <ul
+      className={`${LIST_CLASS} gap-x-4 ${
+        justify === 'center' ? 'justify-center' : 'justify-start'
+      }`}
+    >
+      {SOCIAL_LINKS.map((link) => {
+        const Icon = SOCIAL_ICONS[link.id];
+        // mailto: hands off to the mail client — a new tab would leave a
+        // blank window behind, and there's no opener to sever.
+        const newTab = link.href.startsWith('http');
+        return (
+          <li key={link.href}>
+            <a
+              href={link.href}
+              target={newTab ? '_blank' : undefined}
+              rel={newTab ? 'noopener noreferrer' : undefined}
+              aria-label={link.label}
+              className={ICON_LINK_CLASS}
+            >
+              <Icon className="h-5 w-5" />
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
 
-          {/* `mt-5!` clears reset.css's unlayered `p { margin: 0 }`. */}
-          <p className="mt-5! text-center font-['config-mono-vf'] text-[10px] uppercase tracking-[0.08em] text-vellum-100/45">
-            © {new Date().getFullYear()} Dilettante Perfumery. All rights
-            reserved.
-          </p>
-        </div>
-      </PageContainer>
+function Copyright({align}: {align: 'center' | 'start'}) {
+  return (
+    <div
+      className={`font-['config-mono-vf'] text-[10px] uppercase tracking-[0.08em] ${
+        align === 'center' ? 'text-center' : 'text-left'
+      }`}
+    >
+      © {new Date().getFullYear()} Dilettante Perfumery. All rights reserved.
+    </div>
+  );
+}
 
-      <SubscribeModal
-        open={subscribeOpen}
-        onClose={() => setSubscribeOpen(false)}
-      />
-    </footer>
+type SiteFooterProps = {
+  /** Shop metafield `custom.brand_one_liner`. */
+  brandOneLiner?: string;
+};
+
+/**
+ * Site footer: mobile keeps the centred link/social stack (newsletter sits in
+ * a section above). Desktop is two columns — nav/socials | newsletter — then
+ * a rule and the copyright line.
+ *
+ * Cream color + trust face live on this wrapper; anchors inherit via app.css
+ * `a { color: inherit }`.
+ */
+export function SiteFooter({brandOneLiner}: SiteFooterProps) {
+  return (
+    <div className="bg-inkwell-800 font-['trust-3a'] text-vellum-100">
+      {/* Mobile-only newsletter band above the footer chrome. */}
+      <section aria-label="Newsletter" className="w-full md:hidden">
+        <PageContainer>
+          <div className="pt-8 pb-6">
+            <NewsletterSignup brandOneLiner={brandOneLiner} />
+          </div>
+        </PageContainer>
+      </section>
+
+      <footer className="site-footer w-full">
+        <PageContainer>
+          {/* Mobile: previous centred layout (Subscribe moved to the band above). */}
+          <div className="flex flex-col items-center gap-y-3 pt-4.5 pb-3 md:hidden">
+            <FooterNav orientation="horizontal" />
+            <SocialIcons justify="center" />
+            <div className="mt-5">
+              <Copyright align="center" />
+            </div>
+          </div>
+
+          {/* Desktop: two columns, rule, copyright. */}
+          <div className="hidden pt-12 pb-8 md:block">
+            <div className="mb-5 grid grid-cols-[3fr_7fr] items-start gap-x-16">
+              <div className="flex flex-col gap-y-10">
+                <Link to="/" prefetch="intent" className="inline-flex w-fit">
+                  <img
+                    src={wordmarkVellum}
+                    alt="Dilettante"
+                    className="h-6 w-auto"
+                  />
+                </Link>
+                <FooterNav orientation="vertical" />
+                <SocialIcons justify="start" />
+              </div>
+              <NewsletterSignup
+                brandOneLiner={brandOneLiner}
+                className="w-full"
+              />
+            </div>
+
+            <hr className="mt-12 border-0 border-t-[0.5px]! border-t-vellum-100! py-2" />
+            <div>
+              <Copyright align="start" />
+            </div>
+          </div>
+        </PageContainer>
+      </footer>
+    </div>
   );
 }

@@ -1,5 +1,5 @@
 import {ChevronDownIcon} from '@heroicons/react/16/solid';
-import type {MappedProductOptions} from '@shopify/hydrogen';
+import {Money, type MappedProductOptions} from '@shopify/hydrogen';
 import {AnimatePresence, motion, useReducedMotion} from 'motion/react';
 import {useEffect, useId, useRef, useState, type ReactNode} from 'react';
 import {createPortal} from 'react-dom';
@@ -148,12 +148,8 @@ function VolumeSelect({
     });
   };
 
-  const menuMotion = reducedMotion
-    ? {opacity: 0}
-    : {opacity: 0, y: -4};
-  const menuMotionOpen = reducedMotion
-    ? {opacity: 1}
-    : {opacity: 1, y: 0};
+  const menuMotion = reducedMotion ? {opacity: 0} : {opacity: 0, y: -4};
+  const menuMotionOpen = reducedMotion ? {opacity: 1} : {opacity: 1, y: 0};
 
   const menu =
     typeof document !== 'undefined' && menuPos
@@ -242,15 +238,44 @@ function VolumeOption({
     available,
     exists,
     isDifferentProduct,
+    variant,
   } = value;
 
-  const className = `block w-full whitespace-nowrap px-3.5 py-2.5 text-left transition-opacity ${
-    selected ? 'font-bold' : 'font-normal'
-  } ${exists && available ? 'opacity-100' : 'opacity-40'} ${
+  const price = variant?.price;
+  const className = `flex w-full flex-row items-center gap-2.5 whitespace-nowrap px-3.5 py-2.5 text-left font-normal transition-opacity ${
+    !exists || !available
+      ? 'opacity-40'
+      : selected
+        ? 'opacity-100'
+        : 'opacity-80'
+  } ${
     exists && !selected
       ? 'cursor-pointer hover:bg-inkwell-700/5'
       : 'cursor-default'
   }`;
+
+  const content = (
+    <>
+      <span
+        className={`size-2.5 shrink-0 rounded-full border border-current ${
+          selected ? 'bg-current' : 'bg-transparent'
+        }`}
+        aria-hidden
+      />
+      <span className="flex min-w-0 flex-col items-start gap-1">
+        {price ? (
+          <Money
+            data={price}
+            as="span"
+            className="font-['config-mono-vf'] text-[16px] leading-none tracking-[0.04em] lg:text-[18px]"
+          />
+        ) : null}
+        <span className="text-[11px] leading-none tracking-[0.02em] lg:text-[13px]">
+          {optionLabel(name)}
+        </span>
+      </span>
+    </>
+  );
 
   let control: ReactNode;
   if (isDifferentProduct) {
@@ -264,7 +289,7 @@ function VolumeOption({
         to={`/products/${handle}?${variantUriQuery}`}
         onClick={onClose}
       >
-        {optionLabel(name)}
+        {content}
       </Link>
     );
   } else {
@@ -278,17 +303,13 @@ function VolumeOption({
           onClose();
         }}
       >
-        {optionLabel(name)}
+        {content}
       </button>
     );
   }
 
   return (
-    <li
-      role="option"
-      aria-selected={selected}
-      className="first:mt-1 last:mb-1"
-    >
+    <li role="option" aria-selected={selected} className="first:mt-1 last:mb-1">
       {control}
     </li>
   );

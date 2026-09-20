@@ -1,5 +1,6 @@
 import {ChevronDownIcon} from '@heroicons/react/16/solid';
 import type {MappedProductOptions} from '@shopify/hydrogen';
+import {AnimatePresence, motion, useReducedMotion} from 'motion/react';
 import {useEffect, useId, useRef, useState} from 'react';
 import {createPortal} from 'react-dom';
 import {Link, useLocation, useSearchParams} from 'react-router';
@@ -18,6 +19,10 @@ type ScentFormatLineProps = {
    */
   variantOption?: MappedProductOptions | null;
 };
+
+const MENU_EASE = 'easeOut' as const;
+const MENU_DURATION = 0.15;
+const MENU_DURATION_REDUCED = 0.01;
 
 function optionLabel(name: string): string {
   return formatVolumeSuffix(name) ?? name;
@@ -88,6 +93,7 @@ function VolumeSelect({
 }) {
   const [, setSearchParams] = useSearchParams();
   const {state} = useLocation();
+  const reducedMotion = useReducedMotion();
   const listId = useId();
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLUListElement>(null);
@@ -144,83 +150,98 @@ function VolumeSelect({
     });
   };
 
+  const menuTransition = {
+    duration: reducedMotion ? MENU_DURATION_REDUCED : MENU_DURATION,
+    ease: MENU_EASE,
+  };
+
   const menu =
-    open && menuPos && typeof document !== 'undefined'
+    typeof document !== 'undefined' && menuPos
       ? createPortal(
-          <ul
-            ref={menuRef}
-            id={listId}
-            role="listbox"
-            aria-label={optionName}
-            style={{top: menuPos.top, left: menuPos.left}}
-            className="fixed z-70 min-w-[8rem] border border-inkwell-700/20 bg-vellum-paper font-['trust-3a'] text-[11px] leading-none tracking-[0.02em] text-inkwell-700 shadow-[0_8px_24px_rgb(0_0_0_/0.08)] lg:text-[13px]"
-          >
-            {optionValues.map((value) => {
-              const {
-                name,
-                handle,
-                variantUriQuery,
-                selected,
-                available,
-                exists,
-                isDifferentProduct,
-              } = value;
-              const itemLabel = optionLabel(name);
-              const itemClass = `block w-full whitespace-nowrap px-3.5 py-2.5 text-left transition-opacity ${
-                selected ? 'font-bold' : 'font-normal'
-              } ${exists && available ? 'opacity-100' : 'opacity-40'} ${
-                exists && !selected
-                  ? 'cursor-pointer hover:bg-inkwell-700/5'
-                  : 'cursor-default'
-              }`;
+          <AnimatePresence onExitComplete={() => setMenuPos(null)}>
+            {open ? (
+              <motion.ul
+                ref={menuRef}
+                id={listId}
+                role="listbox"
+                aria-label={optionName}
+                style={{top: menuPos.top, left: menuPos.left}}
+                className="fixed z-70 min-w-[8rem] origin-top border border-inkwell-700/20 bg-vellum-paper font-['trust-3a'] text-[11px] leading-none tracking-[0.02em] text-inkwell-700 shadow-[0_8px_24px_rgb(0_0_0_/0.08)] lg:text-[13px]"
+                initial={
+                  reducedMotion ? {opacity: 0} : {opacity: 0, y: -4}
+                }
+                animate={reducedMotion ? {opacity: 1} : {opacity: 1, y: 0}}
+                exit={reducedMotion ? {opacity: 0} : {opacity: 0, y: -4}}
+                transition={menuTransition}
+              >
+                {optionValues.map((value) => {
+                  const {
+                    name,
+                    handle,
+                    variantUriQuery,
+                    selected,
+                    available,
+                    exists,
+                    isDifferentProduct,
+                  } = value;
+                  const itemLabel = optionLabel(name);
+                  const itemClass = `block w-full whitespace-nowrap px-3.5 py-2.5 text-left transition-opacity ${
+                    selected ? 'font-bold' : 'font-normal'
+                  } ${exists && available ? 'opacity-100' : 'opacity-40'} ${
+                    exists && !selected
+                      ? 'cursor-pointer hover:bg-inkwell-700/5'
+                      : 'cursor-default'
+                  }`;
 
-              if (isDifferentProduct) {
-                return (
-                  <li
-                    key={optionName + name}
-                    role="option"
-                    aria-selected={selected}
-                    className="first:mt-1 last:mb-1"
-                  >
-                    <Link
-                      className={itemClass}
-                      prefetch="intent"
-                      preventScrollReset
-                      replace
-                      state={state}
-                      to={`/products/${handle}?${variantUriQuery}`}
-                      onClick={() => setOpen(false)}
+                  if (isDifferentProduct) {
+                    return (
+                      <li
+                        key={optionName + name}
+                        role="option"
+                        aria-selected={selected}
+                        className="first:mt-1 last:mb-1"
+                      >
+                        <Link
+                          className={itemClass}
+                          prefetch="intent"
+                          preventScrollReset
+                          replace
+                          state={state}
+                          to={`/products/${handle}?${variantUriQuery}`}
+                          onClick={() => setOpen(false)}
+                        >
+                          {itemLabel}
+                        </Link>
+                      </li>
+                    );
+                  }
+
+                  return (
+                    <li
+                      key={optionName + name}
+                      role="option"
+                      aria-selected={selected}
+                      className="first:mt-1 last:mb-1"
                     >
-                      {itemLabel}
-                    </Link>
-                  </li>
-                );
-              }
-
-              return (
-                <li
-                  key={optionName + name}
-                  role="option"
-                  aria-selected={selected}
-                  className="first:mt-1 last:mb-1"
-                >
-                  <button
-                    type="button"
-                    className={`${itemClass} rounded-none border-0 bg-transparent font-[inherit] tracking-[inherit]`}
-                    disabled={!exists}
-                    onClick={() => {
-                      if (!selected && exists) {
-                        selectVariantQuery(variantUriQuery);
-                      }
-                      setOpen(false);
-                    }}
-                  >
-                    {itemLabel}
-                  </button>
-                </li>
-              );
-            })}
-          </ul>,
+                      <button
+                        type="button"
+                        className={`${itemClass} rounded-none border-0 bg-transparent font-[inherit] tracking-[inherit]`}
+                        disabled={!exists}
+                        onClick={() => {
+                          if (!selected && exists) {
+                            selectVariantQuery(variantUriQuery);
+                          }
+                          setOpen(false);
+                        }}
+                      >
+                        {itemLabel}
+                      </button>
+                    </li>
+                  );
+                })}
+              </motion.ul>
+            ) : null}
+          </AnimatePresence>,
           document.body,
         )
       : null;
@@ -237,10 +258,7 @@ function VolumeSelect({
         aria-label={`Select ${optionName}`}
         onClick={() => {
           setOpen((wasOpen) => {
-            if (wasOpen) {
-              setMenuPos(null);
-              return false;
-            }
+            if (wasOpen) return false;
             setMenuPos(menuPositionFromTrigger(triggerRef.current));
             return true;
           });

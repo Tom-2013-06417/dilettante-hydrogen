@@ -5,16 +5,18 @@ import wordmarkVellum from '~/assets/design/wordmark-vellum.svg';
 
 /**
  * Anchors inherit `text-vellum-100` from the footer via app.css `a { color: inherit }`.
- * Avoid per-element opacity so nav, icons, copy, and newsletter share one cream.
  */
 const LINK_CLASS =
   "font-['config-mono-vf'] text-[11px] uppercase tracking-[0.08em] transition-opacity hover:underline hover:opacity-70";
 
-const ICON_LINK_CLASS =
-  'flex items-center transition-opacity hover:opacity-70';
+const ICON_LINK_CLASS = 'flex items-center transition-opacity hover:opacity-70';
 
-/** `[&_li]:mb-0!` clears reset.css's unlayered `li { margin-bottom: 0.5rem }`. */
+/** Clears reset.css's unlayered `li { margin-bottom: 0.5rem }`. */
 const LIST_CLASS = 'm-0 flex list-none items-center p-0 [&_li]:mb-0!';
+
+/** Matches newsletter input border (`border-vellum-100/55`). */
+const FOOTER_RULE =
+  'm-0 border-0 border-t-[0.5px]! border-t-vellum-100/55!';
 
 const PAGE_LINKS = [
   {label: 'About', to: '/about'},
@@ -22,7 +24,6 @@ const PAGE_LINKS = [
   {label: 'Contact', to: '/contact'},
 ];
 
-/** Drawn from primitives to match the thin-stroke icon language. */
 function InstagramIcon({className}: {className?: string}) {
   return (
     <svg
@@ -41,8 +42,7 @@ function InstagramIcon({className}: {className?: string}) {
 }
 
 /**
- * Note glyph only — the container tile from the source file is dropped so the
- * mark reads as a bare icon alongside Instagram.
+ * Note glyph only — container tile dropped so it sits with Instagram.
  * Source: https://commons.wikimedia.org/wiki/File:Tiktok_icon.svg (CC0).
  */
 function TiktokIcon({className}: {className?: string}) {
@@ -58,7 +58,6 @@ function TiktokIcon({className}: {className?: string}) {
   );
 }
 
-/** Envelope drawn to match the Instagram mark's thin-stroke language. */
 function EmailIcon({className}: {className?: string}) {
   return (
     <svg
@@ -81,46 +80,69 @@ const SOCIAL_ICONS = {
   email: EmailIcon,
 };
 
-function FooterNav({orientation}: {orientation: 'horizontal' | 'vertical'}) {
-  const listClass =
-    orientation === 'vertical'
-      ? `${LIST_CLASS} flex-col items-start gap-y-4`
-      : `${LIST_CLASS} justify-center gap-x-6`;
+function PageLinksList({className = ''}: {className?: string}) {
+  return (
+    <ul className={`${LIST_CLASS} flex-col items-start gap-y-4 ${className}`.trim()}>
+      {PAGE_LINKS.map((link) => (
+        <li key={link.to}>
+          <Link to={link.to} prefetch="intent" className={LINK_CLASS}>
+            {link.label}
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
+}
 
+function FooterNav() {
   return (
     <nav aria-label="Footer">
-      <ul className={listClass}>
-        {PAGE_LINKS.map((link) => (
-          <li key={link.to}>
-            <Link to={link.to} prefetch="intent" className={LINK_CLASS}>
-              {link.label}
-            </Link>
-          </li>
-        ))}
+      <PageLinksList />
+    </nav>
+  );
+}
+
+/** Mobile-only: page links | social text links. */
+function MobileLinkGrid() {
+  return (
+    <nav aria-label="Footer" className="grid w-full grid-cols-2 gap-x-8">
+      <PageLinksList />
+      <ul className={`${LIST_CLASS} flex-col items-start gap-y-4`}>
+        {SOCIAL_LINKS.map((link) => {
+          const newTab = link.href.startsWith('http');
+          return (
+            <li key={link.href}>
+              <a
+                href={link.href}
+                target={newTab ? '_blank' : undefined}
+                rel={newTab ? 'noopener noreferrer' : undefined}
+                className={LINK_CLASS}
+              >
+                {link.label}
+              </a>
+            </li>
+          );
+        })}
       </ul>
     </nav>
   );
 }
 
-function SocialIcons({justify}: {justify: 'center' | 'start'}) {
+function SocialIcons() {
   return (
-    <ul
-      className={`${LIST_CLASS} gap-x-4 ${
-        justify === 'center' ? 'justify-center' : 'justify-start'
-      }`}
-    >
+    <ul className={`${LIST_CLASS} justify-start gap-x-4`}>
       {SOCIAL_LINKS.map((link) => {
         const Icon = SOCIAL_ICONS[link.id];
-        // mailto: hands off to the mail client — a new tab would leave a
-        // blank window behind, and there's no opener to sever.
         const newTab = link.href.startsWith('http');
+        const ariaLabel =
+          'ariaLabel' in link && link.ariaLabel ? link.ariaLabel : link.label;
         return (
           <li key={link.href}>
             <a
               href={link.href}
               target={newTab ? '_blank' : undefined}
               rel={newTab ? 'noopener noreferrer' : undefined}
-              aria-label={link.label}
+              aria-label={ariaLabel}
               className={ICON_LINK_CLASS}
             >
               <Icon className="h-5 w-5" />
@@ -132,88 +154,77 @@ function SocialIcons({justify}: {justify: 'center' | 'start'}) {
   );
 }
 
-function Copyright({align}: {align: 'center' | 'start'}) {
+function FooterWordmark({className}: {className?: string}) {
   return (
-    <div
-      className={`font-['config-mono-vf'] text-[10px] uppercase tracking-[0.08em] ${
-        align === 'center' ? 'text-center' : 'text-left'
-      }`}
-    >
+    <Link to="/" prefetch="intent" className="inline-flex w-fit">
+      <img
+        src={wordmarkVellum}
+        alt="Dilettante"
+        className={className ?? 'h-6 w-auto'}
+      />
+    </Link>
+  );
+}
+
+function Copyright() {
+  return (
+    <div className="font-['config-mono-vf'] text-[10px] uppercase tracking-[0.08em] text-vellum-100/80">
       © {new Date().getFullYear()} Dilettante Perfumery. All rights reserved.
     </div>
   );
 }
 
-type SiteFooterProps = {
-  /** Shop metafield `custom.brand_one_liner`. */
-  brandOneLiner?: string;
-};
-
 /**
- * Site footer: mobile keeps the centred link/social stack (newsletter sits in
- * a section above). Desktop is two columns — nav/socials | newsletter — then
- * a rule and the copyright line.
- *
- * Cream color + trust face live on this wrapper; anchors inherit via app.css
- * `a { color: inherit }`.
+ * Mobile: newsletter → links → wordmark/copyright (full-bleed rules between).
+ * Desktop: nav/socials | newsletter, then rule + copyright.
  */
-export function SiteFooter({brandOneLiner}: SiteFooterProps) {
+export function SiteFooter() {
   return (
-    <div className="bg-inkwell-800 font-['trust-3a'] text-vellum-100">
-      {/* Mobile-only newsletter band above the footer chrome. */}
-      <section aria-label="Newsletter" className="w-full md:hidden">
+    <footer className="site-footer bg-inkwell-800 font-['trust-3a'] text-vellum-100">
+      <div className="md:hidden">
         <PageContainer>
-          <div className="pt-8 pb-6">
-            <NewsletterSignup brandOneLiner={brandOneLiner} />
+          <div className="py-9">
+            <NewsletterSignup />
           </div>
         </PageContainer>
-      </section>
 
-      <footer className="site-footer w-full">
+        <hr className={FOOTER_RULE} />
+
         <PageContainer>
-          {/* Mobile: previous centred layout (Subscribe moved to the band above). */}
-          <div className="flex flex-col items-center gap-y-3 pt-4.5 pb-3 md:hidden">
-            <Link to="/" prefetch="intent" className="inline-flex w-fit">
-              <img
-                src={wordmarkVellum}
-                alt="Dilettante"
-                className="h-6 w-auto"
-              />
-            </Link>
-            <FooterNav orientation="horizontal" />
-            <SocialIcons justify="center" />
-            <div className="mt-5">
-              <Copyright align="center" />
-            </div>
+          <div className="py-8">
+            <MobileLinkGrid />
           </div>
+        </PageContainer>
 
-          {/* Desktop: two columns, rule, copyright. */}
-          <div className="hidden pt-12 pb-8 md:block">
+        <hr className={FOOTER_RULE} />
+
+        <PageContainer>
+          <div className="flex flex-col items-start gap-y-3 py-8">
+            <FooterWordmark className="h-7 w-auto" />
+            <Copyright />
+          </div>
+        </PageContainer>
+      </div>
+
+      <div className="hidden md:block">
+        <PageContainer>
+          <div className="pt-12 pb-8">
             <div className="mb-5 grid grid-cols-[3fr_7fr] items-start gap-x-16">
               <div className="flex flex-col gap-y-10">
-                <Link to="/" prefetch="intent" className="inline-flex w-fit">
-                  <img
-                    src={wordmarkVellum}
-                    alt="Dilettante"
-                    className="h-6 w-auto"
-                  />
-                </Link>
-                <FooterNav orientation="vertical" />
-                <SocialIcons justify="start" />
+                <FooterWordmark />
+                <FooterNav />
+                <SocialIcons />
               </div>
-              <NewsletterSignup
-                brandOneLiner={brandOneLiner}
-                className="w-full"
-              />
+              <NewsletterSignup className="w-full" />
             </div>
 
-            <hr className="mt-12 border-0 border-t-[0.5px]! border-t-vellum-100! py-2" />
-            <div>
-              <Copyright align="start" />
+            <hr className={`${FOOTER_RULE} mt-12`} />
+            <div className="pt-5">
+              <Copyright />
             </div>
           </div>
         </PageContainer>
-      </footer>
-    </div>
+      </div>
+    </footer>
   );
 }

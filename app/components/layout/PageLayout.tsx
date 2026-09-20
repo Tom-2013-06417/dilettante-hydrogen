@@ -6,7 +6,6 @@ import {PageTransition} from './PageTransition';
 import {Header, HeaderMenu} from './Header';
 import {SiteFooter} from './SiteFooter';
 import {STATIC_PAGE_PATHS} from '~/lib/staticPages';
-import {shopBrandOneLiner} from '~/lib/shopMetafields';
 import {CartLineFeedbackProvider, CartMain} from '~/components/cart';
 import {HeaderBar} from '~/components/home/sections/HeaderBar';
 
@@ -86,11 +85,7 @@ export function PageLayout({
             <PageTransition>{children}</PageTransition>
           )}
         </main>
-        {showFooter ? (
-          <SiteFooter
-            brandOneLiner={shopBrandOneLiner(header?.shop?.metafields)}
-          />
-        ) : null}
+        {showFooter ? <SiteFooter /> : null}
       </CartLineFeedbackProvider>
     </Aside.Provider>
   );

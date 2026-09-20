@@ -52,52 +52,6 @@
   }
 }
 
-@keyframes first-order-offer-slide-up {
-  from {
-    transform: translateY(100%);
-  }
-  to {
-    transform: translateY(0);
-  }
-}
-
-@keyframes first-order-offer-slide-down {
-  from {
-    transform: translateY(0);
-  }
-  to {
-    transform: translateY(100%);
-  }
-}
-
-/**
- * Shared by the floating strip and the footer-attached duplicate.
- * Duration must match FIRST_ORDER_OFFER_MOTION_MS in firstOrderOffer.ts.
- */
-:root {
-  --first-order-offer-motion-ms: 350ms;
-  --first-order-offer-motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
-  /* py-2 + 13px type + top border. Anatomy cue includes this so the strip covers padding, not the next section. */
-  --first-order-offer-banner-h: 2rem;
-}
-
-.first-order-offer-enter {
-  animation: first-order-offer-slide-up var(--first-order-offer-motion-ms)
-    var(--first-order-offer-motion-ease) both;
-}
-
-.first-order-offer-exit {
-  animation: first-order-offer-slide-down var(--first-order-offer-motion-ms)
-    var(--first-order-offer-motion-ease) both;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .first-order-offer-enter,
-  .first-order-offer-exit {
-    animation: none;
-  }
-}
-
 .animate-fade-up {
   animation: fade-up var(--fade-duration, 0.8s) cubic-bezier(0.22, 1, 0.36, 1)
     var(--fade-delay, 0s) both;

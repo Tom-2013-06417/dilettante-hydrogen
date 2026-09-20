@@ -228,14 +228,7 @@ export const HEADER_QUERY = `#graphql
         }
       }
     }
-    metafields(
-      identifiers: [
-        {namespace: "custom", key: "preorders_enabled"}
-        {namespace: "custom", key: "brand_one_liner"}
-      ]
-    ) {
-      namespace
-      key
+    preordersEnabled: metafield(namespace: "custom", key: "preorders_enabled") {
       type
       value
     }

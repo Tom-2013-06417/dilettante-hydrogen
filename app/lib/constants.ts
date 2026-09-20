@@ -18,13 +18,15 @@ export const SOCIAL_LINKS = [
   },
   {
     id: 'tiktok',
-    label: 'Tiktok',
+    label: 'TikTok',
     href: 'https://www.tiktok.com/@dilettante.perfumery',
   },
   {
     id: 'email',
-    label: `Email us at ${CONTACT_EMAIL}`,
+    label: 'Email',
     href: `mailto:${CONTACT_EMAIL}`,
+    /** Longer description for icon-only controls. */
+    ariaLabel: `Email us at ${CONTACT_EMAIL}`,
   },
 ] as const;
 

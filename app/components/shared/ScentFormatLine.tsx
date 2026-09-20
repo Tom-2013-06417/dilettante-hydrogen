@@ -2,7 +2,7 @@ import {ChevronDownIcon} from '@heroicons/react/16/solid';
 import type {MappedProductOptions} from '@shopify/hydrogen';
 import {useEffect, useId, useRef, useState} from 'react';
 import {createPortal} from 'react-dom';
-import {Link, useNavigate} from 'react-router';
+import {Link, useLocation, useSearchParams} from 'react-router';
 import {formatVolumeSuffix} from '~/lib/scentVolume';
 
 type OptionValue = MappedProductOptions['optionValues'][number];
@@ -86,7 +86,8 @@ function VolumeSelect({
   optionName: string;
   optionValues: OptionValue[];
 }) {
-  const navigate = useNavigate();
+  const [, setSearchParams] = useSearchParams();
+  const {state} = useLocation();
   const listId = useId();
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLUListElement>(null);
@@ -135,6 +136,14 @@ function VolumeSelect({
     };
   }, [open]);
 
+  const selectVariantQuery = (variantUriQuery: string) => {
+    setSearchParams(new URLSearchParams(variantUriQuery), {
+      replace: true,
+      preventScrollReset: true,
+      state,
+    });
+  };
+
   const menu =
     open && menuPos && typeof document !== 'undefined'
       ? createPortal(
@@ -178,6 +187,7 @@ function VolumeSelect({
                       prefetch="intent"
                       preventScrollReset
                       replace
+                      state={state}
                       to={`/products/${handle}?${variantUriQuery}`}
                       onClick={() => setOpen(false)}
                     >
@@ -200,10 +210,7 @@ function VolumeSelect({
                     disabled={!exists}
                     onClick={() => {
                       if (!selected && exists) {
-                        navigate(`?${variantUriQuery}`, {
-                          replace: true,
-                          preventScrollReset: true,
-                        });
+                        selectVariantQuery(variantUriQuery);
                       }
                       setOpen(false);
                     }}
@@ -219,7 +226,7 @@ function VolumeSelect({
       : null;
 
   return (
-    <span className="inline-flex items-baseline gap-1.5">
+    <>
       <button
         ref={triggerRef}
         type="button"
@@ -248,6 +255,6 @@ function VolumeSelect({
         />
       </button>
       {menu}
-    </span>
+    </>
   );
 }

@@ -1,17 +1,18 @@
-import {redirect, useLoaderData} from 'react-router';
+import {useLoaderData} from 'react-router';
 import type {Route} from './+types/products.$handle';
 import {
   getSelectedProductOptions,
   Analytics,
-  useOptimisticVariant,
-  getAdjacentAndFirstAvailableVariants,
   getProductOptions,
-  useSelectedOptionInUrlParam,
 } from '@shopify/hydrogen';
 import {HERO_STRIP_IMAGE_SRCSET} from '~/components/product/ProductHeroPhoto';
 import {ProductPage} from '~/components/product/sections';
 import {shopifyCdnUrl} from '~/lib/cartLineImage';
 import {pageTitle} from '~/lib/constants';
+import {
+  useSeedVariantSearchParams,
+  useVariantFromSearchParams,
+} from '~/lib/productVariantParams';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {parseSecondaryImage} from '~/lib/secondaryImageMetafield';
 
@@ -42,6 +43,22 @@ export const meta: Route.MetaFunction = ({data}) => {
 
   return tags;
 };
+
+/**
+ * Variant option changes only update search params. Skip the product loader so
+ * switching size doesn't refetch / remount the page. Selection is resolved
+ * client-side from adjacentVariants + option firstSelectableVariant.
+ */
+export function shouldRevalidate({
+  currentUrl,
+  nextUrl,
+  formMethod,
+  defaultShouldRevalidate,
+}: Route.ShouldRevalidateArgs) {
+  if (formMethod && formMethod !== 'GET') return true;
+  if (currentUrl.pathname === nextUrl.pathname) return false;
+  return defaultShouldRevalidate;
+}
 
 export async function loader(args: Route.LoaderArgs) {
   // Start fetching non-critical data without blocking time to first byte
@@ -99,15 +116,15 @@ function loadDeferredData({context, params}: Route.LoaderArgs) {
 export default function Product() {
   const {product} = useLoaderData<typeof loader>();
 
-  // Optimistically selects a variant with given available variant information
-  const selectedVariant = useOptimisticVariant(
+  // Prefer the URL-matched variant from adjacent / option variants so the UI
+  // updates without a loader round-trip (see shouldRevalidate above).
+  const selectedVariant = useVariantFromSearchParams(
+    product,
     product.selectedOrFirstAvailableVariant,
-    getAdjacentAndFirstAvailableVariants(product),
   );
 
-  // Sets the search param to the selected variant without navigation
-  // only when no search params are set in the url
-  useSelectedOptionInUrlParam(selectedVariant?.selectedOptions ?? []);
+  // Seed option params via React Router when the URL has none yet.
+  useSeedVariantSearchParams(selectedVariant?.selectedOptions);
 
   const productOptions = getProductOptions({
     ...product,

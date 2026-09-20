@@ -1,6 +1,7 @@
+import type {MappedProductOptions} from '@shopify/hydrogen';
 import {useReducedMotion} from 'motion/react';
 import {useState} from 'react';
-import {useLocation} from 'react-router';
+import {useLocation, useRouteLoaderData} from 'react-router';
 import type {
   ProductFragment,
   ProductVariantFragment,
@@ -22,8 +23,8 @@ import {shopifyCdnUrl, CART_LINE_IMAGE_SIZE} from '~/lib/cartLineImage';
 import {getPreorderBandMessage, parsePreorderEta} from '~/lib/preorder';
 import {preordersEnabledFromRootData} from '~/lib/preordersEnabled';
 import type {ScentProfile} from '~/lib/scentProfile';
+import {formatVolumeSuffix} from '~/lib/scentVolume';
 import type {SecondaryImage} from '~/lib/secondaryImageMetafield';
-import {useRouteLoaderData} from 'react-router';
 import type {loader as rootLoader} from '~/root';
 import {ProductBottleBand} from './ProductBottleBand';
 import {ProductTitle} from './ProductTitle';
@@ -38,9 +39,26 @@ type ProductHeroProps = {
   price?: ProductVariantFragment['price'];
   compareAtPrice: ProductVariantFragment['compareAtPrice'];
   selectedVariant: ProductFragment['selectedOrFirstAvailableVariant'];
+  productOptions?: MappedProductOptions[];
   scentProfile: ScentProfile;
   preorderEta?: ProductFragment['preorderEta'];
 };
+
+/** Prefer a multi-value option whose names look like volumes (e.g. "30 mL"). */
+function findVolumeOption(
+  productOptions: MappedProductOptions[] | undefined,
+): MappedProductOptions | null {
+  if (!productOptions?.length) return null;
+  const multi = productOptions.filter(
+    (option) => option.optionValues.length > 1,
+  );
+  if (!multi.length) return null;
+  return (
+    multi.find((option) =>
+      option.optionValues.some((value) => formatVolumeSuffix(value.name)),
+    ) ?? multi[0]
+  );
+}
 
 export function ProductHero({
   title,
@@ -50,6 +68,7 @@ export function ProductHero({
   price,
   compareAtPrice,
   selectedVariant,
+  productOptions,
   scentProfile,
   preorderEta,
 }: ProductHeroProps) {
@@ -67,6 +86,7 @@ export function ProductHero({
   const [titleNoise, setTitleNoise] = useState(
     Boolean(reducedMotion) || instantIntro,
   );
+  const volumeOption = findVolumeOption(productOptions);
 
   return (
     <div className="design-content-shell relative z-1 flex min-h-0 w-full flex-1 flex-col text-inkwell-700">
@@ -173,6 +193,7 @@ export function ProductHero({
               className="whitespace-nowrap font-['trust-3a'] text-[11px] leading-none tracking-[0.02em] text-inkwell-700/70 lg:text-[13px]"
               concentration={scentProfile.concentration}
               variantTitle={selectedVariant?.title}
+              variantOption={volumeOption}
             />
           </div>
 

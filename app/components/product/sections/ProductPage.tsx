@@ -7,6 +7,7 @@ import {
   type RefObject,
 } from 'react';
 import {createPortal} from 'react-dom';
+import type {MappedProductOptions} from '@shopify/hydrogen';
 import type {ProductFragment} from 'storefrontapi.generated';
 import {useStackCoverRevealed} from '~/components/layout/PageTransition';
 import {parseSecondaryImage} from '~/lib/secondaryImageMetafield';
@@ -26,12 +27,14 @@ const FOREVER_TITLE_SUBTITLE = '(on the Crest of a Wave)';
 type ProductPageProps = {
   product: ProductFragment;
   selectedVariant: ProductFragment['selectedOrFirstAvailableVariant'];
+  productOptions: MappedProductOptions[];
 };
 
 export function ProductPage({
   product,
   selectedVariant,
-}: Omit<ProductPageProps, 'productOptions'>) {
+  productOptions,
+}: ProductPageProps) {
   const scentProfile = getScentProfile(product);
   const vhsSlides = parseVhsSlides(product.vhsImages);
   const secondaryImage = parseSecondaryImage(product.secondaryImage);
@@ -72,6 +75,7 @@ export function ProductPage({
               price={selectedVariant?.price}
               compareAtPrice={selectedVariant?.compareAtPrice}
               selectedVariant={selectedVariant}
+              productOptions={productOptions}
               scentProfile={scentProfile}
               preorderEta={product.preorderEta}
             />

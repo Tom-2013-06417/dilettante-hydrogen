@@ -173,6 +173,13 @@ export function SiteFooter({brandOneLiner}: SiteFooterProps) {
         <PageContainer>
           {/* Mobile: previous centred layout (Subscribe moved to the band above). */}
           <div className="flex flex-col items-center gap-y-3 pt-4.5 pb-3 md:hidden">
+            <Link to="/" prefetch="intent" className="inline-flex w-fit">
+              <img
+                src={wordmarkVellum}
+                alt="Dilettante"
+                className="h-6 w-auto"
+              />
+            </Link>
             <FooterNav orientation="horizontal" />
             <SocialIcons justify="center" />
             <div className="mt-5">

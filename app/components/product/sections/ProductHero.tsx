@@ -119,7 +119,7 @@ export function ProductHero({
             className="pointer-events-none absolute inset-y-0 left-4 z-20 text-inkwell-700/35 sm:left-8"
           />
 
-          <div className="relative flex h-[30svh] w-full overflow-hidden">
+          <div className="relative flex product-hero-title-band w-full overflow-hidden">
             <div className="w-4 shrink-0 sm:w-8" aria-hidden />
             <div
               className="relative flex shrink-0 items-center px-2 sm:px-4"
@@ -148,7 +148,7 @@ export function ProductHero({
         </IntroFade>
 
         {/* Title slides in first (overlaid on hero band) */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[30svh]">
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 product-hero-title-band">
           <IntroTitleSlide
             instant={instantIntro}
             className="absolute inset-y-0 left-5 flex items-center justify-start overflow-visible sm:left-9"

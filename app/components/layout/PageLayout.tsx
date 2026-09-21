@@ -5,7 +5,9 @@ import {Aside} from './Aside';
 import {PageTransition} from './PageTransition';
 import {Header, HeaderMenu} from './Header';
 import {SiteFooter} from './SiteFooter';
+import {TopBanner} from './TopBanner';
 import {STATIC_PAGE_PATHS} from '~/lib/staticPages';
+import {shopAnnouncementTexts, shouldShowTopBanner} from '~/lib/topBanner';
 import {CartLineFeedbackProvider, CartMain} from '~/components/cart';
 import {HeaderBar} from '~/components/home/sections/HeaderBar';
 
@@ -39,10 +41,18 @@ export function PageLayout({
   // Home is a single full-viewport hero; the product page ends on the pinned
   // VHS overlay. Neither takes a footer.
   const showFooter = !isHome && !isProduct;
+  const showTopBanner = shouldShowTopBanner(location.pathname);
 
   return (
     <Aside.Provider>
       <CartLineFeedbackProvider>
+        {showTopBanner ? (
+          <TopBanner
+            texts={shopAnnouncementTexts(
+              header.shop.announcementTexts ?? null,
+            )}
+          />
+        ) : null}
         <CartAside cart={cart} />
         <MobileMenuAside
           header={header}

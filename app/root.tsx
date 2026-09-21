@@ -247,7 +247,9 @@ async function loadCriticalData({context}: Route.LoaderArgs) {
 
   const [header] = await Promise.all([
     storefront.query(HEADER_QUERY, {
-      cache: storefront.CacheLong(),
+      // Shop metafields (e.g. announcement_texts) are merchant-edited; avoid
+      // CacheLong so stale nulls don't stick after a definition/value is added.
+      cache: storefront.CacheShort(),
       variables: {
         headerMenuHandle: 'main-menu', // Adjust to your header menu handle
       },

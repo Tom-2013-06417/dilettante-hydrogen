@@ -232,6 +232,10 @@ export const HEADER_QUERY = `#graphql
       type
       value
     }
+    announcementTexts: metafield(namespace: "custom", key: "announcement_texts") {
+      type
+      value
+    }
   }
   query Header(
     $country: CountryCode

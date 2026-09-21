@@ -62,11 +62,10 @@ export function ProductPage({
           {/* Full-width clip so 100vw hero rule bleeds don't spawn a scrollbar;
               keep this off the sticky parent above (WebKit + clip jitter). */}
           {/*
-            First fold = header + this band + Anatomy cue = 100svh.
-            Cue height is defined (--scent-anatomy-cue-h) so dismissing the
-            offer strip leaves padding, not a peek of SCENT ANATOMY.
+            First fold = header + this band + Anatomy cue.
+            Heights in design.css; mobile + banner shrinks title/fold by 2rem.
           */}
-          <div className="flex min-h-[calc(100svh-var(--stack-header-h,3rem)-var(--scent-anatomy-cue-h,80px))] flex-col overflow-x-clip">
+          <div className="product-hero-first-fold flex flex-col overflow-x-clip">
             <ProductHero
               title={title}
               titleSubtitle={titleSubtitle}

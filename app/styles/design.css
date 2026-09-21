@@ -1,3 +1,58 @@
+@keyframes top-banner-marquee {
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+/*
+  Site top announcement strip (2rem). Two identical groups; -50% loops seamlessly.
+  Mobile product fold reclaim below uses the same 2rem when .top-banner is present.
+*/
+.top-banner {
+  height: 2rem;
+}
+
+.top-banner__track {
+  display: flex;
+  width: max-content;
+  height: 100%;
+  align-items: center;
+}
+
+.top-banner__group {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  white-space: nowrap;
+}
+
+.top-banner__unit,
+.top-banner__sep {
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .top-banner__track {
+    animation: top-banner-marquee 90s linear infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .top-banner__track {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .top-banner__group[aria-hidden] {
+    display: none;
+  }
+
+  .top-banner__unit:not(:first-of-type),
+  .top-banner__sep {
+    display: none;
+  }
+}
+
 @keyframes fade-up {
   from {
     opacity: 0;
@@ -355,6 +410,42 @@ body:has(.teaser-page) {
     var(--scent-anatomy-cue-pad-top) + var(--scent-anatomy-cue-btn-h) +
       var(--scent-anatomy-cue-pad-bottom)
   );
+}
+
+/* Title photo band + overlay share one height. */
+.product-hero-title-band {
+  height: 30svh;
+}
+
+/*
+  First fold = header + this band + Anatomy cue. Cue height is defined so the
+  button stays fully in view at the bottom of the first screen.
+*/
+.product-hero-first-fold {
+  min-height: calc(
+    100svh - var(--stack-header-h, 3rem) - var(--scent-anatomy-cue-h, 80px)
+  );
+}
+
+/*
+  Mobile + top banner: reclaim 2rem (banner height) from the title band and
+  first fold so Anatomy stays in the viewport.
+*/
+@media (max-width: 639px) {
+  body:has(.top-banner) .main--product {
+    min-height: calc(100svh - 2rem);
+  }
+
+  body:has(.top-banner) .product-hero-first-fold {
+    min-height: calc(
+      100svh - 2rem - var(--stack-header-h, 3rem) -
+        var(--scent-anatomy-cue-h, 80px)
+    );
+  }
+
+  body:has(.top-banner) .product-hero-title-band {
+    height: calc(30svh - 2rem);
+  }
 }
 
 @media (min-width: 640px) {

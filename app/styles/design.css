@@ -5,11 +5,15 @@
 }
 
 /*
-  Site top announcement strip (2rem). Two identical groups; -50% loops seamlessly.
+  Site top announcement strip (2rem). Two identical halves; -50% loops seamlessly.
   Mobile product fold reclaim below uses the same 2rem when .top-banner is present.
 */
 .top-banner {
   height: 2rem;
+  /* Keep the marquee off the hit-testing path — decorative only. */
+  pointer-events: none;
+  /* Isolate paint so the infinite transform doesn't dirty the page below. */
+  contain: layout paint style;
 }
 
 .top-banner__track {
@@ -17,17 +21,13 @@
   width: max-content;
   height: 100%;
   align-items: center;
+  /* Own layer; avoid promoting the whole page while this runs forever. */
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
-.top-banner__group {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  white-space: nowrap;
-}
-
-.top-banner__unit,
-.top-banner__sep {
+.top-banner__half {
+  flex: none;
   white-space: nowrap;
 }
 
@@ -41,14 +41,11 @@
   .top-banner__track {
     width: 100%;
     justify-content: center;
+    animation: none;
+    transform: none;
   }
 
-  .top-banner__group[aria-hidden] {
-    display: none;
-  }
-
-  .top-banner__unit:not(:first-of-type),
-  .top-banner__sep {
+  .top-banner__half + .top-banner__half {
     display: none;
   }
 }

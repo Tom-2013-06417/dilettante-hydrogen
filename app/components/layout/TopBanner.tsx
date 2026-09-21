@@ -1,44 +1,29 @@
-import {Fragment} from 'react';
-
 /**
  * Site-wide announcement strip. Not sticky — scrolls with the document.
- * Messages (and repeats) share one middle-dot + flex gap for even spacing.
+ *
+ * Performance: each marquee half is one text node. Dozens of animated spans
+ * were delaying taps/navigation on preview devices.
  */
 
-/** Copies of the message set in each half of the marquee track. */
-const SET_COPIES = 6;
+/** Repeats of the message set per half — two halves already seamless-loop. */
+const SET_COPIES = 3;
 
-const DOT = '·';
+const SEP = ' \u2003·\u2003 ';
 
 type TopBannerProps = {
   texts: string[];
 };
 
-function MarqueeGroup({
-  texts,
-  hidden = false,
-}: {
-  texts: string[];
-  hidden?: boolean;
-}) {
-  const sequence = Array.from({length: SET_COPIES}, () => texts).flat();
-
-  return (
-    <div className="top-banner__group" aria-hidden={hidden || undefined}>
-      {sequence.map((text, index) => (
-        <Fragment key={index}>
-          <span className="top-banner__unit shrink-0">{text}</span>
-          <span className="top-banner__sep shrink-0" aria-hidden>
-            {DOT}
-          </span>
-        </Fragment>
-      ))}
-    </div>
-  );
+function buildHalf(texts: string[]): string {
+  const unit = texts.join(SEP);
+  // Trailing SEP so the join between repeats (and between halves) matches.
+  return Array.from({length: SET_COPIES}, () => unit).join(SEP) + SEP;
 }
 
 export function TopBanner({texts}: TopBannerProps) {
   if (!texts.length) return null;
+
+  const half = buildHalf(texts);
 
   return (
     <div
@@ -46,9 +31,12 @@ export function TopBanner({texts}: TopBannerProps) {
       aria-label="Announcements"
       className="top-banner relative z-50 w-full shrink-0 overflow-hidden bg-inkwell-800 text-vellum-100"
     >
-      <div className="top-banner__track font-['config-mono-vf'] text-[11px] uppercase tracking-[0.08em]">
-        <MarqueeGroup texts={texts} />
-        <MarqueeGroup texts={texts} hidden />
+      <div
+        className="top-banner__track font-['config-mono-vf'] text-[11px] uppercase tracking-[0.08em]"
+        aria-hidden
+      >
+        <span className="top-banner__half">{half}</span>
+        <span className="top-banner__half">{half}</span>
       </div>
       <p className="sr-only">{texts.join('. ')}</p>
     </div>

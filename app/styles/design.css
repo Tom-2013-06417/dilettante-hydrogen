@@ -27,8 +27,24 @@
 }
 
 .top-banner__half {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  /* ~em-space separators used previously on mobile. */
+  gap: 1.5rem;
+  white-space: nowrap;
+}
+
+.top-banner__unit,
+.top-banner__sep {
   flex: none;
   white-space: nowrap;
+}
+
+@media (min-width: 640px) {
+  .top-banner__half {
+    gap: 4.5rem;
+  }
 }
 
 @media (prefers-reduced-motion: no-preference) {

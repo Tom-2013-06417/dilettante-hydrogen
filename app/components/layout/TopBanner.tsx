@@ -1,29 +1,40 @@
+import {Fragment} from 'react';
+
 /**
  * Site-wide announcement strip. Not sticky — scrolls with the document.
  *
- * Performance: each marquee half is one text node. Dozens of animated spans
- * were delaying taps/navigation on preview devices.
+ * Each half is a short flex row (messages + dots). Gap is CSS so mobile/desktop
+ * can differ without duplicating copy strings.
  */
 
 /** Repeats of the message set per half — two halves already seamless-loop. */
 const SET_COPIES = 3;
 
-const SEP = ' \u2003·\u2003 ';
+const DOT = '·';
 
 type TopBannerProps = {
   texts: string[];
 };
 
-function buildHalf(texts: string[]): string {
-  const unit = texts.join(SEP);
-  // Trailing SEP so the join between repeats (and between halves) matches.
-  return Array.from({length: SET_COPIES}, () => unit).join(SEP) + SEP;
+function MarqueeHalf({texts}: {texts: string[]}) {
+  const sequence = Array.from({length: SET_COPIES}, () => texts).flat();
+
+  return (
+    <span className="top-banner__half">
+      {sequence.map((text, index) => (
+        <Fragment key={index}>
+          <span className="top-banner__unit">{text}</span>
+          <span className="top-banner__sep" aria-hidden>
+            {DOT}
+          </span>
+        </Fragment>
+      ))}
+    </span>
+  );
 }
 
 export function TopBanner({texts}: TopBannerProps) {
   if (!texts.length) return null;
-
-  const half = buildHalf(texts);
 
   return (
     <div
@@ -35,8 +46,8 @@ export function TopBanner({texts}: TopBannerProps) {
         className="top-banner__track font-['config-mono-vf'] text-[11px] uppercase tracking-[0.08em]"
         aria-hidden
       >
-        <span className="top-banner__half">{half}</span>
-        <span className="top-banner__half">{half}</span>
+        <MarqueeHalf texts={texts} />
+        <MarqueeHalf texts={texts} />
       </div>
       <p className="sr-only">{texts.join('. ')}</p>
     </div>

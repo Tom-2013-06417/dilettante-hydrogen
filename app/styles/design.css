@@ -33,7 +33,7 @@
 
 @media (prefers-reduced-motion: no-preference) {
   .top-banner__track {
-    animation: top-banner-marquee 90s linear infinite;
+    animation: top-banner-marquee 200s linear infinite;
   }
 }
 
@@ -401,9 +401,7 @@ body:has(.teaser-page) {
 .main--product {
   /* Pin box = padding + button only. Shared by first-fold Anatomy and ???. */
   --scent-anatomy-cue-pad-top: 8px;
-  --scent-anatomy-cue-pad-bottom: calc(
-    8px + env(safe-area-inset-bottom, 0px)
-  );
+  --scent-anatomy-cue-pad-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
   /* py-1.5 + 14px at body 1.25lh + 1px border. */
   --scent-anatomy-cue-btn-h: 32px;
   --scent-anatomy-cue-h: calc(

@@ -6,7 +6,7 @@ import {PageTransition} from './PageTransition';
 import {Header, HeaderMenu} from './Header';
 import {SiteFooter} from './SiteFooter';
 import {TopBanner} from './TopBanner';
-import {STATIC_PAGE_PATHS} from '~/lib/staticPages';
+import {joinClassNames, resolvePageShell} from '~/lib/pageShell';
 import {shopAnnouncementTexts, shouldShowTopBanner} from '~/lib/topBanner';
 import {CartLineFeedbackProvider, CartMain} from '~/components/cart';
 import {HeaderBar} from '~/components/home/sections/HeaderBar';
@@ -26,22 +26,9 @@ export function PageLayout({
   isLoggedIn,
   publicStoreDomain,
 }: PageLayoutProps) {
-  const location = useLocation();
-  const isHome = location.pathname === '/';
-  const isProduct = location.pathname.startsWith('/products/');
-  const isCollection = /^\/collections\/?$/.test(location.pathname);
-  const isStatic = STATIC_PAGE_PATHS.has(location.pathname);
-  // Immersive pages are full-bleed (no site chrome header).
-  const isImmersive = isHome || isProduct || isCollection;
-  // Home ↔ collection ↔ product share the frozen CSS stack cover.
-  const isStackRoute = isHome || isProduct || isCollection;
-  // Static pages draw their own HeaderBar, so they opt out of the chrome header —
-  // but they still animate in like any other routed page.
-  const drawsOwnHeader = isImmersive || isStatic;
-  // Home is a single full-viewport hero; the product page ends on the pinned
-  // VHS overlay. Neither takes a footer.
-  const showFooter = !isHome && !isProduct;
-  const showTopBanner = shouldShowTopBanner(location.pathname);
+  const {pathname} = useLocation();
+  const shell = resolvePageShell(pathname);
+  const showTopBanner = shouldShowTopBanner(pathname);
 
   return (
     <Aside.Provider>
@@ -58,7 +45,7 @@ export function PageLayout({
           header={header}
           publicStoreDomain={publicStoreDomain}
         />
-        {header && !drawsOwnHeader ? (
+        {header && !shell.drawsOwnHeader ? (
           <Header
             header={header}
             cart={cart}
@@ -67,26 +54,18 @@ export function PageLayout({
           />
         ) : null}
         <main
-          className={
-            isHome
-              ? 'main--home'
-              : isProduct
-                ? 'main--product'
-                : isCollection
-                  ? 'main--collection'
-                  : isStatic
-                    ? 'main--static'
-                    : undefined
-          }
+          className={joinClassNames(
+            shell.mainClass,
+            showTopBanner && 'has-top-banner',
+          )}
         >
-          {isStackRoute ? (
+          {shell.stack ? (
             <PageTransition nav="stack">
               {/*
                 Header lives inside the frozen/sliding layer so home → collection
-                can rise as one cover (navbar included). Collection ↔ product
-                still freezes the outgoing paint the same way.
+                can rise as one cover (navbar included).
               */}
-              {!isHome ? (
+              {shell.stackHeaderBar ? (
                 <HeaderBar className="relative z-50 shrink-0 bg-vellum-paper" />
               ) : null}
               {children}
@@ -95,7 +74,7 @@ export function PageLayout({
             <PageTransition>{children}</PageTransition>
           )}
         </main>
-        {showFooter ? <SiteFooter /> : null}
+        {shell.showFooter ? <SiteFooter /> : null}
       </CartLineFeedbackProvider>
     </Aside.Provider>
   );
@@ -106,9 +85,7 @@ function CartAside({cart}: {cart: PageLayoutProps['cart']}) {
     <Aside type="cart" heading="CART">
       <Suspense fallback={<p>Loading cart ...</p>}>
         <Await resolve={cart}>
-          {(cart) => {
-            return <CartMain cart={cart} layout="aside" />;
-          }}
+          {(cart) => <CartMain cart={cart} layout="aside" />}
         </Await>
       </Suspense>
     </Aside>

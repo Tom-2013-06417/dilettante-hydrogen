@@ -1,12 +1,9 @@
 /**
- * Announcement top banner: visibility, shop metafield copy, and fallbacks.
+ * Announcement top banner: visibility + shop metafield copy.
  *
- * Visibility — shown on every route except paths in TOP_BANNER_HIDDEN_PATHS
- * (trailing slashes ignored). Height is `2rem` in design.css (`.top-banner` /
- * mobile product-fold reclaim); keep those in sync if you change it.
- *
- * Copy — shop metafield `custom.announcement_texts` (`list.single_line_text_field`).
- * Enable Storefront API access on the definition in Admin.
+ * Height is `2rem` in design.css (`.top-banner` / mobile product-fold reclaim).
+ * Copy: shop metafield `custom.announcement_texts` (`list.single_line_text_field`),
+ * Storefront API access enabled.
  */
 
 type ShopMetafield = {
@@ -14,14 +11,11 @@ type ShopMetafield = {
   value?: string | null;
 } | null;
 
-/** Paths where the banner is hidden. */
-export const TOP_BANNER_HIDDEN_PATHS = new Set<string>([
-  '/', // home landing
-]);
+/** Paths where the banner is hidden (trailing slashes ignored). */
+const TOP_BANNER_HIDDEN_PATHS = new Set<string>(['/']);
 
-/** Fallback when the metafield is missing or empty. */
 const DEFAULT_ANNOUNCEMENT_TEXTS = [
-  'Free shipping on orders over P5,000',
+  'Free shipping on orders over ₱5,000',
   'Limited offer: Buy 4 samples, get 1 free',
 ] as const;
 

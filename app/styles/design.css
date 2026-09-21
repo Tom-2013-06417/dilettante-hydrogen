@@ -5,14 +5,12 @@
 }
 
 /*
-  Site top announcement strip (2rem). Two identical halves; -50% loops seamlessly.
-  Mobile product fold reclaim below uses the same 2rem when .top-banner is present.
+  Site top announcement strip (2rem). Two identical text halves; -50% loops.
+  Mobile product-fold reclaim uses .main--product.has-top-banner (not :has()).
 */
 .top-banner {
   height: 2rem;
-  /* Keep the marquee off the hit-testing path — decorative only. */
   pointer-events: none;
-  /* Isolate paint so the infinite transform doesn't dirty the page below. */
   contain: layout paint style;
 }
 
@@ -25,30 +23,12 @@
   width: max-content;
   height: 100%;
   align-items: center;
-  /* Own layer; avoid promoting the whole page while this runs forever. */
-  transform: translateZ(0);
   backface-visibility: hidden;
 }
 
 .top-banner__half {
-  display: inline-flex;
-  flex: none;
-  align-items: center;
-  /* ~em-space separators used previously on mobile. */
-  gap: 1.5rem;
-  white-space: nowrap;
-}
-
-.top-banner__unit,
-.top-banner__sep {
   flex: none;
   white-space: nowrap;
-}
-
-@media (min-width: 640px) {
-  .top-banner__half {
-    gap: 4.5rem;
-  }
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -62,7 +42,6 @@
     width: 100%;
     justify-content: center;
     animation: none;
-    transform: none;
   }
 
   .top-banner__half + .top-banner__half {
@@ -443,22 +422,22 @@ body:has(.teaser-page) {
 }
 
 /*
-  Mobile + top banner: reclaim 2rem (banner height) from the title band and
-  first fold so Anatomy stays in the viewport.
+  Mobile + top banner: reclaim 2rem from the title band / first fold.
+  Class is on main (PageLayout) — avoids expensive :has() matching.
 */
 @media (max-width: 639px) {
-  body:has(.top-banner) .main--product {
+  .main--product.has-top-banner {
     min-height: calc(100svh - 2rem);
   }
 
-  body:has(.top-banner) .product-hero-first-fold {
+  .main--product.has-top-banner .product-hero-first-fold {
     min-height: calc(
       100svh - 2rem - var(--stack-header-h, 3rem) -
         var(--scent-anatomy-cue-h, 80px)
     );
   }
 
-  body:has(.top-banner) .product-hero-title-band {
+  .main--product.has-top-banner .product-hero-title-band {
     height: calc(30svh - 2rem);
   }
 }

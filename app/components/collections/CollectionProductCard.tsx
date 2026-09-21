@@ -42,8 +42,6 @@ export function CollectionProductCard({
     <Link
       to={`/products/${product.handle}`}
       state={STACK_ENTER_STATE}
-      // Viewport (not intent): mobile has no hover, so intent rarely warms the
-      // product loader before tap — that wait is the 1–2s before the stack anim.
       prefetch="viewport"
       className="collection-product-card relative mx-auto flex w-full items-stretch gap-3 bg-vellusum py-4 px-4 sm:gap-5 sm:px-5 sm:py-5"
     >

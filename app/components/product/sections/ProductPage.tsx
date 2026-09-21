@@ -62,8 +62,7 @@ export function ProductPage({
           {/* Full-width clip so 100vw hero rule bleeds don't spawn a scrollbar;
               keep this off the sticky parent above (WebKit + clip jitter). */}
           {/*
-            First fold = header + this band + Anatomy cue.
-            Heights in design.css; mobile + banner shrinks title/fold by 2rem.
+            First fold = header + this band + Anatomy cue (heights in design.css).
           */}
           <div className="product-hero-first-fold flex flex-col overflow-x-clip">
             <ProductHero

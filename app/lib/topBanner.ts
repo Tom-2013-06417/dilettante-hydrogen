@@ -1,7 +1,7 @@
 /**
  * Announcement top banner: visibility + shop metafield copy.
  *
- * Height is `2rem` in design.css (`.top-banner` / mobile product-fold reclaim).
+ * Height is `--top-banner-h` in design.css (`.top-banner` / mobile fold reclaim).
  * Copy: shop metafield `custom.announcement_texts` (`list.single_line_text_field`),
  * Storefront API access enabled.
  */

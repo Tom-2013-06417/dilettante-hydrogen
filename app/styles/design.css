@@ -4,14 +4,34 @@
   }
 }
 
+/* Matches stack Y cover: slide-ms ease-in-out, enter delayed slightly. */
+@keyframes top-banner-enter {
+  from {
+    height: 0;
+  }
+  to {
+    height: var(--top-banner-h);
+  }
+}
+
+@keyframes top-banner-exit {
+  from {
+    height: var(--top-banner-h);
+  }
+  to {
+    height: 0;
+  }
+}
+
 /*
-  Site top announcement strip (2rem). Two identical text halves; -50% loops.
+  Site top announcement strip. Two identical text halves; -50% loops.
   Mobile product-fold reclaim uses .main--product.has-top-banner (not :has()).
 */
 .top-banner {
-  height: 2rem;
+  height: var(--top-banner-h);
   pointer-events: none;
   contain: layout paint style;
+  overflow: hidden;
 }
 
 .top-banner--paused .top-banner__track {
@@ -21,7 +41,7 @@
 .top-banner__track {
   display: flex;
   width: max-content;
-  height: 100%;
+  height: var(--top-banner-h);
   align-items: center;
   backface-visibility: hidden;
 }
@@ -32,6 +52,17 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
+  .top-banner {
+    height: 0;
+    animation: top-banner-enter var(--top-banner-slide-ms) ease-in-out
+      var(--top-banner-enter-delay) both;
+  }
+
+  .top-banner--exit {
+    height: var(--top-banner-h);
+    animation: top-banner-exit var(--top-banner-slide-ms) ease-in-out both;
+  }
+
   .top-banner__track {
     animation: top-banner-marquee 200s linear infinite;
   }
@@ -422,23 +453,23 @@ body:has(.teaser-page) {
 }
 
 /*
-  Mobile + top banner: reclaim 2rem from the title band / first fold.
+  Mobile + top banner: reclaim --top-banner-h from the title band / first fold.
   Class is on main (PageLayout) — avoids expensive :has() matching.
 */
 @media (max-width: 639px) {
   .main--product.has-top-banner {
-    min-height: calc(100svh - 2rem);
+    min-height: calc(100svh - var(--top-banner-h));
   }
 
   .main--product.has-top-banner .product-hero-first-fold {
     min-height: calc(
-      100svh - 2rem - var(--stack-header-h, 3rem) -
+      100svh - var(--top-banner-h) - var(--stack-header-h, 3rem) -
         var(--scent-anatomy-cue-h, 80px)
     );
   }
 
   .main--product.has-top-banner .product-hero-title-band {
-    height: calc(30svh - 2rem);
+    height: calc(30svh - var(--top-banner-h));
   }
 }
 
@@ -530,6 +561,11 @@ body:has(.teaser-page) {
 :root {
   /* Phone-width column on desktop — immersive pages stay vertically composed. */
   --design-content-max: 680px;
+  /* Top announcement strip; also reclaimed on mobile product fold. */
+  --top-banner-h: 2rem;
+  /* Stack Y cover (home ↔ collection) in PageTransition. */
+  --top-banner-slide-ms: 280ms;
+  --top-banner-enter-delay: 120ms;
 }
 
 .page-container {

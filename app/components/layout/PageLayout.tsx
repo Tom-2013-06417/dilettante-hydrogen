@@ -33,13 +33,12 @@ export function PageLayout({
   return (
     <Aside.Provider>
       <CartLineFeedbackProvider>
-        {showTopBanner ? (
-          <TopBanner
-            texts={shopAnnouncementTexts(
-              header.shop.announcementTexts ?? null,
-            )}
-          />
-        ) : null}
+        <TopBanner
+          open={showTopBanner}
+          texts={shopAnnouncementTexts(
+            header.shop.announcementTexts ?? null,
+          )}
+        />
         <CartAside cart={cart} />
         <MobileMenuAside
           header={header}

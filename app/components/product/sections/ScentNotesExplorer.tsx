@@ -196,7 +196,7 @@ export function ScentNotesExplorer({
         Last section in the document: this shell pins for the whole scrub.
         Height is svh (not dvh / visualViewport): Chrome's top address bar
         show/hide must not reflow this box or the inkwell footer flashes
-        through. ??? clearance vs the offer strip is the cue's safe-area
+        through. ??? clearance vs the top banner is the cue's safe-area
         padding, not a live viewport height.
       */}
       <div className="sticky top-0 z-10 h-svh overflow-hidden">

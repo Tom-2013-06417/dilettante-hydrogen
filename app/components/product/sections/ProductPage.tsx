@@ -116,9 +116,9 @@ const MOUNT_AT_PROGRESS = 0.45;
  * expands out of the scenes cue once that cue has been filled (or pressed) and
  * collapses back into it, so the document itself still ends at scent anatomy.
  *
- * Portaled to document.body so its z-index can sit between the cart aside
- * (100) and the first-order offer strip. PageTransition's `isolation: isolate`
- * would otherwise trap a local z-40 under the body-portaled strip.
+ * Portaled to document.body under the cart aside overlay (z-100).
+ * PageTransition's `isolation: isolate` would otherwise trap a local
+ * stacking context and clip/cover this panel incorrectly.
  */
 function ScenesOverlay({
   slides,

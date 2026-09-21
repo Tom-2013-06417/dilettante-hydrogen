@@ -16,6 +16,10 @@
   contain: layout paint style;
 }
 
+.top-banner--paused .top-banner__track {
+  animation-play-state: paused;
+}
+
 .top-banner__track {
   display: flex;
   width: max-content;

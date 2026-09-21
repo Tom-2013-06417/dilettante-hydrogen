@@ -1,4 +1,5 @@
 import {Fragment} from 'react';
+import {useNavigation} from 'react-router';
 
 /**
  * Site-wide announcement strip. Not sticky — scrolls with the document.
@@ -34,13 +35,19 @@ function MarqueeHalf({texts}: {texts: string[]}) {
 }
 
 export function TopBanner({texts}: TopBannerProps) {
+  const navigation = useNavigation();
+  // Free the main thread while a route transition is loading/animating.
+  const paused = navigation.state !== 'idle';
+
   if (!texts.length) return null;
 
   return (
     <div
       role="region"
       aria-label="Announcements"
-      className="top-banner relative z-50 w-full shrink-0 overflow-hidden bg-inkwell-800 text-vellum-100"
+      className={`top-banner relative z-50 w-full shrink-0 overflow-hidden bg-inkwell-800 text-vellum-100${
+        paused ? ' top-banner--paused' : ''
+      }`}
     >
       <div
         className="top-banner__track font-['config-mono-vf'] text-[11px] uppercase tracking-[0.08em]"

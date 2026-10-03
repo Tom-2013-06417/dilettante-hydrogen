@@ -236,6 +236,10 @@ export const HEADER_QUERY = `#graphql
       type
       value
     }
+    footerBrandLine: metafield(namespace: "custom", key: "footer_brand_line") {
+      type
+      value
+    }
   }
   query Header(
     $country: CountryCode

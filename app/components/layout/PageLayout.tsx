@@ -73,7 +73,9 @@ export function PageLayout({
             <PageTransition>{children}</PageTransition>
           )}
         </main>
-        {shell.showFooter ? <SiteFooter /> : null}
+        {shell.showFooter ? (
+          <SiteFooter brandLine={header.shop.footerBrandLine?.value} />
+        ) : null}
       </CartLineFeedbackProvider>
     </Aside.Provider>
   );

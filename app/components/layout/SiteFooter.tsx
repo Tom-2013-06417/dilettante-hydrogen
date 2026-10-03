@@ -178,13 +178,13 @@ function Copyright() {
  * Mobile: newsletter → links → wordmark/copyright (full-bleed rules between).
  * Desktop: nav/socials | newsletter, then rule + copyright.
  */
-export function SiteFooter() {
+export function SiteFooter({brandLine}: {brandLine?: string | null}) {
   return (
     <footer className="site-footer bg-inkwell-800 font-['trust-3a'] text-vellum-100">
       <div className="md:hidden">
         <PageContainer>
           <div className="py-9">
-            <NewsletterSignup />
+            <NewsletterSignup brandLine={brandLine} />
           </div>
         </PageContainer>
 
@@ -215,7 +215,7 @@ export function SiteFooter() {
                 <FooterNav />
                 <SocialIcons />
               </div>
-              <NewsletterSignup className="w-full" />
+              <NewsletterSignup className="w-full" brandLine={brandLine} />
             </div>
 
             <hr className={`${FOOTER_RULE} mt-12`} />

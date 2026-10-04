@@ -4,7 +4,9 @@
   --cart-aside-summary-height: 250px;
   /* Fixed cart thumbnail; keep in sync with CART_LINE_IMAGE_SIZE. */
   --cart-line-media-size: 70px;
-  --cart-upsell-media-size: 44px;
+  /* Height of the card's No. / title / variant stack (11 + 4 + 20 + 4 + 12),
+     so the image ends on the variant line; keep in sync with CartUpsellItem. */
+  --cart-upsell-media-size: 51px;
   /* Wide enough for "- 18 +"; the thumbnail is no longer a usable width for it. */
   --cart-line-stepper-width: 100px;
   --grid-item-width: 355px;
@@ -705,39 +707,26 @@ aside.aside-cart .cart-upsell {
   margin-top: auto;
 }
 
-/* Cards stop short of the full width so the next one peeks in — the only hint
-   on touch that the row scrolls. Scrollbar hidden for the same reason as the
-   line list. */
+/* One card at a time, moved only by the chevrons: hidden overflow takes away
+   swipe, wheel and scrollbar but still scrolls programmatically. Snap keeps a
+   card aligned when a resize or a popped item shifts the offsets. */
 .cart-upsell-track {
   display: flex;
   gap: 0.5rem;
   margin-top: 0.5rem;
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
+  overflow: hidden;
   scroll-snap-type: x mandatory;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-.cart-upsell-track::-webkit-scrollbar {
-  display: none;
 }
 
 /* A column so the price row sits on the bottom edge even when a sibling card
    is taller (e.g. one carrying a preorder line). */
 .cart-upsell-item {
-  border: 1px solid color-mix(in srgb, var(--color-vellum-100) 25%, transparent);
   display: flex;
-  flex: 0 0 75%;
+  flex: 0 0 100%;
   flex-direction: column;
   margin: 0;
   min-width: 0;
-  padding: 0.5rem;
   scroll-snap-align: start;
-}
-
-.cart-upsell-item:only-child {
-  flex-basis: 100%;
 }
 
 .cart-upsell-media {

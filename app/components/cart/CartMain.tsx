@@ -1,4 +1,4 @@
-import {Fragment} from 'react';
+import {Fragment, useEffect, useRef, useState} from 'react';
 import {useOptimisticCart} from '@shopify/hydrogen';
 import type {CartApiQueryFragment} from 'storefrontapi.generated';
 import {EmptyBasket} from '~/assets/illustrations/EmptyBasket';
@@ -61,48 +61,97 @@ export function CartMain({layout, cart: originalCart}: CartMainProps) {
       className={className}
       aria-label={layout === 'page' ? 'Cart page' : 'Cart drawer'}
     >
-      {!cartHasItems ? (
-        <>
-          <CartEmpty layout={layout} />
-          <CartUpsell layout={layout} lines={lines} />
-        </>
-      ) : (
-        <CartLineUpdatesProvider
-          layout={layout}
-          lines={lines}
-          serverLines={originalCart?.lines?.nodes ?? []}
-        >
-          <div className="cart-details">
-            <p id="cart-lines" className="sr-only">
-              Line items
-            </p>
-            <div className="cart-line-list">
-              <ul aria-labelledby="cart-lines">
-                {rootLines.map((line, index) => (
-                  <Fragment key={line.id}>
-                    {index > 0 ? (
-                      <li aria-hidden="true" className="list-none py-1">
-                        <BlueprintRule
-                          orientation="h"
-                          className="w-full text-vellum-100/50"
-                        />
-                      </li>
-                    ) : null}
-                    <CartLineItem
-                      line={line}
-                      layout={layout}
-                      childrenMap={childrenMap}
-                    />
-                  </Fragment>
-                ))}
-              </ul>
-              <CartUpsell layout={layout} lines={lines} />
-            </div>
-            <CartSummary cart={cart} layout={layout} />
+      {/* One tree for empty and filled carts, so the summary stays mounted
+          and can slide out when the last line goes. */}
+      <CartLineUpdatesProvider
+        layout={layout}
+        lines={lines}
+        serverLines={originalCart?.lines?.nodes ?? []}
+      >
+        <div className="cart-details">
+          <div className="cart-line-list">
+            {cartHasItems ? (
+              <>
+                <p id="cart-lines" className="sr-only">
+                  Line items
+                </p>
+                <ul aria-labelledby="cart-lines">
+                  {rootLines.map((line, index) => (
+                    <Fragment key={line.id}>
+                      {index > 0 ? (
+                        <li aria-hidden="true" className="list-none py-1">
+                          <BlueprintRule
+                            orientation="h"
+                            className="w-full text-vellum-100/50"
+                          />
+                        </li>
+                      ) : null}
+                      <CartLineItem
+                        line={line}
+                        layout={layout}
+                        childrenMap={childrenMap}
+                      />
+                    </Fragment>
+                  ))}
+                </ul>
+              </>
+            ) : (
+              <CartEmpty layout={layout} />
+            )}
+            <CartUpsell layout={layout} lines={lines} />
           </div>
-        </CartLineUpdatesProvider>
-      )}
+          <CartSummaryReveal open={cartHasItems}>
+            <CartSummary cart={cart} layout={layout} />
+          </CartSummaryReveal>
+        </div>
+      </CartLineUpdatesProvider>
     </section>
+  );
+}
+
+/**
+ * Open state the summary last rendered with. Module scope because CartMain
+ * remounts inside `<Await>` on cart revalidation: a fresh mount starts from
+ * here, so an add that lands with the remount still slides in rather than
+ * appearing open. Undefined until the first mount, so a page load never
+ * animates. Only written in effects, so the server never touches it.
+ */
+let summaryWasOpen: boolean | undefined;
+
+/**
+ * Slides the summary up from the drawer's bottom edge when the cart gains its
+ * first line, and back down when it empties. The collapse is a height
+ * transition, so whatever sits above it — the pinned upsell — rides along.
+ */
+function CartSummaryReveal({
+  children,
+  open,
+}: {
+  children: React.ReactNode;
+  open: boolean;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [shown, setShown] = useState(() => summaryWasOpen ?? open);
+
+  useEffect(() => {
+    summaryWasOpen = open;
+    if (shown === open) return;
+    // Commit the start state first: on a fresh mount the browser would
+    // otherwise fold both states into one style pass and skip the transition.
+    ref.current?.getBoundingClientRect();
+    setShown(open);
+  }, [open, shown]);
+
+  return (
+    <div
+      className="cart-summary-reveal"
+      data-open={shown || undefined}
+      ref={ref}
+    >
+      {/* Unpadded, so the collapsed row can reach zero: a grid item never
+          shrinks past its own padding and border. */}
+      <div>{children}</div>
+    </div>
   );
 }
 

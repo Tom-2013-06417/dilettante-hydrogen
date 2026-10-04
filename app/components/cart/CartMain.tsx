@@ -7,6 +7,7 @@ import {BlueprintRule} from '~/components/product/BlueprintRule';
 import {CartLineItem, type CartLine} from './CartLineItem';
 import {CartLineUpdatesProvider} from './CartLineUpdates';
 import {CartSummary} from './CartSummary';
+import {CartUpsell} from './CartUpsell';
 
 export type CartLayout = 'page' | 'aside';
 
@@ -74,6 +75,7 @@ export function CartMain({layout, cart: originalCart}: CartMainProps) {
               Line items
             </p>
             <div className="cart-line-list">
+              <CartUpsell layout={layout} lines={lines} />
               <ul aria-labelledby="cart-lines">
                 {rootLines.map((line, index) => (
                   <Fragment key={line.id}>

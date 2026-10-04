@@ -3,6 +3,78 @@
 /* eslint-disable */
 import type * as StorefrontAPI from '@shopify/hydrogen/storefront-api-types';
 
+export type CartUpsellVariantFragment = Pick<
+  StorefrontAPI.ProductVariant,
+  | 'id'
+  | 'availableForSale'
+  | 'currentlyNotInStock'
+  | 'requiresShipping'
+  | 'title'
+> & {
+  compareAtPrice?: StorefrontAPI.Maybe<
+    Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>
+  >;
+  price: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>;
+  image?: StorefrontAPI.Maybe<
+    Pick<StorefrontAPI.Image, 'id' | 'url' | 'altText' | 'width' | 'height'>
+  >;
+  product: Pick<StorefrontAPI.Product, 'handle' | 'title' | 'id' | 'vendor'> & {
+    scentNumber?: StorefrontAPI.Maybe<Pick<StorefrontAPI.Metafield, 'value'>>;
+    preorderEta?: StorefrontAPI.Maybe<
+      Pick<StorefrontAPI.Metafield, 'type' | 'value'>
+    >;
+  };
+  selectedOptions: Array<Pick<StorefrontAPI.SelectedOption, 'name' | 'value'>>;
+};
+
+export type CartUpsellVariantsQueryVariables = StorefrontAPI.Exact<{
+  country?: StorefrontAPI.InputMaybe<StorefrontAPI.CountryCode>;
+  ids:
+    | Array<StorefrontAPI.Scalars['ID']['input']>
+    | StorefrontAPI.Scalars['ID']['input'];
+  language?: StorefrontAPI.InputMaybe<StorefrontAPI.LanguageCode>;
+}>;
+
+export type CartUpsellVariantsQuery = {
+  nodes: Array<
+    StorefrontAPI.Maybe<
+      Pick<
+        StorefrontAPI.ProductVariant,
+        | 'id'
+        | 'availableForSale'
+        | 'currentlyNotInStock'
+        | 'requiresShipping'
+        | 'title'
+      > & {
+        compareAtPrice?: StorefrontAPI.Maybe<
+          Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>
+        >;
+        price: Pick<StorefrontAPI.MoneyV2, 'currencyCode' | 'amount'>;
+        image?: StorefrontAPI.Maybe<
+          Pick<
+            StorefrontAPI.Image,
+            'id' | 'url' | 'altText' | 'width' | 'height'
+          >
+        >;
+        product: Pick<
+          StorefrontAPI.Product,
+          'handle' | 'title' | 'id' | 'vendor'
+        > & {
+          scentNumber?: StorefrontAPI.Maybe<
+            Pick<StorefrontAPI.Metafield, 'value'>
+          >;
+          preorderEta?: StorefrontAPI.Maybe<
+            Pick<StorefrontAPI.Metafield, 'type' | 'value'>
+          >;
+        };
+        selectedOptions: Array<
+          Pick<StorefrontAPI.SelectedOption, 'name' | 'value'>
+        >;
+      }
+    >
+  >;
+};
+
 export type MoneyFragment = Pick<
   StorefrontAPI.MoneyV2,
   'currencyCode' | 'amount'
@@ -1203,6 +1275,10 @@ export type ProductQuery = {
 };
 
 interface GeneratedQueryTypes {
+  '#graphql\n  fragment CartUpsellVariant on ProductVariant {\n    id\n    availableForSale\n    currentlyNotInStock\n    compareAtPrice {\n      currencyCode\n      amount\n    }\n    price {\n      currencyCode\n      amount\n    }\n    requiresShipping\n    title\n    image {\n      id\n      url\n      altText\n      width\n      height\n    }\n    product {\n      handle\n      title\n      id\n      vendor\n      scentNumber: metafield(namespace: "custom", key: "scent_number") {\n        value\n      }\n      preorderEta: metafield(namespace: "custom", key: "preorder_eta") {\n        type\n        value\n      }\n    }\n    selectedOptions {\n      name\n      value\n    }\n  }\n  query CartUpsellVariants(\n    $country: CountryCode\n    $ids: [ID!]!\n    $language: LanguageCode\n  ) @inContext(country: $country, language: $language) {\n    nodes(ids: $ids) {\n      ... on ProductVariant {\n        ...CartUpsellVariant\n      }\n    }\n  }\n': {
+    return: CartUpsellVariantsQuery;
+    variables: CartUpsellVariantsQueryVariables;
+  };
   '#graphql\n  fragment Shop on Shop {\n    id\n    name\n    description\n    primaryDomain {\n      url\n    }\n    brand {\n      logo {\n        image {\n          url\n        }\n      }\n    }\n    preordersEnabled: metafield(namespace: "custom", key: "preorders_enabled") {\n      type\n      value\n    }\n    announcementTexts: metafield(namespace: "custom", key: "announcement_texts") {\n      type\n      value\n    }\n    footerBrandLine: metafield(namespace: "custom", key: "footer_brand_line") {\n      type\n      value\n    }\n  }\n  query Header(\n    $country: CountryCode\n    $headerMenuHandle: String!\n    $language: LanguageCode\n  ) @inContext(language: $language, country: $country) {\n    shop {\n      ...Shop\n    }\n    menu(handle: $headerMenuHandle) {\n      ...Menu\n    }\n  }\n  #graphql\n  fragment MenuItem on MenuItem {\n    id\n    resourceId\n    tags\n    title\n    type\n    url\n  }\n  fragment ChildMenuItem on MenuItem {\n    ...MenuItem\n  }\n  fragment ParentMenuItem on MenuItem {\n    ...MenuItem\n    items {\n      ...ChildMenuItem\n    }\n  }\n  fragment Menu on Menu {\n    id\n    items {\n      ...ParentMenuItem\n    }\n  }\n\n': {
     return: HeaderQuery;
     variables: HeaderQueryVariables;

@@ -22,6 +22,7 @@ import {TeaserPage} from '~/components/teaser';
 import {isSiteGated} from '~/lib/siteGate';
 import {isPreordersEnabled} from '~/lib/preordersEnabled';
 import {loadTeaserSlides} from '~/lib/teaserProducts';
+import {loadCartUpsellVariants} from '~/lib/cartUpsell';
 
 /** Oxygen preview URLs sit behind Shopify login; /manifest.json redirects to OAuth. */
 function isOxygenPreviewHost(request: Request): boolean {
@@ -195,6 +196,7 @@ export async function loader(args: Route.LoaderArgs) {
       cart: Promise.resolve(null),
       isLoggedIn: Promise.resolve(false),
       header: {shop: null, menu: null},
+      cartUpsellVariants: [],
       shop: null,
       consent: {
         checkoutDomain: env.PUBLIC_CHECKOUT_DOMAIN,
@@ -245,7 +247,7 @@ export async function loader(args: Route.LoaderArgs) {
 async function loadCriticalData({context}: Route.LoaderArgs) {
   const {storefront} = context;
 
-  const [header] = await Promise.all([
+  const [header, cartUpsellVariants] = await Promise.all([
     storefront.query(HEADER_QUERY, {
       // Shop metafields (e.g. announcement_texts) are merchant-edited; avoid
       // CacheLong so stale nulls don't stick after a definition/value is added.
@@ -254,10 +256,12 @@ async function loadCriticalData({context}: Route.LoaderArgs) {
         headerMenuHandle: 'main-menu', // Adjust to your header menu handle
       },
     }),
-    // Add other queries here, so that they are loaded in parallel
+    // Awaited rather than deferred: a fresh promise on every cart revalidation
+    // would re-suspend the widget and blink it out of the drawer.
+    loadCartUpsellVariants(storefront),
   ]);
 
-  return {header};
+  return {header, cartUpsellVariants};
 }
 
 /**

@@ -4,15 +4,17 @@ import type {CartUpsellVariantFragment} from 'storefrontapi.generated';
 export type CartUpsellVariant = CartUpsellVariantFragment;
 
 /**
- * The 2 mL variant of each scent, in display order. Hardcoded until the upsell
- * gets smarter sorting; the 30 mL variants are deliberately left out.
+ * The 2 mL variant of each scent, in display order (client's pick: 1, 5, 2, 4,
+ * 3). `nodes(ids:)` returns in request order, so this order is what renders.
+ * Hardcoded until the sort is exposed in the admin; the 30 mL variants are
+ * deliberately left out.
  */
 export const CART_UPSELL_VARIANT_IDS = [
   'gid://shopify/ProductVariant/44017479549018', // 01 Kids on the Slope
-  'gid://shopify/ProductVariant/44017482661978', // 02 Summer Cannibals
-  'gid://shopify/ProductVariant/44017509597274', // 03 Temple at Dawn
-  'gid://shopify/ProductVariant/44017510580314', // 04 Forever (on the Crest of a Wave)
   'gid://shopify/ProductVariant/44017478631514', // 05 Creature Feature
+  'gid://shopify/ProductVariant/44017482661978', // 02 Summer Cannibals
+  'gid://shopify/ProductVariant/44017510580314', // 04 Forever (on the Crest of a Wave)
+  'gid://shopify/ProductVariant/44017509597274', // 03 Temple at Dawn
 ];
 
 /**

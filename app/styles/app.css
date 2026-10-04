@@ -667,7 +667,9 @@ aside.aside-cart .cart-main {
    Hide the gutter — classic scrollbars sit in the padded list and crowd the
    delete/quantity controls; scrolling still works via trackpad/wheel/touch. */
 aside.aside-cart .cart-line-list {
+  display: flex;
   flex: 1;
+  flex-direction: column;
   min-height: 0;
   overflow-y: auto;
   scrollbar-width: none;
@@ -690,10 +692,17 @@ aside.aside-cart .cart-summary-aside {
 
 /* Positioned so the BlueprintRule outline can pin to its edges. */
 .cart-upsell {
+  flex-shrink: 0;
   margin-bottom: 0.75rem;
   margin-top: 1.5rem;
   padding: 0.75rem;
   position: relative;
+}
+
+/* Pinned to the bottom of the drawer body while the lines are short; once they
+   grow into it the auto margin runs out and it scrolls as the last element. */
+aside.aside-cart .cart-upsell {
+  margin-top: auto;
 }
 
 /* Cards stop short of the full width so the next one peeks in — the only hint

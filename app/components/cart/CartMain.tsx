@@ -62,7 +62,10 @@ export function CartMain({layout, cart: originalCart}: CartMainProps) {
       aria-label={layout === 'page' ? 'Cart page' : 'Cart drawer'}
     >
       {!cartHasItems ? (
-        <CartEmpty layout={layout} />
+        <>
+          <CartEmpty layout={layout} />
+          <CartUpsell layout={layout} lines={lines} />
+        </>
       ) : (
         <CartLineUpdatesProvider
           layout={layout}

@@ -81,10 +81,10 @@ function useCarousel(itemCount: number) {
 }
 
 /**
- * "You may also like" — the 2 mL variants not already in the cart. Adding one
- * drops it from the list as soon as the optimistic line appears; removing that
- * line from the cart brings it back. Renders nothing once every variant is in
- * the cart.
+ * The 2 mL variants not already in the cart — "Start with a sample" on an empty
+ * cart, "You may also like" once it has lines. Adding one drops it from the
+ * list as soon as the optimistic line appears; removing that line from the cart
+ * brings it back. Renders nothing once every variant is in the cart.
  */
 export function CartUpsell({
   layout,
@@ -133,7 +133,7 @@ export function CartUpsell({
           className="font-['config-mono-vf'] text-[12px] uppercase tracking-[0.08em] text-vellum-100/80"
           id={headingId}
         >
-          You may also like
+          {lines.length ? 'You may also like' : 'Start with a sample'}
         </p>
         <div className="flex items-center gap-1">
           <button

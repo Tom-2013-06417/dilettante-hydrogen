@@ -112,6 +112,22 @@ export function CartUpsell({
 
   return (
     <div aria-labelledby={headingId} className="cart-upsell" role="region">
+      <BlueprintRule
+        orientation="h"
+        className="pointer-events-none absolute inset-x-0 top-0 text-vellum-100/50"
+      />
+      <BlueprintRule
+        orientation="h"
+        className="pointer-events-none absolute inset-x-0 bottom-0 text-vellum-100/50"
+      />
+      <BlueprintRule
+        orientation="v"
+        className="pointer-events-none absolute inset-y-0 left-0 text-vellum-100/50"
+      />
+      <BlueprintRule
+        orientation="v"
+        className="pointer-events-none absolute inset-y-0 right-0 text-vellum-100/50"
+      />
       <div className="flex items-center justify-between">
         <p
           className="font-['config-mono-vf'] text-[12px] uppercase tracking-[0.08em] text-vellum-100/80"
@@ -156,8 +172,6 @@ export function CartUpsell({
           />
         ))}
       </ul>
-
-      <BlueprintRule orientation="h" className="w-full text-vellum-100/50" />
     </div>
   );
 }
@@ -221,7 +235,7 @@ function CartUpsellItem({
               if (layout === 'aside') close();
             }}
           >
-            <p className="mt-1! truncate font-['wayfinder-cf'] text-[26px] font-thin leading-none! tracking-[-5%]">
+            <p className="mt-1! truncate font-['wayfinder-cf'] text-[20px] font-thin leading-none! tracking-[-5%]">
               {product.title}
             </p>
           </Link>
@@ -234,10 +248,10 @@ function CartUpsellItem({
         </div>
       </div>
 
-      <div className="mt-auto flex items-end justify-between gap-3 pt-3">
+      <div className="mt-auto flex items-end justify-between gap-3 pt-2">
         <Money
           as="span"
-          className="font-['config-mono-vf'] text-[14px] tracking-[0.04em]"
+          className="font-['config-mono-vf'] text-[13px] tracking-[0.04em]"
           data={price}
         />
         <CartForm
@@ -260,7 +274,7 @@ function CartUpsellItem({
           route="/cart"
         >
           <button
-            className="h-8 cursor-pointer border border-current px-4 font-['config-mono-vf'] text-[12px] uppercase tracking-[0.08em] transition-colors hover:bg-vellum-100 hover:text-inkwell-700"
+            className="h-7 cursor-pointer border border-current px-3 font-['config-mono-vf'] text-[11px] uppercase tracking-[0.08em] transition-colors hover:bg-vellum-100 hover:text-inkwell-700"
             type="submit"
           >
             Add

@@ -691,7 +691,7 @@ aside.aside-cart .cart-summary-aside {
 /* Positioned so the BlueprintRule outline can pin to its edges. */
 .cart-upsell {
   margin-bottom: 0.75rem;
-  margin-top: 0.75rem;
+  margin-top: 1.5rem;
   padding: 0.75rem;
   position: relative;
 }

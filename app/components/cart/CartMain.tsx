@@ -56,7 +56,6 @@ export function CartMain({layout, cart: originalCart}: CartMainProps) {
     (line) =>
       !('parentRelationship' in line && line.parentRelationship?.parent),
   );
-
   return (
     <section
       className={className}
@@ -75,7 +74,6 @@ export function CartMain({layout, cart: originalCart}: CartMainProps) {
               Line items
             </p>
             <div className="cart-line-list">
-              <CartUpsell layout={layout} lines={lines} />
               <ul aria-labelledby="cart-lines">
                 {rootLines.map((line, index) => (
                   <Fragment key={line.id}>
@@ -95,6 +93,7 @@ export function CartMain({layout, cart: originalCart}: CartMainProps) {
                   </Fragment>
                 ))}
               </ul>
+              <CartUpsell layout={layout} lines={lines} />
             </div>
             <CartSummary cart={cart} layout={layout} />
           </div>

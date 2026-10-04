@@ -128,33 +128,33 @@ export function CartUpsell({
         orientation="v"
         className="pointer-events-none absolute inset-y-0 right-0 text-vellum-100/50"
       />
-      <div className="flex items-center justify-between">
-        <p
-          className="font-['config-mono-vf'] text-[12px] uppercase tracking-[0.08em] text-vellum-100/80"
-          id={headingId}
+      {/* Heading and chevrons sit on the top rule; the drawer-coloured ground
+          breaks the dashes behind them. */}
+      <p
+        className="absolute left-3 top-0 -translate-y-1/2 bg-inkwell-700 px-1! font-['config-mono-vf'] text-[12px] uppercase tracking-[0.08em] text-vellum-100/80"
+        id={headingId}
+      >
+        {lines.length ? 'You may also like' : 'Start with a sample'}
+      </p>
+      <div className="absolute right-1 top-0 flex -translate-y-1/2 items-center gap-1 bg-inkwell-700">
+        <button
+          aria-label="Previous suggestion"
+          className={chevronClassName}
+          disabled={!canPrev}
+          onClick={() => step(-1)}
+          type="button"
         >
-          {lines.length ? 'You may also like' : 'Start with a sample'}
-        </p>
-        <div className="flex items-center gap-1">
-          <button
-            aria-label="Previous suggestion"
-            className={chevronClassName}
-            disabled={!canPrev}
-            onClick={() => step(-1)}
-            type="button"
-          >
-            <ChevronLeftIcon aria-hidden="true" className="h-4 w-4" />
-          </button>
-          <button
-            aria-label="Next suggestion"
-            className={chevronClassName}
-            disabled={!canNext}
-            onClick={() => step(1)}
-            type="button"
-          >
-            <ChevronRightIcon aria-hidden="true" className="h-4 w-4" />
-          </button>
-        </div>
+          <ChevronLeftIcon aria-hidden="true" className="h-4 w-4" />
+        </button>
+        <button
+          aria-label="Next suggestion"
+          className={chevronClassName}
+          disabled={!canNext}
+          onClick={() => step(1)}
+          type="button"
+        >
+          <ChevronRightIcon aria-hidden="true" className="h-4 w-4" />
+        </button>
       </div>
 
       <ul

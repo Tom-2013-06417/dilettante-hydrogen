@@ -240,6 +240,10 @@ export const HEADER_QUERY = `#graphql
       type
       value
     }
+    cartCheckoutNote: metafield(namespace: "custom", key: "cart_checkout_note") {
+      type
+      value
+    }
   }
   query Header(
     $country: CountryCode

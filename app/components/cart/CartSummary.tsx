@@ -18,6 +18,8 @@ export function CartSummary({cart, layout}: CartSummaryProps) {
     layout === 'page' ? 'cart-summary-page' : 'cart-summary-aside';
   const summaryId = useId();
   const estimatedTotal = cart?.cost?.totalAmount;
+  const rootData = useRouteLoaderData<typeof rootLoader>('root');
+  const checkoutNote = rootData?.header?.shop?.cartCheckoutNote?.value?.trim();
 
   return (
     <div aria-labelledby={summaryId} className={className}>
@@ -37,9 +39,11 @@ export function CartSummary({cart, layout}: CartSummaryProps) {
         </div>
       ) : null}
       <CartCheckoutActions cart={cart} checkoutUrl={cart?.checkoutUrl} />
-      <p className="text-center font-['config-mono-vf'] text-[11px] leading-snug text-vellum-100/60">
-        Taxes, discounts, and shipping fees are calculated at checkout.
-      </p>
+      {checkoutNote ? (
+        <p className="text-center font-['config-mono-vf'] text-[11px] leading-snug text-vellum-100/60">
+          {checkoutNote}
+        </p>
+      ) : null}
     </div>
   );
 }

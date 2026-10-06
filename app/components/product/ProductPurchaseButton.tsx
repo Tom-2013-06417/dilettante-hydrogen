@@ -63,7 +63,7 @@ function purchaseButtonLabel(
 ): string {
   if (!isVariantPurchasable(variant ?? null, preordersEnabled)) return 'Sold out';
   if (isPreorderVariant(variant ?? null, preordersEnabled)) return 'Pre-order';
-  return 'Purchase';
+  return 'Add to Cart';
 }
 
 /** Shared Purchase control — the hero band and the scenes panel both use it. */

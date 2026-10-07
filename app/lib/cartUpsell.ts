@@ -83,7 +83,8 @@ export async function loadCartUpsellVariants(
 ): Promise<CartUpsellVariant[]> {
   try {
     const {nodes} = await storefront.query(CART_UPSELL_QUERY, {
-      cache: storefront.CacheLong(),
+      // Stock flags decide Sold out / Pre-order in the widget; keep them fresh.
+      cache: storefront.CacheShort(),
       variables: {ids: CART_UPSELL_VARIANT_IDS},
     });
 

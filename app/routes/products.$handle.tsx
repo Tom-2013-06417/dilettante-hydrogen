@@ -83,8 +83,9 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
 
   const [{product}] = await Promise.all([
     storefront.query(PRODUCT_QUERY, {
-      // Prefetch + revisit: keep product payloads warm across collection taps.
-      cache: storefront.CacheLong(),
+      // Variant stock flags (currentlyNotInStock / availableForSale) drive the
+      // Pre-order CTA and ETA, so this payload must not be long-cached.
+      cache: storefront.CacheShort(),
       variables: {handle, selectedOptions: getSelectedProductOptions(request)},
     }),
     // Add other queries here, so that they are loaded in parallel

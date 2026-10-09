@@ -521,6 +521,84 @@ main {
   padding: 0.75rem 0 0;
 }
 
+/* A new line drops in from just above. */
+@keyframes cart-line-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+/* A removed line fades down out of its slot... */
+@keyframes cart-line-leave {
+  to {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+/* ...then the slot closes so the lines below slide up instead of jumping. */
+@keyframes cart-line-collapse {
+  to {
+    grid-template-rows: 0fr;
+    visibility: hidden;
+  }
+}
+
+.cart-line-row[data-entering] > * {
+  animation: cart-line-enter 80ms ease-out;
+}
+
+/* Keep the 120ms total in step with LINE_LEAVE_MS in CartMain.tsx, which is how
+   long the row stays mounted after the line leaves the cart. */
+.cart-line-row[data-leaving] {
+  animation: cart-line-collapse 60ms ease-in-out 60ms forwards;
+  display: grid;
+  grid-template-rows: 1fr;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.cart-line-row[data-leaving] > * {
+  animation: cart-line-leave 60ms ease-in forwards;
+  min-height: 0;
+}
+
+/* The rule above a line shows only when a line that is staying sits above it,
+   so removing the top line takes the next one's rule with it. Delayed to close
+   in step with the leaving row's collapse. */
+.cart-line-divider {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 60ms ease-in-out 60ms;
+}
+
+.cart-line-divider > * {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.cart-line-row:not([data-leaving]) ~ .cart-line-row .cart-line-divider {
+  grid-template-rows: 1fr;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cart-line-row[data-entering] > *,
+  .cart-line-row[data-leaving] > * {
+    animation: none;
+  }
+
+  /* Gone at once rather than sitting on screen until the row unmounts. */
+  .cart-line-row[data-leaving] {
+    animation: none;
+    display: none;
+  }
+
+  .cart-line-divider {
+    transition: none;
+  }
+}
+
 .cart-line-inner {
   align-items: flex-start;
   display: flex;

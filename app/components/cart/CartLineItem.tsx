@@ -65,6 +65,7 @@ function useRetreat(visible: boolean, ms: number) {
 
 /**
  * A single line item in the cart. It displays the product image, title, price.
+ * The caller supplies the wrapping `<li>`.
  * It also provides controls to update the quantity or remove the line item.
  * If the line is a parent line that has child components (like warranties or gift wrapping), they are
  * rendered nested below the parent line.
@@ -106,7 +107,7 @@ export function CartLineItem({
   );
 
   return (
-    <li key={id} className="cart-line relative">
+    <div className="cart-line relative">
       <CartLineRemoveButton
         className="absolute right-0 top-2 z-10"
         lineIds={[id]}
@@ -228,17 +229,18 @@ export function CartLineItem({
           </p>
           <ul aria-labelledby={childrenLabelId} className="cart-line-children">
             {lineItemChildren.map((childLine) => (
-              <CartLineItem
-                childrenMap={childrenMap}
-                key={childLine.id}
-                line={childLine}
-                layout={layout}
-              />
+              <li key={childLine.id}>
+                <CartLineItem
+                  childrenMap={childrenMap}
+                  line={childLine}
+                  layout={layout}
+                />
+              </li>
             ))}
           </ul>
         </div>
       ) : null}
-    </li>
+    </div>
   );
 }
 

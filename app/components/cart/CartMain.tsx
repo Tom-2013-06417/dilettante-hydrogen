@@ -1,4 +1,4 @@
-import {Fragment, useEffect, useRef, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import {useOptimisticCart} from '@shopify/hydrogen';
 import type {CartApiQueryFragment} from 'storefrontapi.generated';
 import {EmptyBasket} from '~/assets/illustrations/EmptyBasket';
@@ -52,10 +52,20 @@ export function CartMain({layout, cart: originalCart}: CartMainProps) {
   const cartHasItems = cart?.totalQuantity ? cart.totalQuantity > 0 : false;
   const lines = cart?.lines?.nodes ?? [];
   const childrenMap = getLineItemChildrenMap(lines);
-  const rootLines = lines.filter(
-    (line) =>
-      !('parentRelationship' in line && line.parentRelationship?.parent),
-  );
+  // The Cart API and useOptimisticCart both put the newest line first; list
+  // oldest first so an add lands at the bottom.
+  const rootLines = lines
+    .filter(
+      (line) =>
+        !('parentRelationship' in line && line.parentRelationship?.parent),
+    )
+    .reverse();
+  const rows = useLeavingRows(rootLines);
+
+  useEffect(() => {
+    shownLineKeys = new Set(rootLines.flatMap(lineKeys));
+  });
+
   return (
     <section
       className={className}
@@ -70,28 +80,21 @@ export function CartMain({layout, cart: originalCart}: CartMainProps) {
       >
         <div className="cart-details">
           <div className="cart-line-list">
-            {cartHasItems ? (
+            {/* Rows rather than cartHasItems, so the last line can animate out. */}
+            {rows.length > 0 ? (
               <>
                 <p id="cart-lines" className="sr-only">
                   Line items
                 </p>
                 <ul aria-labelledby="cart-lines">
-                  {rootLines.map((line, index) => (
-                    <Fragment key={line.id}>
-                      {index > 0 ? (
-                        <li aria-hidden="true" className="list-none py-1">
-                          <BlueprintRule
-                            orientation="h"
-                            className="w-full text-vellum-100/50"
-                          />
-                        </li>
-                      ) : null}
-                      <CartLineItem
-                        line={line}
-                        layout={layout}
-                        childrenMap={childrenMap}
-                      />
-                    </Fragment>
+                  {rows.map(({line, leaving}) => (
+                    <CartLineRow
+                      key={line.id}
+                      line={line}
+                      leaving={leaving}
+                      layout={layout}
+                      childrenMap={childrenMap}
+                    />
                   ))}
                 </ul>
               </>
@@ -106,6 +109,137 @@ export function CartMain({layout, cart: originalCart}: CartMainProps) {
         </div>
       </CartLineUpdatesProvider>
     </section>
+  );
+}
+
+/**
+ * How long a removed line stays mounted: a 60ms fade, then a 60ms collapse.
+ * Must match the `.cart-line-row[data-leaving]` animations (app.css).
+ */
+const LINE_LEAVE_MS = 120;
+
+/**
+ * Ids and merchandise ids of the lines on screen at the last commit. Module
+ * scope for the same reason as `summaryWasOpen`: a remount inside `<Await>`
+ * must not replay the entrance for lines already showing. Merchandise ids are
+ * kept so an add swapping its placeholder line for the saved one (new id, same
+ * variant) does not count as new either. Undefined until the first mount, so a
+ * page load never animates.
+ */
+let shownLineKeys: Set<string> | undefined;
+
+function lineKeys(line: CartLine) {
+  return line.merchandise?.id ? [line.id, line.merchandise.id] : [line.id];
+}
+
+function isSameLine(a: CartLine, b: CartLine) {
+  return (
+    a.id === b.id ||
+    (!!a.merchandise?.id && a.merchandise.id === b.merchandise?.id)
+  );
+}
+
+type CartLineRowData = {line: CartLine; leaving?: boolean};
+
+/**
+ * The lines to render: the current ones, plus removed ones held in their old
+ * slot for LINE_LEAVE_MS so they can animate out. The optimistic cart drops a
+ * removed line the moment the action is submitted, so this has to catch it in
+ * render — an effect would paint one frame without it.
+ */
+function useLeavingRows(lines: CartLine[]): CartLineRowData[] {
+  const key = lines.map((line) => line.id).join('|');
+  const [state, setState] = useState(() => ({
+    key,
+    rows: lines.map((line): CartLineRowData => ({line})),
+  }));
+
+  let rows = state.rows;
+  if (state.key !== key) {
+    const unclaimed = new Set(lines);
+    const claim = (line: CartLine) => {
+      const match =
+        [...unclaimed].find((next) => next.id === line.id) ??
+        [...unclaimed].find((next) => isSameLine(next, line));
+      if (match) unclaimed.delete(match);
+      return match;
+    };
+
+    rows = state.rows.map((row) => {
+      const next = claim(row.line);
+      return next ? {line: next} : {line: row.line, leaving: true};
+    });
+    lines.forEach((line, index) => {
+      if (!unclaimed.has(line)) return;
+      const before = lines[index - 1];
+      const at = before ? rows.findIndex((row) => row.line === before) + 1 : 0;
+      rows.splice(at, 0, {line});
+    });
+    setState({key, rows});
+  }
+
+  const leavingKey = rows
+    .filter((row) => row.leaving)
+    .map((row) => row.line.id)
+    .join('|');
+  useEffect(() => {
+    if (!leavingKey) return;
+    const timer = setTimeout(() => {
+      setState((prev) => ({
+        ...prev,
+        rows: prev.rows.filter((row) => !row.leaving),
+      }));
+    }, LINE_LEAVE_MS);
+    return () => clearTimeout(timer);
+  }, [leavingKey]);
+
+  // Stored rows only fix order; quantities and prices come from this render.
+  const byId = new Map(lines.map((line) => [line.id, line]));
+  return rows.map((row) =>
+    row.leaving ? row : {line: byId.get(row.line.id) ?? row.line},
+  );
+}
+
+/**
+ * One top-level cart line and the rule above it. A line that was not on screen
+ * at the last commit drops in from above; a removed one fades down and then
+ * collapses so the lines below close the gap.
+ */
+function CartLineRow({
+  line,
+  leaving,
+  layout,
+  childrenMap,
+}: {
+  line: CartLine;
+  leaving?: boolean;
+  layout: CartLayout;
+  childrenMap: LineItemChildrenMap;
+}) {
+  const [entering] = useState(
+    () =>
+      shownLineKeys !== undefined &&
+      !lineKeys(line).some((key) => shownLineKeys?.has(key)),
+  );
+
+  return (
+    <li
+      className="cart-line-row"
+      data-entering={entering || undefined}
+      data-leaving={leaving || undefined}
+    >
+      <div>
+        <div aria-hidden="true" className="cart-line-divider">
+          <div className="py-1">
+            <BlueprintRule
+              orientation="h"
+              className="w-full text-vellum-100/50"
+            />
+          </div>
+        </div>
+        <CartLineItem line={line} layout={layout} childrenMap={childrenMap} />
+      </div>
+    </li>
   );
 }
 

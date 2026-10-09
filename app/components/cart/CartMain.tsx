@@ -61,6 +61,7 @@ export function CartMain({layout, cart: originalCart}: CartMainProps) {
     )
     .reverse();
   const rows = useLeavingRows(rootLines);
+  const listRef = useScrollToEndOnInsert();
 
   useEffect(() => {
     shownLineKeys = new Set(rootLines.flatMap(lineKeys));
@@ -79,7 +80,7 @@ export function CartMain({layout, cart: originalCart}: CartMainProps) {
         serverLines={originalCart?.lines?.nodes ?? []}
       >
         <div className="cart-details">
-          <div className="cart-line-list">
+          <div className="cart-line-list" ref={listRef}>
             {/* Rows rather than cartHasItems, so the last line can animate out. */}
             {rows.length > 0 ? (
               <>
@@ -241,6 +242,92 @@ function CartLineRow({
       </div>
     </li>
   );
+}
+
+/**
+ * How long after an insert the list keeps following its own growth to the
+ * bottom. Covers the new line's divider, which opens over 120ms (app.css) and
+ * so keeps the list growing after the insert lands.
+ */
+const INSERT_SETTLE_MS = 400;
+
+/**
+ * The list's scroll height at the last check. Module scope for the same reason
+ * as `summaryWasOpen`: a remount inside `<Await>` compares against what was on
+ * screen before it. Undefined until the first mount, so a page load with a
+ * long cart never scrolls.
+ */
+let lastListHeight: number | undefined;
+
+/**
+ * Scrolls the line list to the bottom whenever something inserted into it
+ * pushes its content past the fold: a new line, or the upsell becoming the
+ * last thing in the list once the lines outgrow the space it was pinned in.
+ *
+ * Only growth that follows an insert counts, so a quantity change, a removal,
+ * a late font, or the drawer resizing leaves the scroll where the shopper put
+ * it. The list keeps its own height as content is added, so its children are
+ * watched for size as well.
+ */
+function useScrollToEndOnInsert() {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const list = ref.current;
+    if (!list) return;
+
+    // A remount that brings a new line with it never sees that line inserted,
+    // so the first check after a remount counts as one.
+    let insertedAt =
+      lastListHeight === undefined ? -Infinity : performance.now();
+
+    const check = () => {
+      const height = list.scrollHeight;
+      const grew = lastListHeight !== undefined && height > lastListHeight;
+      lastListHeight = height;
+      // 1px of slack: fractional heights can leave scrollHeight just over.
+      const overflowing = height > list.clientHeight + 1;
+      if (
+        !grew ||
+        !overflowing ||
+        performance.now() - insertedAt > INSERT_SETTLE_MS
+      ) {
+        return;
+      }
+      const reduceMotion = window.matchMedia(
+        '(prefers-reduced-motion: reduce)',
+      ).matches;
+      list.scrollTo({top: height, behavior: reduceMotion ? 'auto' : 'smooth'});
+    };
+
+    const resizeObserver = new ResizeObserver(check);
+    const observeAll = () => {
+      resizeObserver.disconnect();
+      resizeObserver.observe(list);
+      Array.from(list.children).forEach((child) =>
+        resizeObserver.observe(child),
+      );
+    };
+    observeAll();
+
+    const mutationObserver = new MutationObserver((mutations) => {
+      const inserted = mutations.some((mutation) =>
+        Array.from(mutation.addedNodes).some((node) => node instanceof Element),
+      );
+      if (inserted) insertedAt = performance.now();
+      // The empty state, the line list and the upsell come and go as direct
+      // children, and each needs watching for size.
+      if (mutations.some((mutation) => mutation.target === list)) observeAll();
+    });
+    mutationObserver.observe(list, {childList: true, subtree: true});
+
+    return () => {
+      resizeObserver.disconnect();
+      mutationObserver.disconnect();
+    };
+  }, []);
+
+  return ref;
 }
 
 /**

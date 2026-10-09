@@ -19,10 +19,7 @@ import {preordersEnabledFromRootData} from '~/lib/preordersEnabled';
 import {Link, useRouteLoaderData} from 'react-router';
 import {useAside} from '~/components/layout';
 import type {loader as rootLoader} from '~/root';
-import type {
-  CartApiQueryFragment,
-  CartLineFragment,
-} from 'storefrontapi.generated';
+import type {CartApiQueryFragment} from 'storefrontapi.generated';
 
 export type CartLine = OptimisticCartLine<CartApiQueryFragment>;
 
@@ -182,10 +179,9 @@ export function CartLineItem({
               <span className="block text-[10px] uppercase tracking-[0.08em] text-vellum-100/60">
                 Subtotal
               </span>
-              <Money
-                as="span"
-                className="mt-px block text-[16px]"
-                data={lineSubtotal(unitPrice, quantity)}
+              <CartLineSubtotal
+                discount={lineDiscount(line)}
+                subtotal={lineSubtotal(unitPrice, quantity)}
               />
             </div>
           ) : (
@@ -252,6 +248,76 @@ export function CartLineItem({
  */
 function lineSubtotal(unitPrice: MoneyV2, quantity: number): MoneyV2 {
   return {...unitPrice, amount: String(Number(unitPrice.amount) * quantity)};
+}
+
+/**
+ * What the server's discounts took off this line, e.g. the free sample in a
+ * "buy 4, get 1" promo. Shopify reports it per line, so this is what shows
+ * which line the promo landed on. Optimistic lines have no allocations yet.
+ */
+function lineDiscount(line: CartLine): number {
+  return (line.discountAllocations ?? []).reduce(
+    (sum, {discountedAmount}) => sum + Number(discountedAmount.amount),
+    0,
+  );
+}
+
+/**
+ * The line subtotal, struck through next to the discounted amount when a
+ * discount applies. The discount comes from the server while the subtotal can
+ * run ahead on a queued quantity, so the result is clamped at zero until the
+ * two agree again.
+ */
+function CartLineSubtotal({
+  subtotal,
+  discount,
+}: {
+  subtotal: MoneyV2;
+  discount: number;
+}) {
+  if (discount <= 0) {
+    return (
+      <Money as="span" className="mt-px block text-[16px]" data={subtotal} />
+    );
+  }
+
+  return (
+    <DiscountedMoney
+      className="mt-px text-[16px]"
+      discounted={{
+        ...subtotal,
+        amount: String(Math.max(0, Number(subtotal.amount) - discount)),
+      }}
+      original={subtotal}
+    />
+  );
+}
+
+/**
+ * The original price struck through and dimmed, then the price actually paid.
+ * The struck price is sized off the caller's font size.
+ */
+export function DiscountedMoney({
+  original,
+  discounted,
+  className = '',
+}: {
+  original: MoneyV2;
+  discounted: MoneyV2;
+  className?: string;
+}) {
+  return (
+    <span className={`flex items-baseline gap-2 ${className}`.trim()}>
+      <s className="text-[0.8em] text-vellum-100/60">
+        <span className="sr-only">Original price </span>
+        <Money as="span" data={original} />
+      </s>
+      <span>
+        <span className="sr-only">Discounted price </span>
+        <Money as="span" data={discounted} />
+      </span>
+    </span>
+  );
 }
 
 /**

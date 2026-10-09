@@ -18,8 +18,16 @@ import {
 } from '~/lib/preordersEnabled';
 import {useVariantUrl} from '~/lib/variants';
 import type {loader as rootLoader} from '~/root';
-import type {CartLine} from './CartLineItem';
+import {DiscountedMoney, type CartLine} from './CartLineItem';
 import type {CartLayout} from './CartMain';
+import {useCartLineUpdates} from './CartLineUpdates';
+
+/**
+ * Mirrors the "Buy 4 Samples, Get 1 Free" automatic discount in the admin.
+ * The widget cannot see that discount before the line exists, so it only
+ * shows the free price while the shop's custom.free_sample_promo_enabled is on.
+ */
+const SAMPLES_BEFORE_FREE = 4;
 
 /** Every variant in the cart, including bundle components. */
 function cartMerchandiseIds(lines: CartLine[], ids = new Set<string>()) {
@@ -102,6 +110,21 @@ export function CartUpsell({
       !inCart.has(variant.id) &&
       isVariantPurchasable(variant, preordersEnabled),
   );
+  const {getDraftQuantity} = useCartLineUpdates();
+  const sampleIds = new Set(variants.map((variant) => variant.id));
+  const samplesInCart = lines.reduce(
+    (sum, line) =>
+      line.merchandise?.id && sampleIds.has(line.merchandise.id)
+        ? sum + (getDraftQuantity(line.id) ?? line.quantity)
+        : sum,
+    0,
+  );
+  const promoEnabled =
+    rootData?.header?.shop?.freeSamplePromoEnabled?.value === 'true';
+  // Only the last scent left can be the free one: with a duplicate in the cart
+  // the promo has already been used and adding it would not be free.
+  const lastSampleFree =
+    promoEnabled && items.length === 1 && samplesInCart === SAMPLES_BEFORE_FREE;
   const {trackRef, canPrev, canNext, step} = useCarousel(items.length);
   const headingId = useId();
 
@@ -166,6 +189,7 @@ export function CartUpsell({
           <CartUpsellItem
             key={variant.id}
             eager={index === 0}
+            free={lastSampleFree}
             layout={layout}
             preordersEnabled={preordersEnabled}
             variant={variant}
@@ -178,11 +202,13 @@ export function CartUpsell({
 
 function CartUpsellItem({
   eager,
+  free,
   layout,
   preordersEnabled,
   variant,
 }: {
   eager: boolean;
+  free: boolean;
   layout: CartLayout;
   preordersEnabled: boolean;
   variant: CartUpsellVariant;
@@ -202,6 +228,8 @@ function CartUpsellItem({
     eta && isPreorderVariant(variant, preordersEnabled)
       ? preorderEtaIso(eta)
       : null;
+  const priceClassName =
+    "font-['config-mono-vf'] text-[13px] tracking-[0.04em]";
 
   return (
     <li className="cart-upsell-item">
@@ -249,11 +277,15 @@ function CartUpsellItem({
       </div>
 
       <div className="mt-auto flex items-end justify-between gap-3 pt-2">
-        <Money
-          as="span"
-          className="font-['config-mono-vf'] text-[13px] tracking-[0.04em]"
-          data={price}
-        />
+        {free ? (
+          <DiscountedMoney
+            className={priceClassName}
+            discounted={{...price, amount: '0'}}
+            original={price}
+          />
+        ) : (
+          <Money as="span" className={priceClassName} data={price} />
+        )}
         <CartForm
           action={CartForm.ACTIONS.LinesAdd}
           // One fetcher per variant so quick successive adds don't cancel

@@ -5,6 +5,7 @@
  * Storefront API access for each definition:
  * - custom.launch_date (Date) → header date “MMM . YYYY”
  * - custom.tagline (Single line text) → italic line under the title
+ * - custom.sample_set_image (File, image) → Sample Set card image
  */
 
 export type StorefrontCollectionMetafield = {

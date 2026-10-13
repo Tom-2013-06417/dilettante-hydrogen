@@ -117,6 +117,20 @@ const COLLECTION_QUERY = `#graphql
         type
         value
       }
+      sampleSetImage: metafield(namespace: "custom", key: "sample_set_image") {
+        type
+        reference {
+          ... on MediaImage {
+            id
+            image {
+              url
+              altText
+              width
+              height
+            }
+          }
+        }
+      }
       products(
         first: $first,
         last: $last,

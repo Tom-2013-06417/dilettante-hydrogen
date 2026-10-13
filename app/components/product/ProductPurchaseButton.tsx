@@ -33,7 +33,7 @@ function withCartLineProductMetafields<
   };
 }
 
-const BUTTON_CLASS =
+export const PURCHASE_BUTTON_CLASS =
   "cursor-pointer border-0 px-5 py-2.5 font-['config-mono-vf'] text-[13px] font-bold uppercase tracking-[0.08em] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 sm:px-6 sm:py-3 sm:text-[14px]";
 
 /**
@@ -41,7 +41,7 @@ const BUTTON_CLASS =
  * competing bg-* utilities resolve by stylesheet order, not by which one the
  * caller passed last.
  */
-const TONE_CLASS = {
+export const PURCHASE_BUTTON_TONE_CLASS = {
   inkwell: 'bg-[#152015] text-vellum-100',
   vellum: 'bg-vellum-100 text-inkwell-700',
 } as const;
@@ -53,7 +53,7 @@ type ProductPurchaseButtonProps = {
   /** custom.preorder_eta — stamped onto cart lines for fulfillment. */
   preorderEta?: ProductFragment['preorderEta'];
   /** 'inkwell' on the vellum hero; 'vellum' on the inkwell scenes panel. */
-  tone?: keyof typeof TONE_CLASS;
+  tone?: keyof typeof PURCHASE_BUTTON_TONE_CLASS;
   className?: string;
 };
 
@@ -87,7 +87,7 @@ export function ProductPurchaseButton({
 
   return (
     <AddToCartButton
-      className={`${BUTTON_CLASS} ${TONE_CLASS[tone]} ${className}`}
+      className={`${PURCHASE_BUTTON_CLASS} ${PURCHASE_BUTTON_TONE_CLASS[tone]} ${className}`}
       disabled={!purchasable}
       onClick={() => open('cart')}
       lines={

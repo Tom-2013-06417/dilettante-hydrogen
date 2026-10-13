@@ -1,10 +1,15 @@
 import {PageContainer} from '~/components/shared';
 import {parseCollectionMetafields} from '~/lib/collectionMetafields';
+import {
+  parseSecondaryImage,
+  type StorefrontSecondaryImageMetafield,
+} from '~/lib/secondaryImageMetafield';
 import {CollectionHeader} from './CollectionHeader';
 import {
   CollectionProductCard,
   type CollectionProductCardProduct,
 } from './CollectionProductCard';
+import {CollectionSampleSetCard} from './CollectionSampleSetCard';
 
 export type CollectionPageCollection = {
   id: string;
@@ -13,6 +18,7 @@ export type CollectionPageCollection = {
   description?: string | null;
   launchDate?: {type: string; value?: string | null} | null;
   tagline?: {type: string; value?: string | null} | null;
+  sampleSetImage?: StorefrontSecondaryImageMetafield;
   products: {
     nodes: CollectionProductCardProduct[];
   };
@@ -28,6 +34,7 @@ export function CollectionPage({collection}: CollectionPageProps) {
     tagline: collection.tagline ?? null,
   });
   const tagline = meta.tagline || collection.description?.trim() || undefined;
+  const products = collection.products.nodes;
 
   return (
     <article className="collection-page relative min-h-full w-full text-inkwell-700">
@@ -39,7 +46,7 @@ export function CollectionPage({collection}: CollectionPageProps) {
         />
 
         <ul className="m-0 flex list-none flex-col gap-2 p-0 sm:gap-2">
-          {collection.products.nodes.map((product, index) => (
+          {products.map((product, index) => (
             <li key={product.id}>
               <CollectionProductCard
                 product={product}
@@ -47,6 +54,12 @@ export function CollectionPage({collection}: CollectionPageProps) {
               />
             </li>
           ))}
+          <li>
+            <CollectionSampleSetCard
+              image={parseSecondaryImage(collection.sampleSetImage)}
+              loading={products.length < 4 ? 'eager' : 'lazy'}
+            />
+          </li>
         </ul>
       </PageContainer>
     </article>

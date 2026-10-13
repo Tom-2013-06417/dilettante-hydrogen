@@ -734,6 +734,20 @@ export type CollectionQuery = {
       tagline?: StorefrontAPI.Maybe<
         Pick<StorefrontAPI.Metafield, 'type' | 'value'>
       >;
+      sampleSetImage?: StorefrontAPI.Maybe<
+        Pick<StorefrontAPI.Metafield, 'type'> & {
+          reference?: StorefrontAPI.Maybe<
+            Pick<StorefrontAPI.MediaImage, 'id'> & {
+              image?: StorefrontAPI.Maybe<
+                Pick<
+                  StorefrontAPI.Image,
+                  'url' | 'altText' | 'width' | 'height'
+                >
+              >;
+            }
+          >;
+        }
+      >;
       products: {
         nodes: Array<
           Pick<StorefrontAPI.Product, 'id' | 'handle' | 'title'> & {
@@ -1341,7 +1355,7 @@ interface GeneratedQueryTypes {
     return: BlogsQuery;
     variables: BlogsQueryVariables;
   };
-  '#graphql\n  #graphql\n  fragment CollectionProduct on Product {\n    id\n    handle\n    title\n    featuredImage {\n      id\n      altText\n      url\n      width\n      height\n    }\n    scentNumber: metafield(namespace: "custom", key: "scent_number") {\n      type\n      value\n    }\n    scentTagline: metafield(namespace: "custom", key: "scent_tagline") {\n      type\n      value\n    }\n  }\n\n  query Collection(\n    $handle: String!\n    $country: CountryCode\n    $language: LanguageCode\n    $first: Int\n    $last: Int\n    $startCursor: String\n    $endCursor: String\n  ) @inContext(country: $country, language: $language) {\n    collection(handle: $handle) {\n      id\n      handle\n      title\n      description\n      launchDate: metafield(namespace: "custom", key: "launch_date") {\n        type\n        value\n      }\n      tagline: metafield(namespace: "custom", key: "tagline") {\n        type\n        value\n      }\n      products(\n        first: $first,\n        last: $last,\n        before: $startCursor,\n        after: $endCursor\n      ) {\n        nodes {\n          ...CollectionProduct\n        }\n        pageInfo {\n          hasPreviousPage\n          hasNextPage\n          endCursor\n          startCursor\n        }\n      }\n    }\n  }\n': {
+  '#graphql\n  #graphql\n  fragment CollectionProduct on Product {\n    id\n    handle\n    title\n    featuredImage {\n      id\n      altText\n      url\n      width\n      height\n    }\n    scentNumber: metafield(namespace: "custom", key: "scent_number") {\n      type\n      value\n    }\n    scentTagline: metafield(namespace: "custom", key: "scent_tagline") {\n      type\n      value\n    }\n  }\n\n  query Collection(\n    $handle: String!\n    $country: CountryCode\n    $language: LanguageCode\n    $first: Int\n    $last: Int\n    $startCursor: String\n    $endCursor: String\n  ) @inContext(country: $country, language: $language) {\n    collection(handle: $handle) {\n      id\n      handle\n      title\n      description\n      launchDate: metafield(namespace: "custom", key: "launch_date") {\n        type\n        value\n      }\n      tagline: metafield(namespace: "custom", key: "tagline") {\n        type\n        value\n      }\n      sampleSetImage: metafield(namespace: "custom", key: "sample_set_image") {\n        type\n        reference {\n          ... on MediaImage {\n            id\n            image {\n              url\n              altText\n              width\n              height\n            }\n          }\n        }\n      }\n      products(\n        first: $first,\n        last: $last,\n        before: $startCursor,\n        after: $endCursor\n      ) {\n        nodes {\n          ...CollectionProduct\n        }\n        pageInfo {\n          hasPreviousPage\n          hasNextPage\n          endCursor\n          startCursor\n        }\n      }\n    }\n  }\n': {
     return: CollectionQuery;
     variables: CollectionQueryVariables;
   };

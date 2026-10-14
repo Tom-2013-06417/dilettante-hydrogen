@@ -259,15 +259,25 @@ const INSERT_SETTLE_MS = 400;
  */
 let lastListHeight: number | undefined;
 
+/** A cart line that was not on screen at the last commit. */
+const ENTERING_ROW = '.cart-line-row[data-entering]';
+
+function hasEnteringRow(node: Node) {
+  return (
+    node instanceof Element &&
+    (node.matches(ENTERING_ROW) || node.querySelector(ENTERING_ROW) !== null)
+  );
+}
+
 /**
- * Scrolls the line list to the bottom whenever something inserted into it
- * pushes its content past the fold: a new line, or the upsell becoming the
- * last thing in the list once the lines outgrow the space it was pinned in.
+ * Scrolls the line list to the bottom whenever an added line pushes its
+ * content past the fold, including the upsell becoming the last thing in the
+ * list once the lines outgrow the space it was pinned in.
  *
- * Only growth that follows an insert counts, so a quantity change, a removal,
- * a late font, or the drawer resizing leaves the scroll where the shopper put
- * it. The list keeps its own height as content is added, so its children are
- * watched for size as well.
+ * Only growth that follows a new line counts, so a quantity change, a removal
+ * (which can bring a variant back into the upsell), a late font, or the drawer
+ * resizing leaves the scroll where the shopper put it. The list keeps its own
+ * height as content is added, so its children are watched for size as well.
  */
 function useScrollToEndOnInsert() {
   const ref = useRef<HTMLDivElement>(null);
@@ -277,9 +287,11 @@ function useScrollToEndOnInsert() {
     if (!list) return;
 
     // A remount that brings a new line with it never sees that line inserted,
-    // so the first check after a remount counts as one.
+    // so the first check after such a remount counts as one.
     let insertedAt =
-      lastListHeight === undefined ? -Infinity : performance.now();
+      lastListHeight !== undefined && hasEnteringRow(list)
+        ? performance.now()
+        : -Infinity;
 
     const check = () => {
       const height = list.scrollHeight;
@@ -312,7 +324,7 @@ function useScrollToEndOnInsert() {
 
     const mutationObserver = new MutationObserver((mutations) => {
       const inserted = mutations.some((mutation) =>
-        Array.from(mutation.addedNodes).some((node) => node instanceof Element),
+        Array.from(mutation.addedNodes).some(hasEnteringRow),
       );
       if (inserted) insertedAt = performance.now();
       // The empty state, the line list and the upsell come and go as direct

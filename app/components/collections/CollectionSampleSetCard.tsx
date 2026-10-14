@@ -76,7 +76,7 @@ export function CollectionSampleSetCard({
   const title = 'Sample Set';
 
   return (
-    <article className="relative mx-auto flex w-full flex-col border border-inkwell-700 bg-vellusum px-4 pb-2 shadow-[0_2px_3px_rgba(21,32,21,0.35)] sm:px-5">
+    <article className="relative mx-auto flex w-full flex-col border border-inkwell-700 bg-vellusum px-4 shadow-[0_2px_3px_rgba(21,32,21,0.35)] sm:px-5">
       {/* 15px inside the border is 16px from the outer edge, in line with the
           collection cards' left-4 rules. */}
       <BlueprintRule
@@ -118,14 +118,7 @@ export function CollectionSampleSetCard({
           className="pointer-events-none absolute top-full -right-4 -left-4 z-0 text-inkwell-700/18 sm:-right-5 sm:-left-5"
         />
 
-        <div className="z-1 col-start-2 row-start-1 flex min-w-0 flex-col pt-4 sm:pt-5">
-          <div className="my-2 inline-flex items-center gap-1 text-[11px] font-bold tracking-[0.02em] lg:text-[16px]">
-            No.
-            <span className="flex h-3.5 items-center justify-center rounded-[50%] bg-inkwell-700 px-2 font-['config-mono-vf'] text-[11px] font-medium leading-none text-vellum-100 [font-variant-numeric:slashed-zero] lg:h-4.75 lg:px-2.5 lg:text-[16px]">
-              01-05
-            </span>
-          </div>
-
+        <div className="z-1 col-start-2 row-start-1 flex min-w-0 flex-col pt-8 sm:pt-8">
           <div>
             <BlueprintRule
               orientation="h"
@@ -154,9 +147,9 @@ export function CollectionSampleSetCard({
           </div>
         </div>
 
-        <div className="z-1 col-start-1 col-end-3 row-start-2 flex flex-wrap items-end justify-between gap-x-3 gap-y-2 py-3 sm:col-start-2">
+        <div className="z-1 col-start-1 col-end-3 row-start-2 flex flex-wrap items-end justify-between gap-x-3 gap-y-2 py-3 sm:py-4 sm:col-start-2">
           {currencyCode ? (
-            <div className="min-w-0 font-['config-mono-vf'] tracking-[0.04em]">
+            <div className="ml-1 min-w-0 font-['config-mono-vf'] tracking-[0.04em] sm:ml-0">
               <s className="block text-[10px] tracking-[0.08em] text-inkwell-700/60 lg:text-[12px]">
                 <span className="sr-only">Original price </span>
                 <Money
@@ -187,7 +180,7 @@ export function CollectionSampleSetCard({
         </div>
       </div>
 
-      <span className="mt-2 text-center font-['trust-3a'] text-[11px] leading-snug tracking-[0.02em] text-inkwell-700/70 lg:text-[13px]">
+      <span className="py-4 text-center font-['trust-3a'] lg:py-6.5 text-[11px] leading-snug tracking-[0.02em] text-inkwell-700/70 lg:text-[13px]">
         2 mL spray vials. Comes with a 10% discount code for a full bottle (sent
         via email), valid for 45 days.
       </span>

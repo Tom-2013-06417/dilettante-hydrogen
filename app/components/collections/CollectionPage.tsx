@@ -26,15 +26,29 @@ export type CollectionPageCollection = {
 
 type CollectionPageProps = {
   collection: CollectionPageCollection;
+  sampleHighlight?: boolean;
 };
 
-export function CollectionPage({collection}: CollectionPageProps) {
+export function CollectionPage({
+  collection,
+  sampleHighlight = false,
+}: CollectionPageProps) {
   const meta = parseCollectionMetafields({
     launchDate: collection.launchDate ?? null,
     tagline: collection.tagline ?? null,
   });
   const tagline = meta.tagline || collection.description?.trim() || undefined;
   const products = collection.products.nodes;
+  const productOffset = sampleHighlight ? 1 : 0;
+
+  const sampleSetItem = (
+    <li>
+      <CollectionSampleSetCard
+        image={parseSecondaryImage(collection.sampleSetImage)}
+        loading={sampleHighlight || products.length < 4 ? 'eager' : 'lazy'}
+      />
+    </li>
+  );
 
   return (
     <article className="collection-page relative min-h-full w-full text-inkwell-700">
@@ -46,20 +60,16 @@ export function CollectionPage({collection}: CollectionPageProps) {
         />
 
         <ul className="m-0 flex list-none flex-col gap-2 p-0 sm:gap-2">
+          {sampleHighlight && sampleSetItem}
           {products.map((product, index) => (
             <li key={product.id}>
               <CollectionProductCard
                 product={product}
-                loading={index < 4 ? 'eager' : 'lazy'}
+                loading={index + productOffset < 4 ? 'eager' : 'lazy'}
               />
             </li>
           ))}
-          <li>
-            <CollectionSampleSetCard
-              image={parseSecondaryImage(collection.sampleSetImage)}
-              loading={products.length < 4 ? 'eager' : 'lazy'}
-            />
-          </li>
+          {!sampleHighlight && sampleSetItem}
         </ul>
       </PageContainer>
     </article>

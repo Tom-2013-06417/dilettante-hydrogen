@@ -1,4 +1,4 @@
-import {useLoaderData} from 'react-router';
+import {useLoaderData, useSearchParams} from 'react-router';
 import type {Route} from './+types/collections._index';
 import {getPaginationVariables, Analytics} from '@shopify/hydrogen';
 import {CollectionPage} from '~/components/collections';
@@ -53,10 +53,15 @@ function loadDeferredData(_args: Route.LoaderArgs) {
 
 export default function Collections() {
   const {collection} = useLoaderData<typeof loader>();
+  const [searchParams] = useSearchParams();
+  const sampleHighlight = searchParams.get('sample_highlight') === 't';
 
   return (
     <>
-      <CollectionPage collection={collection} />
+      <CollectionPage
+        collection={collection}
+        sampleHighlight={sampleHighlight}
+      />
       <Analytics.CollectionView
         data={{
           collection: {

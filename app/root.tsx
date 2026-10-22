@@ -19,14 +19,53 @@ import {PageLayout, TypekitFonts} from '~/components/layout';
 import {MetaPixel} from '~/components/analytics';
 import {ClientOnly} from '~/components/shared';
 import {TeaserPage} from '~/components/teaser';
+import {SITE_TITLE} from '~/lib/constants';
 import {isSiteGated} from '~/lib/siteGate';
 import {isPreordersEnabled} from '~/lib/preordersEnabled';
+import {
+  defaultShareImageUrl,
+  seoDescription,
+  seoMediaFromImage,
+  TWITTER_HANDLE,
+} from '~/lib/seo';
 import {loadTeaserSlides} from '~/lib/teaserProducts';
 import {loadCartUpsellVariants} from '~/lib/cartUpsell';
 
 /** Oxygen preview URLs sit behind Shopify login; /manifest.json redirects to OAuth. */
 function isOxygenPreviewHost(request: Request): boolean {
   return new URL(request.url).hostname.endsWith('.myshopify.dev');
+}
+
+type ShopSeoSource = {
+  description?: string | null;
+  brand?: {
+    logo?: {
+      image?: {
+        url?: string | null;
+      } | null;
+    } | null;
+  } | null;
+} | null;
+
+/** Shop-level defaults; leaf routes merge via getSeoMeta(...seoFromMatches). */
+function buildRootSeo(request: Request, shop: ShopSeoSource) {
+  const origin = new URL(request.url).origin;
+  const logoUrl = shop?.brand?.logo?.image?.url;
+  return {
+    title: SITE_TITLE,
+    description: seoDescription(shop?.description),
+    media: seoMediaFromImage(
+      logoUrl
+        ? {url: logoUrl, altText: SITE_TITLE}
+        : {
+            url: defaultShareImageUrl(origin),
+            width: 192,
+            height: 192,
+            altText: SITE_TITLE,
+          },
+    ),
+    handle: TWITTER_HANDLE,
+  };
 }
 
 export type RootLoader = typeof loader;
@@ -198,6 +237,7 @@ export async function loader(args: Route.LoaderArgs) {
       header: {shop: null, menu: null},
       cartUpsellVariants: [],
       shop: null,
+      seo: buildRootSeo(args.request, null),
       consent: {
         checkoutDomain: env.PUBLIC_CHECKOUT_DOMAIN,
         storefrontAccessToken: env.PUBLIC_STOREFRONT_API_TOKEN,
@@ -229,6 +269,7 @@ export async function loader(args: Route.LoaderArgs) {
       storefront,
       publicStorefrontId: env.PUBLIC_STOREFRONT_ID,
     }),
+    seo: buildRootSeo(args.request, criticalData.header?.shop ?? null),
     consent: {
       checkoutDomain: env.PUBLIC_CHECKOUT_DOMAIN,
       storefrontAccessToken: env.PUBLIC_STOREFRONT_API_TOKEN,

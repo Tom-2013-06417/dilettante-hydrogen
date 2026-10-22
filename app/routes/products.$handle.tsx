@@ -4,6 +4,7 @@ import {
   getSelectedProductOptions,
   Analytics,
   getProductOptions,
+  getSeoMeta,
 } from '@shopify/hydrogen';
 import {HERO_STRIP_IMAGE_SRCSET} from '~/components/product/ProductHeroPhoto';
 import {ProductPage} from '~/components/product/sections';
@@ -15,14 +16,18 @@ import {
 } from '~/lib/productVariantParams';
 import {redirectIfHandleIsLocalized} from '~/lib/redirect';
 import {parseSecondaryImage} from '~/lib/secondaryImageMetafield';
+import {
+  seoDescription,
+  seoFromMatches,
+  seoMediaFromImage,
+  twitterImageMeta,
+} from '~/lib/seo';
 
-export const meta: Route.MetaFunction = ({data}) => {
+export const meta: Route.MetaFunction = ({data, matches}) => {
+  const image = data?.product?.selectedOrFirstAvailableVariant?.image;
   const tags: Route.MetaDescriptors = [
-    {title: pageTitle(data?.product.title)},
-    {
-      rel: 'canonical',
-      href: `/products/${data?.product.handle}`,
-    },
+    ...(getSeoMeta(...seoFromMatches(matches)) ?? []),
+    ...twitterImageMeta(image?.url),
   ];
 
   // Same strategy as the hero band (`eager` + `fetchpriority=high`). The strip
@@ -98,8 +103,28 @@ async function loadCriticalData({context, params, request}: Route.LoaderArgs) {
   // The API handle might be localized, so redirect to the localized handle
   redirectIfHandleIsLocalized(request, {handle, data: product});
 
+  const image = product.selectedOrFirstAvailableVariant?.image;
+  const origin = new URL(request.url).origin;
+
   return {
     product,
+    seo: {
+      title: pageTitle(product.seo?.title || product.title),
+      description: seoDescription(
+        product.seo?.description || product.description,
+      ),
+      url: `${origin}/products/${product.handle}`,
+      media: seoMediaFromImage(
+        image
+          ? {
+              url: image.url,
+              width: image.width,
+              height: image.height,
+              altText: image.altText || product.title,
+            }
+          : null,
+      ),
+    },
   };
 }
 

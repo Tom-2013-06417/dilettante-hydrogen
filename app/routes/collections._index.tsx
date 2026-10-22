@@ -1,11 +1,41 @@
 import {useLoaderData, useSearchParams} from 'react-router';
 import type {Route} from './+types/collections._index';
-import {getPaginationVariables, Analytics} from '@shopify/hydrogen';
+import {
+  getPaginationVariables,
+  Analytics,
+  getSeoMeta,
+} from '@shopify/hydrogen';
 import {CollectionPage} from '~/components/collections';
 import {DEBUT_COLLECTION_HANDLE, pageTitle} from '~/lib/constants';
+import {parseSecondaryImage} from '~/lib/secondaryImageMetafield';
+import {
+  seoDescription,
+  seoFromMatches,
+  seoMediaFromImage,
+  twitterImageMeta,
+} from '~/lib/seo';
 
-export const meta: Route.MetaFunction = ({data}) => {
-  return [{title: pageTitle(data?.collection.title)}];
+export const meta: Route.MetaFunction = ({data, matches, location}) => {
+  const sampleHighlight =
+    new URLSearchParams(location.search).get('sample_highlight') === 't';
+  const sampleImage = parseSecondaryImage(data?.collection?.sampleSetImage);
+  const shareImageUrl = sampleHighlight
+    ? sampleImage?.url
+    : collectionShareImage(data?.collection)?.url;
+
+  // Shared as /collections?sample_highlight=t — swap in the Sample Set card image.
+  const highlightSeo =
+    sampleHighlight && sampleImage
+      ? {
+          title: pageTitle('Sample Set'),
+          media: seoMediaFromImage(sampleImage),
+        }
+      : undefined;
+
+  return [
+    ...(getSeoMeta(...seoFromMatches(matches), highlightSeo) ?? []),
+    ...twitterImageMeta(shareImageUrl),
+  ];
 };
 
 export async function loader(args: Route.LoaderArgs) {
@@ -37,8 +67,53 @@ async function loadCriticalData({context, request}: Route.LoaderArgs) {
     });
   }
 
+  const origin = new URL(request.url).origin;
+  const shareImage = collectionShareImage(collection);
+
   return {
     collection,
+    seo: {
+      title: pageTitle(collection.title),
+      description: seoDescription(collection.description),
+      url: `${origin}/collections`,
+      // Prefer a real product/collection photo over the root brand logo.
+      media: seoMediaFromImage(shareImage),
+    },
+  };
+}
+
+/** Plain /collections share art — not the inkwell logo from root SEO. */
+function collectionShareImage(
+  collection:
+    | {
+        title?: string | null;
+        image?: {
+          url?: string | null;
+          altText?: string | null;
+          width?: number | null;
+          height?: number | null;
+        } | null;
+        products?: {
+          nodes?: Array<{
+            featuredImage?: {
+              url?: string | null;
+              altText?: string | null;
+              width?: number | null;
+              height?: number | null;
+            } | null;
+          }>;
+        };
+      }
+    | null
+    | undefined,
+) {
+  const image = collection?.image ?? collection?.products?.nodes?.[0]?.featuredImage;
+  if (!image?.url) return null;
+  return {
+    url: image.url,
+    width: image.width,
+    height: image.height,
+    altText: image.altText || collection?.title || undefined,
   };
 }
 
@@ -114,6 +189,13 @@ const COLLECTION_QUERY = `#graphql
       handle
       title
       description
+      image {
+        id
+        url
+        altText
+        width
+        height
+      }
       launchDate: metafield(namespace: "custom", key: "launch_date") {
         type
         value

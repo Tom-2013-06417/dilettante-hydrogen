@@ -25,7 +25,7 @@ import type {loader as rootLoader} from '~/root';
  * lines. The cart total only lands on SET_PRICE through the admin's "Buy 4
  * Samples, Get 1 Free" automatic discount.
  */
-const SET_PRICE = '1600.0';
+const SET_PRICE = '1500.0';
 const SET_COMPARE_AT_PRICE = '2000.0';
 
 function scentNumberOf(variant: CartUpsellVariant) {

@@ -251,9 +251,9 @@ function lineSubtotal(unitPrice: MoneyV2, quantity: number): MoneyV2 {
 }
 
 /**
- * What the server's discounts took off this line, e.g. the free sample in a
- * "buy 4, get 1" promo. Shopify reports it per line, so this is what shows
- * which line the promo landed on. Optimistic lines have no allocations yet.
+ * What the server's discounts took off this line, e.g. the sample lines in a
+ * "25% off 5+" promo. Shopify reports it per line, so this is what shows
+ * which lines the promo landed on. Optimistic lines have no allocations yet.
  */
 function lineDiscount(line: CartLine): number {
   return (line.discountAllocations ?? []).reduce(

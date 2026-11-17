@@ -22,8 +22,8 @@ import type {loader as rootLoader} from '~/root';
 
 /**
  * Not a Shopify product: the set is the five 2 mL variants added as separate
- * lines. The cart total only lands on SET_PRICE through the admin's "Buy 4
- * Samples, Get 1 Free" automatic discount.
+ * lines. The cart total only lands on SET_PRICE through the admin's
+ * "25% off 5+ samples" automatic discount.
  */
 const SET_PRICE = '1500.0';
 const SET_COMPARE_AT_PRICE = '2000.0';

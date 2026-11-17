@@ -16,7 +16,7 @@ const TOP_BANNER_HIDDEN_PATHS = new Set<string>(['/']);
 
 const DEFAULT_ANNOUNCEMENT_TEXTS = [
   'Free shipping on orders over ₱5,000',
-  'Limited offer: Buy 4 samples, get 1 free',
+  'Last Chance — 25% off 5+ samples',
 ] as const;
 
 function normalizePathname(pathname: string): string {

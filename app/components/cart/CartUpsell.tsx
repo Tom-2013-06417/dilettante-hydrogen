@@ -23,11 +23,13 @@ import type {CartLayout} from './CartMain';
 import {useCartLineUpdates} from './CartLineUpdates';
 
 /**
- * Mirrors the "Buy 4 Samples, Get 1 Free" automatic discount in the admin.
- * The widget cannot see that discount before the line exists, so it only
- * shows the free price while the shop's custom.free_sample_promo_enabled is on.
+ * Mirrors the "25% off 5+ samples" automatic discount in the admin. The widget
+ * cannot see that discount before the line exists, so it shows the discounted
+ * price while the shop's custom.free_sample_promo_enabled is on and adding
+ * this sample would leave the cart at the threshold (or already past it).
  */
-const SAMPLES_BEFORE_FREE = 4;
+const SAMPLE_PROMO_MIN_QTY = 5;
+const SAMPLE_PROMO_OFF = 0.25;
 
 /** Every variant in the cart, including bundle components. */
 function cartMerchandiseIds(lines: CartLine[], ids = new Set<string>()) {
@@ -121,10 +123,9 @@ export function CartUpsell({
   );
   const promoEnabled =
     rootData?.header?.shop?.freeSamplePromoEnabled?.value === 'true';
-  // Only the last scent left can be the free one: with a duplicate in the cart
-  // the promo has already been used and adding it would not be free.
-  const lastSampleFree =
-    promoEnabled && items.length === 1 && samplesInCart === SAMPLES_BEFORE_FREE;
+  // Any remaining sample qualifies once the next add reaches 5+ in the cart.
+  const sampleDiscounted =
+    promoEnabled && samplesInCart + 1 >= SAMPLE_PROMO_MIN_QTY;
   const {trackRef, canPrev, canNext, step} = useCarousel(items.length);
   const headingId = useId();
 
@@ -189,7 +190,7 @@ export function CartUpsell({
           <CartUpsellItem
             key={variant.id}
             eager={index === 0}
-            free={lastSampleFree}
+            discounted={sampleDiscounted}
             layout={layout}
             preordersEnabled={preordersEnabled}
             variant={variant}
@@ -202,13 +203,13 @@ export function CartUpsell({
 
 function CartUpsellItem({
   eager,
-  free,
+  discounted,
   layout,
   preordersEnabled,
   variant,
 }: {
   eager: boolean;
-  free: boolean;
+  discounted: boolean;
   layout: CartLayout;
   preordersEnabled: boolean;
   variant: CartUpsellVariant;
@@ -230,6 +231,12 @@ function CartUpsellItem({
       : null;
   const priceClassName =
     "font-['config-mono-vf'] text-[13px] tracking-[0.04em]";
+  const promoPrice = discounted
+    ? {
+        ...price,
+        amount: String(Number(price.amount) * (1 - SAMPLE_PROMO_OFF)),
+      }
+    : null;
 
   return (
     <li className="cart-upsell-item">
@@ -277,10 +284,10 @@ function CartUpsellItem({
       </div>
 
       <div className="mt-auto flex items-end justify-between gap-3 pt-2">
-        {free ? (
+        {promoPrice ? (
           <DiscountedMoney
             className={priceClassName}
-            discounted={{...price, amount: '0'}}
+            discounted={promoPrice}
             original={price}
           />
         ) : (

@@ -457,7 +457,7 @@ body:has(.teaser-page) {
   height: calc(30svh - var(--top-banner-h));
 }
 
-/* Discovery set hero — shorter than the product title band. */
+/* Discovery set hero — mobile stays compact; desktop grows below. */
 .discovery-hero-image-band {
   height: 22svh;
 }
@@ -527,6 +527,15 @@ body:has(.teaser-page) {
     --scent-anatomy-cue-h: calc(
       3.75rem + env(safe-area-inset-bottom, 0px)
     );
+  }
+
+  /* Desktop: taller hero than mobile’s 22svh; contents flex-shrinks. */
+  .discovery-hero-image-band {
+    height: 28svh;
+  }
+
+  .main--product.has-top-banner .discovery-hero-image-band {
+    height: calc(28svh - var(--top-banner-h));
   }
 
   .product-hero-first-fold--discovery {

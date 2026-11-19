@@ -1,3 +1,4 @@
+import type {DiscoverySetVariantFragment} from 'storefrontapi.generated';
 import {PageContainer} from '~/components/shared';
 import {parseCollectionMetafields} from '~/lib/collectionMetafields';
 import {
@@ -25,12 +26,14 @@ export type CollectionPageCollection = {
 type CollectionPageProps = {
   collection: CollectionPageCollection;
   discoverySetImage?: CollectionDiscoverySetCardImage | null;
+  discoverySetVariant?: DiscoverySetVariantFragment | null;
   sampleHighlight?: boolean;
 };
 
 export function CollectionPage({
   collection,
   discoverySetImage = null,
+  discoverySetVariant = null,
   sampleHighlight = false,
 }: CollectionPageProps) {
   const meta = parseCollectionMetafields({
@@ -45,6 +48,7 @@ export function CollectionPage({
     <li>
       <CollectionSampleSetCard
         image={discoverySetImage}
+        selectedVariant={discoverySetVariant}
         loading={sampleHighlight || products.length < 4 ? 'eager' : 'lazy'}
       />
     </li>

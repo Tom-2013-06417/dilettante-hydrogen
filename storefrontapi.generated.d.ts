@@ -763,35 +763,6 @@ export type CollectionQuery = {
   >;
 };
 
-export type CollectionDiscoverySetQueryVariables = StorefrontAPI.Exact<{
-  country?: StorefrontAPI.InputMaybe<StorefrontAPI.CountryCode>;
-  id: StorefrontAPI.Scalars['ID']['input'];
-  language?: StorefrontAPI.InputMaybe<StorefrontAPI.LanguageCode>;
-}>;
-
-export type CollectionDiscoverySetQuery = {
-  product?: StorefrontAPI.Maybe<
-    Pick<StorefrontAPI.Product, 'id'> & {
-      featuredImage?: StorefrontAPI.Maybe<
-        Pick<StorefrontAPI.Image, 'id' | 'url' | 'altText' | 'width' | 'height'>
-      >;
-    }
-  >;
-};
-
-export type ContactInformationQueryVariables = StorefrontAPI.Exact<{
-  country?: StorefrontAPI.InputMaybe<StorefrontAPI.CountryCode>;
-  language?: StorefrontAPI.InputMaybe<StorefrontAPI.LanguageCode>;
-}>;
-
-export type ContactInformationQuery = {
-  shop: {
-    contactInformation?: StorefrontAPI.Maybe<
-      Pick<StorefrontAPI.ShopPolicy, 'body' | 'handle' | 'id' | 'title' | 'url'>
-    >;
-  };
-};
-
 export type DiscoverySetVariantFragment = Pick<
   StorefrontAPI.ProductVariant,
   | 'id'
@@ -809,6 +780,65 @@ export type DiscoverySetVariantFragment = Pick<
   >;
   selectedOptions: Array<Pick<StorefrontAPI.SelectedOption, 'name' | 'value'>>;
   product: Pick<StorefrontAPI.Product, 'id' | 'handle' | 'title' | 'vendor'>;
+};
+
+export type CollectionDiscoverySetQueryVariables = StorefrontAPI.Exact<{
+  country?: StorefrontAPI.InputMaybe<StorefrontAPI.CountryCode>;
+  id: StorefrontAPI.Scalars['ID']['input'];
+  language?: StorefrontAPI.InputMaybe<StorefrontAPI.LanguageCode>;
+}>;
+
+export type CollectionDiscoverySetQuery = {
+  product?: StorefrontAPI.Maybe<
+    Pick<StorefrontAPI.Product, 'id'> & {
+      featuredImage?: StorefrontAPI.Maybe<
+        Pick<StorefrontAPI.Image, 'id' | 'url' | 'altText' | 'width' | 'height'>
+      >;
+      variants: {
+        nodes: Array<
+          Pick<
+            StorefrontAPI.ProductVariant,
+            | 'id'
+            | 'title'
+            | 'availableForSale'
+            | 'currentlyNotInStock'
+            | 'requiresShipping'
+          > & {
+            compareAtPrice?: StorefrontAPI.Maybe<
+              Pick<StorefrontAPI.MoneyV2, 'amount' | 'currencyCode'>
+            >;
+            price: Pick<StorefrontAPI.MoneyV2, 'amount' | 'currencyCode'>;
+            image?: StorefrontAPI.Maybe<
+              Pick<
+                StorefrontAPI.Image,
+                'id' | 'url' | 'altText' | 'width' | 'height'
+              >
+            >;
+            selectedOptions: Array<
+              Pick<StorefrontAPI.SelectedOption, 'name' | 'value'>
+            >;
+            product: Pick<
+              StorefrontAPI.Product,
+              'id' | 'handle' | 'title' | 'vendor'
+            >;
+          }
+        >;
+      };
+    }
+  >;
+};
+
+export type ContactInformationQueryVariables = StorefrontAPI.Exact<{
+  country?: StorefrontAPI.InputMaybe<StorefrontAPI.CountryCode>;
+  language?: StorefrontAPI.InputMaybe<StorefrontAPI.LanguageCode>;
+}>;
+
+export type ContactInformationQuery = {
+  shop: {
+    contactInformation?: StorefrontAPI.Maybe<
+      Pick<StorefrontAPI.ShopPolicy, 'body' | 'handle' | 'id' | 'title' | 'url'>
+    >;
+  };
 };
 
 export type DiscoverySetProductQueryVariables = StorefrontAPI.Exact<{
@@ -1472,7 +1502,7 @@ interface GeneratedQueryTypes {
     return: CollectionQuery;
     variables: CollectionQueryVariables;
   };
-  '#graphql\n  query CollectionDiscoverySet(\n    $country: CountryCode\n    $id: ID!\n    $language: LanguageCode\n  ) @inContext(country: $country, language: $language) {\n    product: node(id: $id) {\n      ... on Product {\n        id\n        featuredImage {\n          id\n          url\n          altText\n          width\n          height\n        }\n      }\n    }\n  }\n': {
+  '#graphql\n  query CollectionDiscoverySet(\n    $country: CountryCode\n    $id: ID!\n    $language: LanguageCode\n  ) @inContext(country: $country, language: $language) {\n    product: node(id: $id) {\n      ... on Product {\n        id\n        featuredImage {\n          id\n          url\n          altText\n          width\n          height\n        }\n        variants(first: 20) {\n          nodes {\n            ...DiscoverySetVariant\n          }\n        }\n      }\n    }\n  }\n  #graphql\n  fragment DiscoverySetVariant on ProductVariant {\n    id\n    title\n    availableForSale\n    currentlyNotInStock\n    requiresShipping\n    compareAtPrice {\n      amount\n      currencyCode\n    }\n    price {\n      amount\n      currencyCode\n    }\n    image {\n      id\n      url\n      altText\n      width\n      height\n    }\n    selectedOptions {\n      name\n      value\n    }\n    product {\n      id\n      handle\n      title\n      vendor\n    }\n  }\n\n': {
     return: CollectionDiscoverySetQuery;
     variables: CollectionDiscoverySetQueryVariables;
   };

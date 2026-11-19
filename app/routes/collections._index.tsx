@@ -10,6 +10,7 @@ import {DEBUT_COLLECTION_HANDLE, pageTitle} from '~/lib/constants';
 import {
   DISCOVERY_SET_PRODUCT_ID,
   DISCOVERY_SET_TITLE,
+  discoverySetVariant,
 } from '~/lib/sampleSet';
 import {
   seoDescription,
@@ -90,10 +91,14 @@ async function loadCriticalData({context, request}: Route.LoaderArgs) {
         height: discoverySet.featuredImage.height,
       }
     : null;
+  const selectedDiscoveryVariant = discoverySet?.variants?.nodes
+    ? discoverySetVariant(discoverySet.variants.nodes)
+    : null;
 
   return {
     collection,
     discoverySetImage,
+    discoverySetVariant: selectedDiscoveryVariant,
     seo: {
       title: pageTitle(collection.title),
       description: seoDescription(collection.description),
@@ -149,7 +154,8 @@ function loadDeferredData(_args: Route.LoaderArgs) {
 }
 
 export default function Collections() {
-  const {collection, discoverySetImage} = useLoaderData<typeof loader>();
+  const {collection, discoverySetImage, discoverySetVariant} =
+    useLoaderData<typeof loader>();
   const [searchParams] = useSearchParams();
   const sampleHighlight = searchParams.get('sample_highlight') === 't';
 
@@ -158,6 +164,7 @@ export default function Collections() {
       <CollectionPage
         collection={collection}
         discoverySetImage={discoverySetImage}
+        discoverySetVariant={discoverySetVariant}
         sampleHighlight={sampleHighlight}
       />
       <Analytics.CollectionView
@@ -247,6 +254,41 @@ const COLLECTION_QUERY = `#graphql
   }
 ` as const;
 
+const COLLECTION_DISCOVERY_SET_VARIANT_FRAGMENT = `#graphql
+  fragment DiscoverySetVariant on ProductVariant {
+    id
+    title
+    availableForSale
+    currentlyNotInStock
+    requiresShipping
+    compareAtPrice {
+      amount
+      currencyCode
+    }
+    price {
+      amount
+      currencyCode
+    }
+    image {
+      id
+      url
+      altText
+      width
+      height
+    }
+    selectedOptions {
+      name
+      value
+    }
+    product {
+      id
+      handle
+      title
+      vendor
+    }
+  }
+` as const;
+
 const COLLECTION_DISCOVERY_SET_QUERY = `#graphql
   query CollectionDiscoverySet(
     $country: CountryCode
@@ -263,7 +305,13 @@ const COLLECTION_DISCOVERY_SET_QUERY = `#graphql
           width
           height
         }
+        variants(first: 20) {
+          nodes {
+            ...DiscoverySetVariant
+          }
+        }
       }
     }
   }
+  ${COLLECTION_DISCOVERY_SET_VARIANT_FRAGMENT}
 ` as const;

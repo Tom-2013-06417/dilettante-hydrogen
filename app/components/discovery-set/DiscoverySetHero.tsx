@@ -59,21 +59,17 @@ export function DiscoverySetHero({
 
   return (
     <div className="design-content-shell relative z-1 flex min-h-0 w-full flex-1 flex-col text-inkwell-700">
-      {/* Shell edges — leftmost + rightmost. Logo-aligned V is on image+title. */}
-      <BlueprintRule
-        orientation="v"
-        className="pointer-events-none absolute inset-y-0 left-0 z-10 hidden text-inkwell-700/35 md:block"
-      />
+      {/* Right shell edge — left V lives on the hero+title block only. */}
       <BlueprintRule
         orientation="v"
         className="pointer-events-none absolute inset-y-0 right-0 z-10 hidden text-inkwell-700/35 md:block"
       />
 
-      {/*
-        Image + title share the logo-left V rule (left-4 / sm:left-8 — same
-        as HeaderBar / ProductHero). Both sit to the right of that rule.
-      */}
       <div className="relative shrink-0">
+        {/*
+          Logo-aligned V along image + title — stops at the price row
+          (no left V on the price cell itself).
+        */}
         <BlueprintRule
           orientation="v"
           className="pointer-events-none absolute inset-y-0 left-4 z-10 text-inkwell-700/35 sm:left-8"
@@ -85,7 +81,7 @@ export function DiscoverySetHero({
               <ProductHeroPhoto
                 image={heroImage}
                 alt={heroImage.altText || DISCOVERY_SET_TITLE}
-                className="h-full w-full object-cover"
+                className="h-full w-full object-cover object-center"
                 sizes={HERO_BAND_IMAGE_SIZES}
                 fetchPriority="high"
               />
@@ -114,16 +110,17 @@ export function DiscoverySetHero({
 
       <IntroFade instant={instantIntro}>
         <div className="relative flex min-h-20 w-full shrink-0 overflow-visible">
+          {/* Top H starts at logo V; no left V on the price cell. */}
           <BlueprintRule
             orientation="h"
-            className="absolute inset-x-0 top-0 text-inkwell-700/35"
-          />
-          <BlueprintRule
-            orientation="h"
-            className="absolute bottom-0 left-4 right-[40%] text-inkwell-700/35 sm:left-8"
+            className="absolute top-0 right-0 left-4 text-inkwell-700/35 sm:left-8"
           />
 
-          <div className="relative flex w-[60%] flex-col items-start justify-center px-6 sm:px-10">
+          {/*
+            pl matches title cell: ml-4+px-6 / sm:ml-8+px-10 so price + 2 mL
+            line up with the title / subtitle.
+          */}
+          <div className="relative flex w-[60%] flex-col items-start justify-center pr-6 pl-10 sm:pr-10 sm:pl-[4.5rem]">
             <BlueprintRule
               orientation="v"
               className="absolute inset-y-0 right-0 text-inkwell-700/35"
@@ -163,10 +160,6 @@ export function DiscoverySetHero({
             >
               {buttonLabel}
             </AddToCartButton>
-            <BlueprintRule
-              orientation="h"
-              className="absolute inset-x-0 bottom-0 text-inkwell-700/35"
-            />
           </div>
         </div>
       </IntroFade>

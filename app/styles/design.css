@@ -462,6 +462,11 @@ body:has(.teaser-page) {
   height: 22svh;
 }
 
+/* Contents secondary strip — keep cover crop vertically centered. */
+.discovery-contents-band img {
+  object-position: center center;
+}
+
 .main--product.has-top-banner .discovery-hero-image-band {
   height: calc(22svh - var(--top-banner-h));
 }
@@ -478,16 +483,25 @@ body:has(.teaser-page) {
 }
 
 /*
-  Discovery set: lock the fold so the contents list cannot grow past the
-  viewport budget (header + fold + footnote cue slot = 100svh − banner).
+  Discovery set first fold.
+  Mobile: min-height fills the viewport, but height can grow when a contents
+  accordion row opens (page scrolls). Desktop: lock height + clip as before.
 */
 .product-hero-first-fold--discovery {
-  height: calc(
+  min-height: calc(
     100svh - var(--stack-header-h, 3rem) - var(--scent-anatomy-cue-h, 80px) -
       var(--fold-banner-reclaim, 0px)
   );
-  min-height: 0;
-  overflow: hidden;
+  height: auto;
+  overflow: visible;
+}
+
+/* Force the hero column to fill the fold min-height when content is short. */
+.product-hero-first-fold--discovery > * {
+  min-height: calc(
+    100svh - var(--stack-header-h, 3rem) - var(--scent-anatomy-cue-h, 80px) -
+      var(--fold-banner-reclaim, 0px)
+  );
 }
 
 @media (min-width: 640px) {
@@ -513,6 +527,19 @@ body:has(.teaser-page) {
     --scent-anatomy-cue-h: calc(
       3.75rem + env(safe-area-inset-bottom, 0px)
     );
+  }
+
+  .product-hero-first-fold--discovery {
+    height: calc(
+      100svh - var(--stack-header-h, 5.5rem) - var(--scent-anatomy-cue-h, 80px) -
+        var(--fold-banner-reclaim, 0px)
+    );
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .product-hero-first-fold--discovery > * {
+    min-height: 0;
   }
 }
 

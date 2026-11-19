@@ -7,7 +7,10 @@ import {
 } from '@shopify/hydrogen';
 import {CollectionPage} from '~/components/collections';
 import {DEBUT_COLLECTION_HANDLE, pageTitle} from '~/lib/constants';
-import {parseSecondaryImage} from '~/lib/secondaryImageMetafield';
+import {
+  DISCOVERY_SET_PRODUCT_ID,
+  DISCOVERY_SET_TITLE,
+} from '~/lib/sampleSet';
 import {
   seoDescription,
   seoFromMatches,
@@ -18,17 +21,22 @@ import {
 export const meta: Route.MetaFunction = ({data, matches, location}) => {
   const sampleHighlight =
     new URLSearchParams(location.search).get('sample_highlight') === 't';
-  const sampleImage = parseSecondaryImage(data?.collection?.sampleSetImage);
+  const discoveryImage = data?.discoverySetImage;
   const shareImageUrl = sampleHighlight
-    ? sampleImage?.url
+    ? discoveryImage?.url
     : collectionShareImage(data?.collection)?.url;
 
-  // Shared as /collections?sample_highlight=t — swap in the Sample Set card image.
+  // Shared as /collections?sample_highlight=t — swap in the Discovery Set card image.
   const highlightSeo =
-    sampleHighlight && sampleImage
+    sampleHighlight && discoveryImage
       ? {
-          title: pageTitle('Sample Set'),
-          media: seoMediaFromImage(sampleImage),
+          title: pageTitle(DISCOVERY_SET_TITLE),
+          media: seoMediaFromImage({
+            url: discoveryImage.url,
+            width: discoveryImage.width,
+            height: discoveryImage.height,
+            altText: discoveryImage.altText || DISCOVERY_SET_TITLE,
+          }),
         }
       : undefined;
 
@@ -55,9 +63,13 @@ async function loadCriticalData({context, request}: Route.LoaderArgs) {
     pageBy: 24,
   });
 
-  const [{collection}] = await Promise.all([
+  const [{collection}, {product: discoverySet}] = await Promise.all([
     storefront.query(COLLECTION_QUERY, {
       variables: {handle: DEBUT_COLLECTION_HANDLE, ...paginationVariables},
+    }),
+    storefront.query(COLLECTION_DISCOVERY_SET_QUERY, {
+      cache: storefront.CacheShort(),
+      variables: {id: DISCOVERY_SET_PRODUCT_ID},
     }),
   ]);
 
@@ -69,9 +81,19 @@ async function loadCriticalData({context, request}: Route.LoaderArgs) {
 
   const origin = new URL(request.url).origin;
   const shareImage = collectionShareImage(collection);
+  const discoverySetImage = discoverySet?.featuredImage?.url
+    ? {
+        id: discoverySet.featuredImage.id,
+        url: discoverySet.featuredImage.url,
+        altText: discoverySet.featuredImage.altText || DISCOVERY_SET_TITLE,
+        width: discoverySet.featuredImage.width,
+        height: discoverySet.featuredImage.height,
+      }
+    : null;
 
   return {
     collection,
+    discoverySetImage,
     seo: {
       title: pageTitle(collection.title),
       description: seoDescription(collection.description),
@@ -127,7 +149,7 @@ function loadDeferredData(_args: Route.LoaderArgs) {
 }
 
 export default function Collections() {
-  const {collection} = useLoaderData<typeof loader>();
+  const {collection, discoverySetImage} = useLoaderData<typeof loader>();
   const [searchParams] = useSearchParams();
   const sampleHighlight = searchParams.get('sample_highlight') === 't';
 
@@ -135,6 +157,7 @@ export default function Collections() {
     <>
       <CollectionPage
         collection={collection}
+        discoverySetImage={discoverySetImage}
         sampleHighlight={sampleHighlight}
       />
       <Analytics.CollectionView
@@ -204,20 +227,6 @@ const COLLECTION_QUERY = `#graphql
         type
         value
       }
-      sampleSetImage: metafield(namespace: "custom", key: "sample_set_image") {
-        type
-        reference {
-          ... on MediaImage {
-            id
-            image {
-              url
-              altText
-              width
-              height
-            }
-          }
-        }
-      }
       products(
         first: $first,
         last: $last,
@@ -232,6 +241,27 @@ const COLLECTION_QUERY = `#graphql
           hasNextPage
           endCursor
           startCursor
+        }
+      }
+    }
+  }
+` as const;
+
+const COLLECTION_DISCOVERY_SET_QUERY = `#graphql
+  query CollectionDiscoverySet(
+    $country: CountryCode
+    $id: ID!
+    $language: LanguageCode
+  ) @inContext(country: $country, language: $language) {
+    product: node(id: $id) {
+      ... on Product {
+        id
+        featuredImage {
+          id
+          url
+          altText
+          width
+          height
         }
       }
     }

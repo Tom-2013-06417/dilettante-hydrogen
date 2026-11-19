@@ -1,15 +1,14 @@
 import {PageContainer} from '~/components/shared';
 import {parseCollectionMetafields} from '~/lib/collectionMetafields';
 import {
-  parseSecondaryImage,
-  type StorefrontSecondaryImageMetafield,
-} from '~/lib/secondaryImageMetafield';
+  CollectionSampleSetCard,
+  type CollectionDiscoverySetCardImage,
+} from './CollectionSampleSetCard';
 import {CollectionHeader} from './CollectionHeader';
 import {
   CollectionProductCard,
   type CollectionProductCardProduct,
 } from './CollectionProductCard';
-import {CollectionSampleSetCard} from './CollectionSampleSetCard';
 
 export type CollectionPageCollection = {
   id: string;
@@ -18,7 +17,6 @@ export type CollectionPageCollection = {
   description?: string | null;
   launchDate?: {type: string; value?: string | null} | null;
   tagline?: {type: string; value?: string | null} | null;
-  sampleSetImage?: StorefrontSecondaryImageMetafield;
   products: {
     nodes: CollectionProductCardProduct[];
   };
@@ -26,11 +24,13 @@ export type CollectionPageCollection = {
 
 type CollectionPageProps = {
   collection: CollectionPageCollection;
+  discoverySetImage?: CollectionDiscoverySetCardImage | null;
   sampleHighlight?: boolean;
 };
 
 export function CollectionPage({
   collection,
+  discoverySetImage = null,
   sampleHighlight = false,
 }: CollectionPageProps) {
   const meta = parseCollectionMetafields({
@@ -44,7 +44,7 @@ export function CollectionPage({
   const sampleSetItem = (
     <li>
       <CollectionSampleSetCard
-        image={parseSecondaryImage(collection.sampleSetImage)}
+        image={discoverySetImage}
         loading={sampleHighlight || products.length < 4 ? 'eager' : 'lazy'}
       />
     </li>

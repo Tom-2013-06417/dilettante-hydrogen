@@ -24,7 +24,7 @@ export function DiscoverySetPage({
   return (
     <article className="product-page product-page--discovery relative w-full">
       <div className="relative z-10 bg-vellum-paper">
-        <div className="product-hero-first-fold product-hero-first-fold--discovery flex flex-col overflow-x-clip">
+        <div className="product-hero-first-fold product-hero-first-fold--discovery flex flex-col overflow-x-clip sm:overflow-hidden">
           <DiscoverySetHero
             heroImage={heroImage}
             sideImage={sideImage}

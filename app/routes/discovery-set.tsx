@@ -76,17 +76,8 @@ export async function loader({context, request}: Route.LoaderArgs) {
         height: product.featuredImage.height,
       }
     : null;
-  const sideImage = parseSecondaryImage(collection.sampleSetImage);
-  const collectionHero = collection.image?.url
-    ? {
-        id: collection.image.id ?? 'discovery-set-hero',
-        url: collection.image.url,
-        altText: collection.image.altText || DISCOVERY_SET_TITLE,
-        width: collection.image.width,
-        height: collection.image.height,
-      }
-    : null;
-  const heroImage = productImage ?? collectionHero ?? sideImage;
+  const sideImage = parseSecondaryImage(product.secondaryImage);
+  const heroImage = productImage ?? sideImage;
 
   const items = [...collection.products.nodes]
     .map((node) => {
@@ -95,19 +86,19 @@ export async function loader({context, request}: Route.LoaderArgs) {
         concentration: null,
         scentTagline: null,
         scentShortDescription: null,
-        heroNotes: null,
+        heroNotes: node.heroNotes ?? null,
         topNotes: null,
         heartNotes: null,
         baseNotes: null,
         ingredientList: null,
-        olfactoryFamily: node.olfactoryFamily ?? null,
+        olfactoryFamily: null,
         occasion: null,
         season: null,
       });
       return {
         number: parsed.number ?? '',
         title: node.title,
-        notes: parsed.olfactoryFamily ?? [],
+        notes: parsed.heroNotes ?? [],
       };
     })
     .filter((item) => item.number)
@@ -228,6 +219,20 @@ const DISCOVERY_SET_PRODUCT_QUERY = `#graphql
           width
           height
         }
+        secondaryImage: metafield(namespace: "custom", key: "secondary_image") {
+          type
+          reference {
+            ... on MediaImage {
+              id
+              image {
+                url
+                altText
+                width
+                height
+              }
+            }
+          }
+        }
         seo {
           title
           description
@@ -253,27 +258,6 @@ const DISCOVERY_SET_CONTENTS_QUERY = `#graphql
       id
       handle
       title
-      image {
-        id
-        url
-        altText
-        width
-        height
-      }
-      sampleSetImage: metafield(namespace: "custom", key: "sample_set_image") {
-        type
-        reference {
-          ... on MediaImage {
-            id
-            image {
-              url
-              altText
-              width
-              height
-            }
-          }
-        }
-      }
       products(first: 10) {
         nodes {
           id
@@ -283,7 +267,7 @@ const DISCOVERY_SET_CONTENTS_QUERY = `#graphql
             type
             value
           }
-          olfactoryFamily: metafield(namespace: "custom", key: "olfactory_family") {
+          heroNotes: metafield(namespace: "custom", key: "hero_notes") {
             type
             value
           }

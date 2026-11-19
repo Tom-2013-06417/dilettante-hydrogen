@@ -25,7 +25,7 @@
 
 /*
   Site top announcement strip. Two identical text halves; -50% loops.
-  Mobile product-fold reclaim uses .main--product.has-top-banner (not :has()).
+  Product-fold reclaim uses .main--product.has-top-banner (not :has()).
 */
 .top-banner {
   height: var(--top-banner-h);
@@ -426,7 +426,7 @@ body:has(.teaser-page) {
 }
 
 .main--product {
-  /* Pin box = padding + button only. Shared by first-fold Anatomy and ???. */
+  /* Pin box = padding + button only. Shared by first-fold Anatomy and footnote. */
   --scent-anatomy-cue-pad-top: 8px;
   --scent-anatomy-cue-pad-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
   /* py-1.5 + 14px at body 1.25lh + 1px border. */
@@ -435,11 +435,35 @@ body:has(.teaser-page) {
     var(--scent-anatomy-cue-pad-top) + var(--scent-anatomy-cue-btn-h) +
       var(--scent-anatomy-cue-pad-bottom)
   );
+  /*
+    Banner sits above <main>. When present, fold math must reclaim it so
+    header + fold + cue/footnote = the remaining viewport (no scroll).
+    Class is on main (PageLayout) — avoids expensive :has() matching.
+  */
+  --fold-banner-reclaim: 0px;
+}
+
+.main--product.has-top-banner {
+  --fold-banner-reclaim: var(--top-banner-h);
+  min-height: calc(100svh - var(--top-banner-h));
 }
 
 /* Title photo band + overlay share one height. */
 .product-hero-title-band {
   height: 30svh;
+}
+
+.main--product.has-top-banner .product-hero-title-band {
+  height: calc(30svh - var(--top-banner-h));
+}
+
+/* Discovery set hero — shorter than the product title band. */
+.discovery-hero-image-band {
+  height: 22svh;
+}
+
+.main--product.has-top-banner .discovery-hero-image-band {
+  height: calc(22svh - var(--top-banner-h));
 }
 
 /*
@@ -448,29 +472,22 @@ body:has(.teaser-page) {
 */
 .product-hero-first-fold {
   min-height: calc(
-    100svh - var(--stack-header-h, 3rem) - var(--scent-anatomy-cue-h, 80px)
+    100svh - var(--stack-header-h, 3rem) - var(--scent-anatomy-cue-h, 80px) -
+      var(--fold-banner-reclaim, 0px)
   );
 }
 
 /*
-  Mobile + top banner: reclaim --top-banner-h from the title band / first fold.
-  Class is on main (PageLayout) — avoids expensive :has() matching.
+  Discovery set: lock the fold so the contents list cannot grow past the
+  viewport budget (header + fold + footnote cue slot = 100svh − banner).
 */
-@media (max-width: 639px) {
-  .main--product.has-top-banner {
-    min-height: calc(100svh - var(--top-banner-h));
-  }
-
-  .main--product.has-top-banner .product-hero-first-fold {
-    min-height: calc(
-      100svh - var(--top-banner-h) - var(--stack-header-h, 3rem) -
-        var(--scent-anatomy-cue-h, 80px)
-    );
-  }
-
-  .main--product.has-top-banner .product-hero-title-band {
-    height: calc(30svh - var(--top-banner-h));
-  }
+.product-hero-first-fold--discovery {
+  height: calc(
+    100svh - var(--stack-header-h, 3rem) - var(--scent-anatomy-cue-h, 80px) -
+      var(--fold-banner-reclaim, 0px)
+  );
+  min-height: 0;
+  overflow: hidden;
 }
 
 @media (min-width: 640px) {
@@ -485,6 +502,17 @@ body:has(.teaser-page) {
       46px + env(safe-area-inset-bottom, 0px)
     );
     --scent-anatomy-cue-btn-h: 34px;
+  }
+
+  /*
+    Desktop anatomy cue keeps a large bottom pad (~92px total). Discovery only
+    needs a compact footnote — shrink the cue slot so the first-fold (contents)
+    gains the difference. Mobile keeps the shared cue-h (looks good already).
+  */
+  .product-page--discovery {
+    --scent-anatomy-cue-h: calc(
+      3.75rem + env(safe-area-inset-bottom, 0px)
+    );
   }
 }
 
@@ -561,7 +589,7 @@ body:has(.teaser-page) {
 :root {
   /* Phone-width column on desktop — immersive pages stay vertically composed. */
   --design-content-max: 680px;
-  /* Top announcement strip; also reclaimed on mobile product fold. */
+  /* Top announcement strip; reclaimed from product fold via --fold-banner-reclaim. */
   --top-banner-h: 2rem;
   /* Stack Y cover (home ↔ collection) in PageTransition. */
   --top-banner-slide-ms: 280ms;

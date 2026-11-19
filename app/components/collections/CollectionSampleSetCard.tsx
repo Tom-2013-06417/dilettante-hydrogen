@@ -1,4 +1,4 @@
-import {Image, Money, type OptimisticCartLineInput} from '@shopify/hydrogen';
+import {Image, Money} from '@shopify/hydrogen';
 import {useRouteLoaderData} from 'react-router';
 import {AddToCartButton} from '~/components/cart';
 import {useAside} from '~/components/layout';
@@ -7,53 +7,15 @@ import {
   PURCHASE_BUTTON_TONE_CLASS,
 } from '~/components/product/ProductPurchaseButton';
 import {BlueprintRule} from '~/components/product/BlueprintRule';
-import {
-  CART_UPSELL_VARIANT_IDS,
-  type CartUpsellVariant,
-} from '~/lib/cartUpsell';
-import {
-  isPreorderVariant,
-  parsePreorderEta,
-  preorderEtaIso,
-} from '~/lib/preorder';
 import {preordersEnabledFromRootData} from '~/lib/preordersEnabled';
+import {
+  SAMPLE_SET_COMPARE_AT_PRICE,
+  SAMPLE_SET_PRICE,
+  sampleSetAvailable,
+  sampleSetLines,
+} from '~/lib/sampleSet';
 import type {SecondaryImage} from '~/lib/secondaryImageMetafield';
 import type {loader as rootLoader} from '~/root';
-
-/**
- * Not a Shopify product: the set is the five 2 mL variants added as separate
- * lines. The cart total only lands on SET_PRICE through the admin's
- * "25% off 5+ samples" automatic discount.
- */
-const SET_PRICE = '1500.0';
-const SET_COMPARE_AT_PRICE = '2000.0';
-
-function scentNumberOf(variant: CartUpsellVariant) {
-  return variant.product.scentNumber?.value?.trim() ?? '';
-}
-
-function sampleSetLines(
-  variants: CartUpsellVariant[],
-  preordersEnabled: boolean,
-): OptimisticCartLineInput[] {
-  return [...variants]
-    .sort((a, b) => scentNumberOf(a).localeCompare(scentNumberOf(b)))
-    .map((variant) => {
-      const eta = parsePreorderEta(variant.product.preorderEta ?? null);
-      const etaIso =
-        eta && isPreorderVariant(variant, preordersEnabled)
-          ? preorderEtaIso(eta)
-          : null;
-      return {
-        merchandiseId: variant.id,
-        quantity: 1,
-        ...(etaIso
-          ? {attributes: [{key: '_preorder_eta', value: etaIso}]}
-          : {}),
-        selectedVariant: variant,
-      };
-    });
-}
 
 type CollectionSampleSetCardProps = {
   /** Collection custom.sample_set_image. */
@@ -71,7 +33,7 @@ export function CollectionSampleSetCard({
   const variants = rootData?.cartUpsellVariants ?? [];
   // Oversold 2 mL stock still sells through the set (owners handle
   // fulfillment); only a variant Shopify itself won't sell holds it back.
-  const available = variants.length === CART_UPSELL_VARIANT_IDS.length;
+  const available = sampleSetAvailable(variants);
   const currencyCode = variants[0]?.price.currencyCode;
   const title = 'Sample Set';
 
@@ -154,12 +116,15 @@ export function CollectionSampleSetCard({
                 <span className="sr-only">Original price </span>
                 <Money
                   as="span"
-                  data={{amount: SET_COMPARE_AT_PRICE, currencyCode}}
+                  data={{amount: SAMPLE_SET_COMPARE_AT_PRICE, currencyCode}}
                 />
               </s>
               <span className="mt-px block text-[16px] lg:text-[20px]">
                 <span className="sr-only">Discounted price </span>
-                <Money as="span" data={{amount: SET_PRICE, currencyCode}} />
+                <Money
+                  as="span"
+                  data={{amount: SAMPLE_SET_PRICE, currencyCode}}
+                />
               </span>
             </div>
           ) : (

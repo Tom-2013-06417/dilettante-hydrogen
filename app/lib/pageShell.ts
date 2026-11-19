@@ -4,12 +4,7 @@ import {STATIC_PAGE_PATHS} from '~/lib/staticPages';
  * Layout shell for a pathname. Add a kind + PAGE_SHELL entry for new page families.
  */
 
-export type PageKind =
-  | 'home'
-  | 'product'
-  | 'collection'
-  | 'static'
-  | 'default';
+export type PageKind = 'home' | 'product' | 'collection' | 'static' | 'default';
 
 type PageShell = {
   mainClass?: string;
@@ -61,7 +56,9 @@ const PAGE_SHELL: Record<PageKind, PageShell> = {
 
 function resolvePageKind(pathname: string): PageKind {
   if (pathname === '/') return 'home';
-  if (pathname.startsWith('/products/')) return 'product';
+  if (pathname.startsWith('/products/') || pathname === '/discovery-set') {
+    return 'product';
+  }
   if (/^\/collections\/?$/.test(pathname)) return 'collection';
   if (STATIC_PAGE_PATHS.has(pathname)) return 'static';
   return 'default';

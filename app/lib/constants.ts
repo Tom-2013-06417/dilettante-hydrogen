@@ -60,7 +60,9 @@ export function shouldOpenCartFromSearch(search: string) {
  * product → collection → home; anything else falls back to home.
  */
 export function parentNavHref(pathname: string): string {
-  if (pathname.startsWith('/products/')) return '/collections';
+  if (pathname.startsWith('/products/') || pathname === '/discovery-set') {
+    return '/collections';
+  }
   if (/^\/collections\/?$/.test(pathname)) return '/';
   return '/';
 }
@@ -72,7 +74,9 @@ export function parentNavHref(pathname: string): string {
 export function storefrontStackDepth(pathname: string): number | null {
   if (pathname === '/') return 0;
   if (/^\/collections\/?$/.test(pathname)) return 1;
-  if (pathname.startsWith('/products/')) return 2;
+  if (pathname.startsWith('/products/') || pathname === '/discovery-set') {
+    return 2;
+  }
   return null;
 }
 

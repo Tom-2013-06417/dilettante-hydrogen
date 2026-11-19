@@ -728,6 +728,9 @@ export type CollectionQuery = {
       StorefrontAPI.Collection,
       'id' | 'handle' | 'title' | 'description'
     > & {
+      image?: StorefrontAPI.Maybe<
+        Pick<StorefrontAPI.Image, 'id' | 'url' | 'altText' | 'width' | 'height'>
+      >;
       launchDate?: StorefrontAPI.Maybe<
         Pick<StorefrontAPI.Metafield, 'type' | 'value'>
       >;
@@ -785,6 +788,117 @@ export type ContactInformationQuery = {
       Pick<StorefrontAPI.ShopPolicy, 'body' | 'handle' | 'id' | 'title' | 'url'>
     >;
   };
+};
+
+export type DiscoverySetVariantFragment = Pick<
+  StorefrontAPI.ProductVariant,
+  | 'id'
+  | 'title'
+  | 'availableForSale'
+  | 'currentlyNotInStock'
+  | 'requiresShipping'
+> & {
+  compareAtPrice?: StorefrontAPI.Maybe<
+    Pick<StorefrontAPI.MoneyV2, 'amount' | 'currencyCode'>
+  >;
+  price: Pick<StorefrontAPI.MoneyV2, 'amount' | 'currencyCode'>;
+  image?: StorefrontAPI.Maybe<
+    Pick<StorefrontAPI.Image, 'id' | 'url' | 'altText' | 'width' | 'height'>
+  >;
+  selectedOptions: Array<Pick<StorefrontAPI.SelectedOption, 'name' | 'value'>>;
+  product: Pick<StorefrontAPI.Product, 'id' | 'handle' | 'title' | 'vendor'>;
+};
+
+export type DiscoverySetProductQueryVariables = StorefrontAPI.Exact<{
+  country?: StorefrontAPI.InputMaybe<StorefrontAPI.CountryCode>;
+  id: StorefrontAPI.Scalars['ID']['input'];
+  language?: StorefrontAPI.InputMaybe<StorefrontAPI.LanguageCode>;
+}>;
+
+export type DiscoverySetProductQuery = {
+  product?: StorefrontAPI.Maybe<
+    Pick<
+      StorefrontAPI.Product,
+      'id' | 'handle' | 'title' | 'description' | 'vendor'
+    > & {
+      featuredImage?: StorefrontAPI.Maybe<
+        Pick<StorefrontAPI.Image, 'id' | 'url' | 'altText' | 'width' | 'height'>
+      >;
+      seo: Pick<StorefrontAPI.Seo, 'title' | 'description'>;
+      variants: {
+        nodes: Array<
+          Pick<
+            StorefrontAPI.ProductVariant,
+            | 'id'
+            | 'title'
+            | 'availableForSale'
+            | 'currentlyNotInStock'
+            | 'requiresShipping'
+          > & {
+            compareAtPrice?: StorefrontAPI.Maybe<
+              Pick<StorefrontAPI.MoneyV2, 'amount' | 'currencyCode'>
+            >;
+            price: Pick<StorefrontAPI.MoneyV2, 'amount' | 'currencyCode'>;
+            image?: StorefrontAPI.Maybe<
+              Pick<
+                StorefrontAPI.Image,
+                'id' | 'url' | 'altText' | 'width' | 'height'
+              >
+            >;
+            selectedOptions: Array<
+              Pick<StorefrontAPI.SelectedOption, 'name' | 'value'>
+            >;
+            product: Pick<
+              StorefrontAPI.Product,
+              'id' | 'handle' | 'title' | 'vendor'
+            >;
+          }
+        >;
+      };
+    }
+  >;
+};
+
+export type DiscoverySetContentsQueryVariables = StorefrontAPI.Exact<{
+  country?: StorefrontAPI.InputMaybe<StorefrontAPI.CountryCode>;
+  handle: StorefrontAPI.Scalars['String']['input'];
+  language?: StorefrontAPI.InputMaybe<StorefrontAPI.LanguageCode>;
+}>;
+
+export type DiscoverySetContentsQuery = {
+  collection?: StorefrontAPI.Maybe<
+    Pick<StorefrontAPI.Collection, 'id' | 'handle' | 'title'> & {
+      image?: StorefrontAPI.Maybe<
+        Pick<StorefrontAPI.Image, 'id' | 'url' | 'altText' | 'width' | 'height'>
+      >;
+      sampleSetImage?: StorefrontAPI.Maybe<
+        Pick<StorefrontAPI.Metafield, 'type'> & {
+          reference?: StorefrontAPI.Maybe<
+            Pick<StorefrontAPI.MediaImage, 'id'> & {
+              image?: StorefrontAPI.Maybe<
+                Pick<
+                  StorefrontAPI.Image,
+                  'url' | 'altText' | 'width' | 'height'
+                >
+              >;
+            }
+          >;
+        }
+      >;
+      products: {
+        nodes: Array<
+          Pick<StorefrontAPI.Product, 'id' | 'handle' | 'title'> & {
+            scentNumber?: StorefrontAPI.Maybe<
+              Pick<StorefrontAPI.Metafield, 'type' | 'value'>
+            >;
+            olfactoryFamily?: StorefrontAPI.Maybe<
+              Pick<StorefrontAPI.Metafield, 'type' | 'value'>
+            >;
+          }
+        >;
+      };
+    }
+  >;
 };
 
 export type PageQueryVariables = StorefrontAPI.Exact<{
@@ -1355,13 +1469,21 @@ interface GeneratedQueryTypes {
     return: BlogsQuery;
     variables: BlogsQueryVariables;
   };
-  '#graphql\n  #graphql\n  fragment CollectionProduct on Product {\n    id\n    handle\n    title\n    featuredImage {\n      id\n      altText\n      url\n      width\n      height\n    }\n    scentNumber: metafield(namespace: "custom", key: "scent_number") {\n      type\n      value\n    }\n    scentTagline: metafield(namespace: "custom", key: "scent_tagline") {\n      type\n      value\n    }\n  }\n\n  query Collection(\n    $handle: String!\n    $country: CountryCode\n    $language: LanguageCode\n    $first: Int\n    $last: Int\n    $startCursor: String\n    $endCursor: String\n  ) @inContext(country: $country, language: $language) {\n    collection(handle: $handle) {\n      id\n      handle\n      title\n      description\n      launchDate: metafield(namespace: "custom", key: "launch_date") {\n        type\n        value\n      }\n      tagline: metafield(namespace: "custom", key: "tagline") {\n        type\n        value\n      }\n      sampleSetImage: metafield(namespace: "custom", key: "sample_set_image") {\n        type\n        reference {\n          ... on MediaImage {\n            id\n            image {\n              url\n              altText\n              width\n              height\n            }\n          }\n        }\n      }\n      products(\n        first: $first,\n        last: $last,\n        before: $startCursor,\n        after: $endCursor\n      ) {\n        nodes {\n          ...CollectionProduct\n        }\n        pageInfo {\n          hasPreviousPage\n          hasNextPage\n          endCursor\n          startCursor\n        }\n      }\n    }\n  }\n': {
+  '#graphql\n  #graphql\n  fragment CollectionProduct on Product {\n    id\n    handle\n    title\n    featuredImage {\n      id\n      altText\n      url\n      width\n      height\n    }\n    scentNumber: metafield(namespace: "custom", key: "scent_number") {\n      type\n      value\n    }\n    scentTagline: metafield(namespace: "custom", key: "scent_tagline") {\n      type\n      value\n    }\n  }\n\n  query Collection(\n    $handle: String!\n    $country: CountryCode\n    $language: LanguageCode\n    $first: Int\n    $last: Int\n    $startCursor: String\n    $endCursor: String\n  ) @inContext(country: $country, language: $language) {\n    collection(handle: $handle) {\n      id\n      handle\n      title\n      description\n      image {\n        id\n        url\n        altText\n        width\n        height\n      }\n      launchDate: metafield(namespace: "custom", key: "launch_date") {\n        type\n        value\n      }\n      tagline: metafield(namespace: "custom", key: "tagline") {\n        type\n        value\n      }\n      sampleSetImage: metafield(namespace: "custom", key: "sample_set_image") {\n        type\n        reference {\n          ... on MediaImage {\n            id\n            image {\n              url\n              altText\n              width\n              height\n            }\n          }\n        }\n      }\n      products(\n        first: $first,\n        last: $last,\n        before: $startCursor,\n        after: $endCursor\n      ) {\n        nodes {\n          ...CollectionProduct\n        }\n        pageInfo {\n          hasPreviousPage\n          hasNextPage\n          endCursor\n          startCursor\n        }\n      }\n    }\n  }\n': {
     return: CollectionQuery;
     variables: CollectionQueryVariables;
   };
   '#graphql\n  query ContactInformation(\n    $country: CountryCode\n    $language: LanguageCode\n  ) @inContext(language: $language, country: $country) {\n    shop {\n      contactInformation {\n        body\n        handle\n        id\n        title\n        url\n      }\n    }\n  }\n': {
     return: ContactInformationQuery;
     variables: ContactInformationQueryVariables;
+  };
+  '#graphql\n  query DiscoverySetProduct(\n    $country: CountryCode\n    $id: ID!\n    $language: LanguageCode\n  ) @inContext(country: $country, language: $language) {\n    product: node(id: $id) {\n      ... on Product {\n        id\n        handle\n        title\n        description\n        vendor\n        featuredImage {\n          id\n          url\n          altText\n          width\n          height\n        }\n        seo {\n          title\n          description\n        }\n        variants(first: 20) {\n          nodes {\n            ...DiscoverySetVariant\n          }\n        }\n      }\n    }\n  }\n  #graphql\n  fragment DiscoverySetVariant on ProductVariant {\n    id\n    title\n    availableForSale\n    currentlyNotInStock\n    requiresShipping\n    compareAtPrice {\n      amount\n      currencyCode\n    }\n    price {\n      amount\n      currencyCode\n    }\n    image {\n      id\n      url\n      altText\n      width\n      height\n    }\n    selectedOptions {\n      name\n      value\n    }\n    product {\n      id\n      handle\n      title\n      vendor\n    }\n  }\n\n': {
+    return: DiscoverySetProductQuery;
+    variables: DiscoverySetProductQueryVariables;
+  };
+  '#graphql\n  query DiscoverySetContents(\n    $country: CountryCode\n    $handle: String!\n    $language: LanguageCode\n  ) @inContext(country: $country, language: $language) {\n    collection(handle: $handle) {\n      id\n      handle\n      title\n      image {\n        id\n        url\n        altText\n        width\n        height\n      }\n      sampleSetImage: metafield(namespace: "custom", key: "sample_set_image") {\n        type\n        reference {\n          ... on MediaImage {\n            id\n            image {\n              url\n              altText\n              width\n              height\n            }\n          }\n        }\n      }\n      products(first: 10) {\n        nodes {\n          id\n          handle\n          title\n          scentNumber: metafield(namespace: "custom", key: "scent_number") {\n            type\n            value\n          }\n          olfactoryFamily: metafield(namespace: "custom", key: "olfactory_family") {\n            type\n            value\n          }\n        }\n      }\n    }\n  }\n': {
+    return: DiscoverySetContentsQuery;
+    variables: DiscoverySetContentsQueryVariables;
   };
   '#graphql\n  query Page(\n    $language: LanguageCode,\n    $country: CountryCode,\n    $handle: String!\n  )\n  @inContext(language: $language, country: $country) {\n    page(handle: $handle) {\n      handle\n      id\n      title\n      body\n      seo {\n        description\n        title\n      }\n    }\n  }\n': {
     return: PageQuery;

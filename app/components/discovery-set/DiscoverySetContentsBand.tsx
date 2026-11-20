@@ -27,12 +27,56 @@ type DiscoverySetContentsBandProps = {
   items: DiscoverySetContentItem[];
 };
 
-/** Title Case each word; first letter wins even after punctuation (e.g. “(On”). */
+/** Articles / short prepositions / conjunctions — stay lowercase in titles. */
+const TITLE_CASE_SMALL_WORDS = new Set([
+  'a',
+  'an',
+  'the',
+  'and',
+  'but',
+  'or',
+  'nor',
+  'for',
+  'yet',
+  'so',
+  'as',
+  'at',
+  'by',
+  'in',
+  'of',
+  'on',
+  'to',
+  'up',
+  'via',
+  'per',
+  'from',
+  'into',
+  'onto',
+  'upon',
+  'with',
+  'over',
+  'under',
+  'vs',
+]);
+
+/**
+ * Title case product titles from Shopify. First word is always capitalized;
+ * small words stay lowercase (e.g. “Kids on the Slope”, “Forever (on the Crest
+ * of a Wave)”).
+ */
 function toTitleCase(value: string) {
+  let isFirstWord = true;
   return value.trim().replace(/\S+/g, (word) => {
     const match = /^(.*?)([A-Za-zÀ-ÖØ-öø-ÿ])(.*)$/u.exec(word);
-    if (!match) return word;
+    if (!match) {
+      isFirstWord = false;
+      return word;
+    }
     const [, before, first, rest] = match;
+    const core = `${first}${rest}`.toLowerCase();
+    const capitalize = isFirstWord || !TITLE_CASE_SMALL_WORDS.has(core);
+    isFirstWord = false;
+    if (!capitalize) return `${before}${core}`;
     return `${before}${first.toUpperCase()}${rest.toLowerCase()}`;
   });
 }

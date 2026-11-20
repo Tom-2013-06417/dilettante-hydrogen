@@ -10,7 +10,7 @@ export const DISCOVERY_SET_TITLE = 'Discovery Set';
 export const DISCOVERY_SET_TAGLINE =
   'Five samples to help you find your favorites.';
 export const DISCOVERY_SET_FOOTNOTE =
-  'Includes x5 2ml samples and a discount code for 10% off on your next full bottle purchase.';
+  'Includes a discount code for 10% off your next full-bottle purchase.';
 
 /**
  * Prefer a variant named for the active collection (e.g. "Debut Collection");

@@ -443,6 +443,14 @@ body:has(.teaser-page) {
   --fold-banner-reclaim: 0px;
 }
 
+/*
+  Discovery footnote is one line — keep the cue slot short so the contents
+  band claims the remaining first-fold height (mobile + desktop).
+*/
+.product-page--discovery {
+  --scent-anatomy-cue-h: calc(2.25rem + env(safe-area-inset-bottom, 0px));
+}
+
 .main--product.has-top-banner {
   --fold-banner-reclaim: var(--top-banner-h);
   min-height: calc(100svh - var(--top-banner-h));
@@ -521,11 +529,11 @@ body:has(.teaser-page) {
   /*
     Desktop anatomy cue keeps a large bottom pad (~92px total). Discovery only
     needs a compact footnote — shrink the cue slot so the first-fold (contents)
-    gains the difference. Mobile keeps the shared cue-h (looks good already).
+    gains the difference.
   */
   .product-page--discovery {
     --scent-anatomy-cue-h: calc(
-      3.75rem + env(safe-area-inset-bottom, 0px)
+      2.5rem + env(safe-area-inset-bottom, 0px)
     );
   }
 

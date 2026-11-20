@@ -55,7 +55,7 @@ export function DiscoverySetHero({
   const currencyCode = selectedVariant?.price.currencyCode;
   const instantIntro = isStackEnterState(state);
   const volumeSuffix = formatVolumeSuffix(SAMPLE_SET_VOLUME_TITLE);
-  const volume = volumeSuffix ? `5 × ${volumeSuffix}` : undefined;
+  const volume = volumeSuffix ? `5 · ${volumeSuffix}` : undefined;
   const buttonLabel = purchasable ? 'Add to Cart' : 'Sold out';
 
   return (

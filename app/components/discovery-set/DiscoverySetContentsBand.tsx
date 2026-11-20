@@ -161,7 +161,7 @@ export function DiscoverySetContentsBand({
           (justify-center was re-centering the whole list and shifting “Contents” up).
           Desktop stays centered — no accordion there.
         */}
-        <div className="flex min-h-0 flex-1 flex-col justify-start pt-4 pb-2 sm:justify-center sm:pt-3 sm:pb-3">
+        <div className="flex min-h-0 flex-1 flex-col justify-start pt-6 pb-2 sm:justify-center sm:pt-3 sm:pb-3">
           <span className="px-3 font-['config-mono-vf'] text-[11px] font-bold uppercase tracking-[0.14em] text-inkwell-700/70 sm:px-8 lg:text-[12px]">
             Contents
           </span>

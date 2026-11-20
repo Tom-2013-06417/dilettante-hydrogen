@@ -794,6 +794,20 @@ export type CollectionDiscoverySetQuery = {
       featuredImage?: StorefrontAPI.Maybe<
         Pick<StorefrontAPI.Image, 'id' | 'url' | 'altText' | 'width' | 'height'>
       >;
+      secondaryImage?: StorefrontAPI.Maybe<
+        Pick<StorefrontAPI.Metafield, 'type'> & {
+          reference?: StorefrontAPI.Maybe<
+            Pick<StorefrontAPI.MediaImage, 'id'> & {
+              image?: StorefrontAPI.Maybe<
+                Pick<
+                  StorefrontAPI.Image,
+                  'url' | 'altText' | 'width' | 'height'
+                >
+              >;
+            }
+          >;
+        }
+      >;
       variants: {
         nodes: Array<
           Pick<
@@ -1502,7 +1516,7 @@ interface GeneratedQueryTypes {
     return: CollectionQuery;
     variables: CollectionQueryVariables;
   };
-  '#graphql\n  query CollectionDiscoverySet(\n    $country: CountryCode\n    $id: ID!\n    $language: LanguageCode\n  ) @inContext(country: $country, language: $language) {\n    product: node(id: $id) {\n      ... on Product {\n        id\n        featuredImage {\n          id\n          url\n          altText\n          width\n          height\n        }\n        variants(first: 20) {\n          nodes {\n            ...DiscoverySetVariant\n          }\n        }\n      }\n    }\n  }\n  #graphql\n  fragment DiscoverySetVariant on ProductVariant {\n    id\n    title\n    availableForSale\n    currentlyNotInStock\n    requiresShipping\n    compareAtPrice {\n      amount\n      currencyCode\n    }\n    price {\n      amount\n      currencyCode\n    }\n    image {\n      id\n      url\n      altText\n      width\n      height\n    }\n    selectedOptions {\n      name\n      value\n    }\n    product {\n      id\n      handle\n      title\n      vendor\n    }\n  }\n\n': {
+  '#graphql\n  query CollectionDiscoverySet(\n    $country: CountryCode\n    $id: ID!\n    $language: LanguageCode\n  ) @inContext(country: $country, language: $language) {\n    product: node(id: $id) {\n      ... on Product {\n        id\n        featuredImage {\n          id\n          url\n          altText\n          width\n          height\n        }\n        secondaryImage: metafield(namespace: "custom", key: "secondary_image") {\n          type\n          reference {\n            ... on MediaImage {\n              id\n              image {\n                url\n                altText\n                width\n                height\n              }\n            }\n          }\n        }\n        variants(first: 20) {\n          nodes {\n            ...DiscoverySetVariant\n          }\n        }\n      }\n    }\n  }\n  #graphql\n  fragment DiscoverySetVariant on ProductVariant {\n    id\n    title\n    availableForSale\n    currentlyNotInStock\n    requiresShipping\n    compareAtPrice {\n      amount\n      currencyCode\n    }\n    price {\n      amount\n      currencyCode\n    }\n    image {\n      id\n      url\n      altText\n      width\n      height\n    }\n    selectedOptions {\n      name\n      value\n    }\n    product {\n      id\n      handle\n      title\n      vendor\n    }\n  }\n\n': {
     return: CollectionDiscoverySetQuery;
     variables: CollectionDiscoverySetQueryVariables;
   };

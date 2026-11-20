@@ -12,6 +12,7 @@ import {
   DISCOVERY_SET_TITLE,
   discoverySetVariant,
 } from '~/lib/sampleSet';
+import {parseSecondaryImage} from '~/lib/secondaryImageMetafield';
 import {
   seoDescription,
   seoFromMatches,
@@ -82,7 +83,8 @@ async function loadCriticalData({context, request}: Route.LoaderArgs) {
 
   const origin = new URL(request.url).origin;
   const shareImage = collectionShareImage(collection);
-  const discoverySetImage = discoverySet?.featuredImage?.url
+  const secondaryImage = parseSecondaryImage(discoverySet?.secondaryImage);
+  const featuredImage = discoverySet?.featuredImage?.url
     ? {
         id: discoverySet.featuredImage.id,
         url: discoverySet.featuredImage.url,
@@ -91,6 +93,16 @@ async function loadCriticalData({context, request}: Route.LoaderArgs) {
         height: discoverySet.featuredImage.height,
       }
     : null;
+  // Collection card prefers the product secondary image (same as /discovery-set strip).
+  const discoverySetImage = secondaryImage
+    ? {
+        id: secondaryImage.id,
+        url: secondaryImage.url,
+        altText: secondaryImage.altText || DISCOVERY_SET_TITLE,
+        width: secondaryImage.width,
+        height: secondaryImage.height,
+      }
+    : featuredImage;
   const selectedDiscoveryVariant = discoverySet?.variants?.nodes
     ? discoverySetVariant(discoverySet.variants.nodes)
     : null;
@@ -304,6 +316,20 @@ const COLLECTION_DISCOVERY_SET_QUERY = `#graphql
           altText
           width
           height
+        }
+        secondaryImage: metafield(namespace: "custom", key: "secondary_image") {
+          type
+          reference {
+            ... on MediaImage {
+              id
+              image {
+                url
+                altText
+                width
+                height
+              }
+            }
+          }
         }
         variants(first: 20) {
           nodes {

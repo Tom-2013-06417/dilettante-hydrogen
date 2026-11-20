@@ -30,6 +30,7 @@ export function ProductNumberBadge({
   number,
   className = '',
   variant = 'pill',
+  showPrefix = true,
 }: {
   number: string;
   className?: string;
@@ -38,12 +39,14 @@ export function ProductNumberBadge({
    * 'plain' — number only; the ellipse has nothing to sit against on inkwell.
    */
   variant?: 'pill' | 'plain';
+  /** When false, render only the oval / number (no leading “No.”). */
+  showPrefix?: boolean;
 }) {
   return (
     <span
       className={`inline-flex items-center gap-1 text-[12px] font-bold tracking-[0.02em] lg:text-[14px] ${className}`}
     >
-      No.
+      {showPrefix ? <>No.</> : null}
       <span
         className={
           variant === 'pill'

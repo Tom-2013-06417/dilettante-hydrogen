@@ -1,4 +1,5 @@
 import {Money} from '@shopify/hydrogen';
+import {useId} from 'react';
 import {useLocation, useRouteLoaderData} from 'react-router';
 import type {DiscoverySetVariantFragment} from 'storefrontapi.generated';
 import {AddToCartButton} from '~/components/cart';
@@ -14,6 +15,10 @@ import {
   PURCHASE_BUTTON_CLASS,
   PURCHASE_BUTTON_TONE_CLASS,
 } from '~/components/product/ProductPurchaseButton';
+import {
+  ProductTitleNoiseFilter,
+  productTitleNoiseStyle,
+} from '~/components/product/sections/ProductTitle';
 import {isStackEnterState} from '~/lib/constants';
 import {
   isVariantPurchasable,
@@ -57,6 +62,8 @@ export function DiscoverySetHero({
   const volumeSuffix = formatVolumeSuffix(SAMPLE_SET_VOLUME_TITLE);
   const volume = volumeSuffix ? `5 samples · ${volumeSuffix} each` : undefined;
   const buttonLabel = purchasable ? 'Add to Cart' : 'Sold out';
+  const titleNoiseFilterId = `discovery-title-noise-${useId().replace(/:/g, '')}`;
+  const titleNoiseStyle = productTitleNoiseStyle(titleNoiseFilterId);
 
   return (
     <div className="design-content-shell relative z-1 flex min-h-0 w-full flex-1 flex-col text-inkwell-700">
@@ -99,7 +106,11 @@ export function DiscoverySetHero({
         */}
         <IntroFade instant={instantIntro}>
           <div className="relative ml-4 bg-vellusum px-6 pt-4 pb-2 sm:ml-8 sm:px-10 sm:pt-5 sm:pb-2.5">
-            <span className="relative z-0 -m-0.5 block translate-y-0.5 pr-2 font-['wayfinder-cf'] text-[60px] font-light leading-[0.72] tracking-[-6%] text-inkwell-700 lg:text-[72px]">
+            <ProductTitleNoiseFilter id={titleNoiseFilterId} />
+            <span
+              className="relative z-0 -m-0.5 block translate-y-0.5 pr-2 font-['wayfinder-cf'] text-[60px] font-light leading-[0.72] tracking-[-6%] text-inkwell-700 lg:text-[72px]"
+              style={titleNoiseStyle}
+            >
               {DISCOVERY_SET_TITLE}
             </span>
             <span className="mt-2 block font-['trust-3a'] text-[14px] font-normal leading-snug tracking-[0.02em] text-inkwell-700 sm:mt-3 sm:text-[15px] lg:text-[18px]">

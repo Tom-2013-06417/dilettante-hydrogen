@@ -25,6 +25,70 @@ type ProductTitleProps = {
   showNumber?: boolean;
 };
 
+/**
+ * Figma mono noise (#FFF6E6, ~22% density, size ~0.5) via SVG filter.
+ * feTurbulence → cream speckles composited into the glyph fill.
+ * Callers must apply `filter: url(#id)` on the painted text.
+ */
+export function ProductTitleNoiseFilter({
+  id,
+  enabled = true,
+}: {
+  id: string;
+  enabled?: boolean;
+}) {
+  if (!enabled) return null;
+
+  return (
+    <svg
+      aria-hidden
+      className="pointer-events-none absolute h-0 w-0 overflow-hidden"
+    >
+      <filter
+        id={id}
+        x="-5%"
+        y="-5%"
+        width="110%"
+        height="110%"
+        filterUnits="objectBoundingBox"
+        colorInterpolationFilters="sRGB"
+      >
+        <feTurbulence
+          type="fractalNoise"
+          baseFrequency="0.85"
+          numOctaves="3"
+          stitchTiles="stitch"
+          result="noise"
+        />
+        <feColorMatrix
+          in="noise"
+          type="matrix"
+          values="
+                0 0 0 0 1
+                0 0 0 0 0.965
+                0 0 0 0 0.902
+                1.25 0 0 0 -0.78"
+          result="creamSpeckle"
+        />
+        <feComposite
+          in="creamSpeckle"
+          in2="SourceGraphic"
+          operator="in"
+          result="speckleInGlyph"
+        />
+        <feMerge>
+          <feMergeNode in="SourceGraphic" />
+          <feMergeNode in="speckleInGlyph" />
+        </feMerge>
+      </filter>
+    </svg>
+  );
+}
+
+export function productTitleNoiseStyle(filterId: string, enabled = true) {
+  return enabled ? {filter: `url(#${filterId})`} : undefined;
+}
+
 /** "No. 03" — the scent number, on its own so callers can place it freely. */
 export function ProductNumberBadge({
   number,
@@ -77,7 +141,7 @@ export function ProductTitle({
     whichever definition came first in the document.
   */
   const filterId = `product-title-noise-${useId().replace(/:/g, '')}`;
-  const noiseStyle = enableNoise ? {filter: `url(#${filterId})`} : undefined;
+  const noiseStyle = productTitleNoiseStyle(filterId, enableNoise);
   const plate = variant === 'plate';
 
   return (
@@ -96,54 +160,7 @@ export function ProductTitle({
             : ''
         }`}
       >
-        {/*
-          Figma mono noise (#FFF6E6, ~22% density, size ~0.5) via SVG filter.
-          feTurbulence → cream speckles composited into the glyph fill.
-        */}
-        {enableNoise ? (
-          <svg
-            aria-hidden
-            className="pointer-events-none absolute h-0 w-0 overflow-hidden"
-          >
-            <filter
-              id={filterId}
-              x="-5%"
-              y="-5%"
-              width="110%"
-              height="110%"
-              filterUnits="objectBoundingBox"
-              colorInterpolationFilters="sRGB"
-            >
-              <feTurbulence
-                type="fractalNoise"
-                baseFrequency="0.85"
-                numOctaves="3"
-                stitchTiles="stitch"
-                result="noise"
-              />
-              <feColorMatrix
-                in="noise"
-                type="matrix"
-                values="
-                0 0 0 0 1
-                0 0 0 0 0.965
-                0 0 0 0 0.902
-                1.25 0 0 0 -0.78"
-                result="creamSpeckle"
-              />
-              <feComposite
-                in="creamSpeckle"
-                in2="SourceGraphic"
-                operator="in"
-                result="speckleInGlyph"
-              />
-              <feMerge>
-                <feMergeNode in="SourceGraphic" />
-                <feMergeNode in="speckleInGlyph" />
-              </feMerge>
-            </filter>
-          </svg>
-        ) : null}
+        <ProductTitleNoiseFilter id={filterId} enabled={enableNoise} />
         <div className="relative overflow-visible">
           {plate ? (
             <>
